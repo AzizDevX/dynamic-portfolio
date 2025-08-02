@@ -1,0 +1,18 @@
+**/.env
+**/node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories
+**/node_modules/
+
+# dotenv environment variables
+**/.env
+
+# Build output
+dist/
+build/
