@@ -4,7 +4,7 @@ import Project from "../models/ProjectShema.js";
 import validateProjectInput from "../middlewares/validateProjectInput.js";
 // Route to add a new project
 // This route expects a POST request with project details in the request body
-Router.post("/addProject", validateProjectInput, async (req, res) => {
+Router.post("/add/project", validateProjectInput, async (req, res) => {
   try {
     const IsUsedId = await Project.findOne({ projectId: req.body.projectId });
     if (IsUsedId) {
