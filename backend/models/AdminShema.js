@@ -11,7 +11,7 @@ const adminShema = mongoose.Schema({
     type: String,
     require: true,
     minlenth: 6,
-    maxlenth: 20,
+    maxlenth: 50,
   },
   role: {
     type: String,
