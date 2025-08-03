@@ -23,7 +23,7 @@ Router.post(
         description: req.body.description,
         image: req.body.image,
         githubLink: req.body.githubLink,
-        technologies: req.body.technologies,
+        project_technologies: req.body.project_technologies,
         createdAt: new Date(),
       });
       const savedProject = await NewProject.save();
@@ -35,4 +35,26 @@ Router.post(
     }
   }
 );
+
+// GET REQ TO SHOW ALL PROJECT FOR Frontend
+Router.get("/show/projects", async (req, res) => {
+  try {
+    const Projects = await Project.find();
+    if (Projects.length === 0) {
+      return res.status(404).json({ message: "No Projects Found" });
+    }
+    const FilteredData = Projects.map((doc) => ({
+      projectId: doc.projectId,
+      title: doc.title,
+      description: doc.description,
+      image: doc.image,
+      githubLink: doc.githubLink,
+      project_technologies: doc.project_technologies,
+    }));
+    return res.status(200).json(FilteredData);
+  } catch (err) {
+    res.status(500).json({ message: "Server Error" });
+    return console.log("Something Wrong ", err);
+  }
+});
 export default Router;

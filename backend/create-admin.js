@@ -28,11 +28,11 @@ async function createAdmin() {
             return CreateUserName();
           } else if (response === "n" || response === "N") {
             console.log("❌ Exit without changes");
-            mongoose.disconnect();
+            mongoose.connection.close();
             return process.exit(0);
           } else {
             console.log("⚠️ Only valid inputs LETTER: y or n");
-            mongoose.disconnect();
+            mongoose.connection.close();
             return process.exit(0);
           }
         }
@@ -80,11 +80,11 @@ async function createAdmin() {
       const IsSaved = await SaveNewAdmin.save();
       if (!IsSaved) {
         console.log("❌ Error occurred");
-        mongoose.disconnect();
+        mongoose.connection.close();
         return process.exit(0);
       } else {
         console.log("✅ New admin created successfully.");
-        mongoose.disconnect();
+        mongoose.connection.close();
         return process.exit(0);
       }
     };

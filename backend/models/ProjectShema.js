@@ -29,7 +29,7 @@ const ProjectSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    technologies: {
+    project_technologies: {
       type: [String],
     },
     createdAt: {
