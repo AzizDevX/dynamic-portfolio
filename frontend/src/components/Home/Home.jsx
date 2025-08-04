@@ -161,9 +161,11 @@ const Home = () => {
               </h1>
 
               <p className={styles.heroDescription}>
-                I craft exceptional digital experiences through innovative web
-                development and thoughtful design. Let's build something amazing
-                together.
+                <span>
+                  {MainHomeData
+                    ? MainHomeData.description
+                    : "You Need To Complete Setup The Backend Or Your DataBase Not Connected"}
+                </span>
               </p>
 
               <div className={styles.heroButtons}>
