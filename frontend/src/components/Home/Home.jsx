@@ -68,7 +68,7 @@ const Home = () => {
     return () => clearTimeout(timeout);
   }, [typedText, currentIndex, isDeleting, GetRoles]);
 
-  const statsArray = MainHomeData?.Stats?.[0]?.Stats || [];
+  const statsArray = MainHomeData?.Stats?.[0]?.Stats || [""];
 
   const services = [
     {
@@ -214,10 +214,12 @@ const Home = () => {
             {statsArray.map((stat, index) => (
               <div key={index} className={styles.statItem}>
                 <div className={styles.statNumber}>
-                  {stat.StatsNumber || "NoData"}
+                  {MainHomeData ? stat.StatsNumber : "NoData"}
                 </div>
                 <div className={styles.statLabel}>
-                  {stat.StatsLabel || "NoData"}
+                  {MainHomeData
+                    ? stat.StatsLabel
+                    : "NoData So BackEnd Not Running Or incomplete Setup Of Backend"}
                 </div>
               </div>
             ))}
