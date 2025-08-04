@@ -68,13 +68,7 @@ const Home = () => {
     return () => clearTimeout(timeout);
   }, [typedText, currentIndex, isDeleting, GetRoles]);
 
-  // Mock dynamic data - in real app, this would come from backend
-  const stats = [
-    { number: "50+", label: "Projects Completed" },
-    { number: "3+", label: "Years Experience" },
-    { number: "25+", label: "Happy Clients" },
-    { number: "15+", label: "Technologies" },
-  ];
+  const statsArray = MainHomeData?.Stats?.[0]?.Stats || [];
 
   const services = [
     {
@@ -182,11 +176,19 @@ const Home = () => {
               <div className={styles.socialProof}>
                 <div className={styles.socialProofItem}>
                   <Users size={20} />
-                  <span>25+ Happy Clients</span>
+                  <span>
+                    {" "}
+                    {MainHomeData
+                      ? MainHomeData.Clients_Counting
+                      : "NoData"}{" "}
+                    Happy Clients
+                  </span>
                 </div>
                 <div className={styles.socialProofItem}>
                   <Star size={20} />
-                  <span>5.0 Rating</span>
+                  <span>
+                    {MainHomeData ? MainHomeData.Rateing : "NoData"} Rating
+                  </span>
                 </div>
               </div>
             </div>
@@ -195,7 +197,7 @@ const Home = () => {
               <div className={styles.imageContainer}>
                 <img
                   src={developerPortrait}
-                  alt="Aziz Kammoun - Full Stack Developer"
+                  alt="Home image "
                   className={styles.profileImage}
                 />
                 <div className={styles.imageGlow}></div>
@@ -209,10 +211,14 @@ const Home = () => {
       <section className={styles.stats}>
         <div className={styles.container}>
           <div className={styles.statsGrid}>
-            {stats.map((stat, index) => (
+            {statsArray.map((stat, index) => (
               <div key={index} className={styles.statItem}>
-                <div className={styles.statNumber}>{stat.number}</div>
-                <div className={styles.statLabel}>{stat.label}</div>
+                <div className={styles.statNumber}>
+                  {stat.StatsNumber || "NoData"}
+                </div>
+                <div className={styles.statLabel}>
+                  {stat.StatsLabel || "NoData"}
+                </div>
               </div>
             ))}
           </div>
