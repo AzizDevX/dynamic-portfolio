@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   ArrowRight,
   Download,
@@ -17,8 +18,24 @@ const Home = () => {
   const [typedText, setTypedText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [HomeTitle, setHomeTitle] = useState(null);
 
-  const roles = [
+  useEffect(() => {
+    const fetchHomeData = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/home/main/data"
+        );
+        setHomeTitle(response.data); // assumes your API returns an object
+      } catch (error) {
+        console.error("Error fetching home data:", error);
+      }
+    };
+
+    fetchHomeData();
+  }, []);
+
+  const MainRoles = [
     "Full Stack Developer",
     "UI/UX Designer",
     "Problem Solver",
@@ -27,7 +44,7 @@ const Home = () => {
 
   useEffect(() => {
     const typeSpeed = isDeleting ? 50 : 100;
-    const currentRole = roles[currentIndex];
+    const currentRole = MainRoles[currentIndex];
 
     const timeout = setTimeout(() => {
       if (!isDeleting) {
@@ -41,13 +58,13 @@ const Home = () => {
           setTypedText(currentRole.slice(0, typedText.length - 1));
         } else {
           setIsDeleting(false);
-          setCurrentIndex((prev) => (prev + 1) % roles.length);
+          setCurrentIndex((prev) => (prev + 1) % MainRoles.length);
         }
       }
     }, typeSpeed);
 
     return () => clearTimeout(timeout);
-  }, [typedText, currentIndex, isDeleting, roles]);
+  }, [typedText, currentIndex, isDeleting, MainRoles]);
 
   // Mock dynamic data - in real app, this would come from backend
   const stats = [
@@ -130,7 +147,9 @@ const Home = () => {
               </div>
 
               <h1 className={styles.heroTitle}>
-                <span className={styles.name}>Aziz Kammoun</span>
+                <span className={styles.name}>
+                  {HomeTitle ? HomeTitle.TitleYourName : "Loading..."}
+                </span>
                 <span className={styles.role}>
                   {typedText}
                   <span className={styles.cursor}>|</span>
