@@ -6,10 +6,18 @@ import DeleteProject from "./routers/DeleteProject.js";
 import AdminLogin from "./routers/auth.js";
 import cookieParser from "cookie-parser";
 import MainHomeData from "./routers/ShowHomeData.js";
+import cors from "cors";
+
 const app = express();
 app.use(cookieParser());
 app.use(express.json());
 dotenv.config();
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 dbconnection();
 const port = process.env.port;
 
