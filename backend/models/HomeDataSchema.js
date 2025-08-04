@@ -17,17 +17,12 @@ const homeDataSchema = mongoose.Schema({
     type: Number,
     default: 0,
   },
-  Projects_Counting: {
-    type: Number,
-    default: 0,
-  },
-  Experience: {
-    type: String,
-  },
-  Technologies_Counting: {
-    type: Number,
-    default: 0,
-  },
+  Stats: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Stats",
+    },
+  ],
 });
 const HomeData = mongoose.model("HomePageData", homeDataSchema);
 export default HomeData;

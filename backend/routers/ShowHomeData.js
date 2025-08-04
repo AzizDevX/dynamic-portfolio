@@ -1,4 +1,5 @@
 import HomeData from "../models/HomeDataSchema.js";
+import StatsData from "../models/StatsShema.js";
 import express from "express";
 const Router = express.Router();
 Router.get("/home/main/data", async (req, res) => {
@@ -7,15 +8,14 @@ Router.get("/home/main/data", async (req, res) => {
     if (!homeData) {
       return res.status(404).json({ message: "Home data not found" });
     }
+    const StatsInfo = await HomeData.findOne().populate("Stats");
     const filteredData = {
       DisplayName: homeData.DisplayName,
       MainRoles: homeData.MainRoles,
       description: homeData.description,
       Clients_Counting: homeData.Clients_Counting,
       Rateing: homeData.Rateing,
-      Projects_Counting: homeData.Projects_Counting,
-      Experience: homeData.Experience,
-      Technologies_Counting: homeData.Technologies_Counting,
+      Stats: StatsInfo.Stats,
     };
     return res.status(200).json(filteredData);
   } catch (error) {
