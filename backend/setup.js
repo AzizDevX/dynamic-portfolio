@@ -14,7 +14,7 @@ async function setupHomeData_DefaultValues() {
     }
 
     const homeData = new HomeData({
-      TitleYourName: "Your Name Here",
+      DisplayName: "Your Name Here",
       MainRoles: ["Developer", "Designer"],
       description:
         "Experienced in web development and design. You can customize all this from the Admin Dashboard.",

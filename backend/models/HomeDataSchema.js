@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 const homeDataSchema = mongoose.Schema({
-  TitleYourName: {
+  DisplayName: {
     type: String,
   },
   MainRoles: {

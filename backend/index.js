@@ -18,6 +18,7 @@ app.use(
     credentials: true,
   })
 );
+
 dbconnection();
 const port = process.env.port;
 
@@ -26,7 +27,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/", AdminLogin);
-app.use("/", MainHomeData);
+app.use("/api/", MainHomeData);
 app.use("/api/", AddProjectRouter);
 app.use("/api/", DeleteProject);
 

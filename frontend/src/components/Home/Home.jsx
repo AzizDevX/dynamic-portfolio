@@ -148,7 +148,9 @@ const Home = () => {
 
               <h1 className={styles.heroTitle}>
                 <span className={styles.name}>
-                  {HomeTitle ? HomeTitle.TitleYourName : "Loading..."}
+                  {HomeTitle
+                    ? HomeTitle.DisplayName
+                    : "You Need To Complete Setup"}
                 </span>
                 <span className={styles.role}>
                   {typedText}
