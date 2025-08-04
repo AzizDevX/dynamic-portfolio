@@ -18,7 +18,7 @@ const Home = () => {
   const [typedText, setTypedText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [HomeTitle, setHomeTitle] = useState(null);
+  const [MainHomeData, setMainHomeData] = useState(null);
 
   useEffect(() => {
     const fetchHomeData = async () => {
@@ -26,7 +26,8 @@ const Home = () => {
         const response = await axios.get(
           "http://localhost:5000/api/home/main/data"
         );
-        setHomeTitle(response.data); // assumes your API returns an object
+        setMainHomeData(response.data); // assumes your API returns an object
+        console.log("Home data fetched successfully:", response.data);
       } catch (error) {
         console.error("Error fetching home data:", error);
       }
@@ -35,16 +36,17 @@ const Home = () => {
     fetchHomeData();
   }, []);
 
-  const MainRoles = [
-    "Full Stack Developer",
-    "UI/UX Designer",
-    "Problem Solver",
-    "Tech Enthusiast",
-  ];
+  const GetRoles = MainHomeData?.MainRoles
+    ? Object.values(MainHomeData.MainRoles)
+    : [];
 
   useEffect(() => {
+    if (!GetRoles || GetRoles.length === 0) return;
+
+    const currentRole = GetRoles[currentIndex];
+    if (!currentRole || typeof currentRole !== "string") return;
+
     const typeSpeed = isDeleting ? 50 : 100;
-    const currentRole = MainRoles[currentIndex];
 
     const timeout = setTimeout(() => {
       if (!isDeleting) {
@@ -58,13 +60,13 @@ const Home = () => {
           setTypedText(currentRole.slice(0, typedText.length - 1));
         } else {
           setIsDeleting(false);
-          setCurrentIndex((prev) => (prev + 1) % MainRoles.length);
+          setCurrentIndex((prev) => (prev + 1) % GetRoles.length);
         }
       }
     }, typeSpeed);
 
     return () => clearTimeout(timeout);
-  }, [typedText, currentIndex, isDeleting, MainRoles]);
+  }, [typedText, currentIndex, isDeleting, GetRoles]);
 
   // Mock dynamic data - in real app, this would come from backend
   const stats = [
@@ -148,8 +150,8 @@ const Home = () => {
 
               <h1 className={styles.heroTitle}>
                 <span className={styles.name}>
-                  {HomeTitle
-                    ? HomeTitle.DisplayName
+                  {MainHomeData
+                    ? MainHomeData.DisplayName
                     : "You Need To Complete Setup"}
                 </span>
                 <span className={styles.role}>
