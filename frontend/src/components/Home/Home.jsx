@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Navbar from "../Navbar/Navbar";
+import Footer from "../Footer/Footer";
+import "../../App.css";
+
 import {
   ArrowRight,
   Download,
@@ -126,6 +130,8 @@ const Home = () => {
 
   return (
     <div className={styles.home} id="home">
+      <Navbar />
+
       {/* Hero Section */}
       <section className={styles.hero}>
         <div className={styles.heroBackground}>
@@ -341,6 +347,7 @@ const Home = () => {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   );
 };
