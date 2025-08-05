@@ -41,8 +41,10 @@ async function createAdmin() {
 
     const CreateUserName = async () => {
       rl.question("Admin UserName (min 4 characters): ", (user) => {
-        if (user.length < 4) {
-          console.log(" --- ⚠️ Username must be at least 4 characters. ---");
+        if (user.length < 4 || user.length > 20) {
+          console.log(
+            " --- ⚠️ Username must be at least 4 characters And Less Than 20 Char. ---"
+          );
           return CreateUserName();
         } else {
           adminData.UserName = user;
@@ -53,8 +55,10 @@ async function createAdmin() {
 
     const CreateUserPass = async () => {
       rl.question("Admin Password (min 6 characters): ", (pass) => {
-        if (pass.length < 6) {
-          console.log(" --- ⚠️ Password must be at least 6 characters. ---");
+        if (pass.length < 6 || pass.length > 50) {
+          console.log(
+            " --- ⚠️ Password must be at least 6 characters And Less Than 50 char. ---"
+          );
           return CreateUserPass();
         } else {
           rl.close();
