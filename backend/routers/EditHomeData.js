@@ -3,10 +3,12 @@ import HomeData from "../models/HomeDataSchema.js";
 import { upload } from "../controllers/storage.js";
 import HomeLogoFolder from "../middlewares/HomeLogo.js";
 import { access, unlink } from "fs/promises";
+import isAdminLogged from "../middlewares/isAdminLogged.js";
 const Router = express.Router();
 
 Router.put(
   "/update/logo",
+  isAdminLogged,
   HomeLogoFolder,
   upload.single("image"),
   async (req, res) => {

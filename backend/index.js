@@ -6,7 +6,7 @@ import DeleteProject from "./routers/DeleteProject.js";
 import AdminLogin from "./routers/auth.js";
 import cookieParser from "cookie-parser";
 import MainHomeData from "./routers/ShowHomeData.js";
-import AddHomeData from "./routers/AddHomeData.js";
+import EditHomeData from "./routers/EditHomeData.js";
 import AdminDashboardSecurity from "./models/AdminDashboard_securityRule.js";
 import cors from "cors";
 
@@ -39,7 +39,7 @@ app.use("/auth/", AdminLogin);
 app.use("/api/", MainHomeData);
 app.use("/api/", AddProjectRouter);
 app.use("/api/", DeleteProject);
-app.use("/api/", AddHomeData);
+app.use("/api/", EditHomeData);
 app.use("/api/", AdminDashboardSecurity);
 
 app.listen(port, () => {
