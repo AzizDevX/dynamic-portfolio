@@ -10,6 +10,12 @@ import AddHomeData from "./routers/AddHomeData.js";
 import AdminDashboardSecurity from "./models/AdminDashboard_securityRule.js";
 import cors from "cors";
 
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 app.use(cookieParser());
 app.use(express.json());
@@ -27,6 +33,7 @@ const port = process.env.port;
 app.get("/", (req, res) => {
   res.send("Server Alive");
 });
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use("/auth/", AdminLogin);
 app.use("/api/", MainHomeData);
