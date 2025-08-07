@@ -63,4 +63,6 @@ Router.put(
   }
 );
 
+Router.put("/edit/homedata", async (req, res) => {});
+
 export default Router;

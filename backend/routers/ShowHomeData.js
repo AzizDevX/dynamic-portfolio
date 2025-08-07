@@ -1,5 +1,7 @@
 import HomeData from "../models/HomeDataSchema.js";
 import StatsData from "../models/StatsShema.js";
+import AboutUsData from "../models/AboutUsShema.js";
+import AboutUsSlides from "../models/AboutUsSlidesSchema.js";
 import express from "express";
 const Router = express.Router();
 Router.get("/home/main/data", async (req, res) => {
@@ -9,6 +11,13 @@ Router.get("/home/main/data", async (req, res) => {
       return res.status(404).json({ message: "Home data not found" });
     }
     const StatsInfo = await HomeData.findOne().populate("Stats");
+    const AboutUsInfo = await AboutUsData.findOne().select(
+      "AboutUsTitle AboutUsDescription AboutSkills"
+    );
+
+    const AboutUsSlides = await AboutUsData.findOne()
+      .populate("AboutUsSlides")
+      .select("slideImage slideTitle slideDescription");
     const filteredData = {
       DisplayName: homeData.DisplayName,
       MainRoles: homeData.MainRoles,
@@ -16,6 +25,8 @@ Router.get("/home/main/data", async (req, res) => {
       Clients_Counting: homeData.Clients_Counting,
       Rateing: homeData.Rateing,
       Stats: StatsInfo.Stats,
+      AboutUs: AboutUsInfo,
+      AboutUsSlides: AboutUsSlides,
     };
     return res.status(200).json(filteredData);
   } catch (error) {
