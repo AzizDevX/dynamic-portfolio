@@ -7,7 +7,7 @@ import AdminLogin from "./routers/auth.js";
 import cookieParser from "cookie-parser";
 import MainHomeData from "./routers/ShowHomeData.js";
 import EditHomeData from "./routers/EditHomeData.js";
-import AdminDashboardSecurity from "./models/AdminDashboard_securityRule.js";
+import AdminDashboardSecurity from "./routers/AdminDashboard_securityRule.js";
 import cors from "cors";
 
 import path from "path";
