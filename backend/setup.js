@@ -45,6 +45,7 @@ async function setupHomeData_DefaultValues() {
 
     const StatsData = await Stats.findOne();
     const homeData = new HomeData({
+      HomeLogo: "default.png",
       DisplayName: "Your Name Here",
       MainRoles: ["Full Stack Developer", "Problem Solver", "Tech Enthusiast"],
       description:

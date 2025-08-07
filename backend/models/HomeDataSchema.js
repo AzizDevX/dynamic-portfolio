@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 const homeDataSchema = mongoose.Schema({
+  HomeLogo: {
+    type: String,
+  },
   DisplayName: {
     type: String,
   },
