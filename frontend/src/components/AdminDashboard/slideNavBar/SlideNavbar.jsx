@@ -1,5 +1,8 @@
 import React from "react";
 import styles from "./SlideNavbar.module.css";
+import { useNavigate } from "react-router-dom";
+import { verifyJWTToken } from "../utils/authUtils";
+
 import {
   Home,
   User,
@@ -21,6 +24,24 @@ const SlideNavbar = ({
   setMobileMenuOpen,
   onLogout,
 }) => {
+  const navigate = useNavigate();
+
+  const handleNavClick = async (sectionId) => {
+    try {
+      const isValid = await verifyJWTToken();
+
+      if (isValid === false) {
+        navigate("/denied");
+        return;
+      }
+
+      setActiveSection(sectionId);
+      setMobileMenuOpen(false);
+    } catch (error) {
+      navigate("/denied");
+    }
+  };
+
   // Navigation sections
   const sections = [
     { id: "home", label: "Home", icon: Home },
@@ -65,9 +86,24 @@ const SlideNavbar = ({
               className={`${styles.navItem} ${
                 activeSection === section.id ? styles.active : ""
               }`}
-              onClick={() => {
-                setActiveSection(section.id);
-                setMobileMenuOpen(false);
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleNavClick(section.id);
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleNavClick(section.id);
+              }}
+              style={{
+                WebkitTouchCallout: "none",
+                WebkitUserSelect: "none",
+                KhtmlUserSelect: "none",
+                MozUserSelect: "none",
+                msUserSelect: "none",
+                userSelect: "none",
+                touchAction: "manipulation",
               }}
             >
               <Icon size={20} />
@@ -90,4 +126,3 @@ const SlideNavbar = ({
 };
 
 export default SlideNavbar;
-
