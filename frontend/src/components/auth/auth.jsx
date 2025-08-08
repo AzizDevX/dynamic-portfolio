@@ -43,8 +43,6 @@ const AuthPage = () => {
         }
       );
 
-      const data = response.data;
-
       // Handle successful login
       console.log("Login successful");
       // Redirect or handle success state here
