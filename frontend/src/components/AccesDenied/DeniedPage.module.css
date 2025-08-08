@@ -1,0 +1,27 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  text-align: center;
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 25%, #3b82f6 100%);
+}
+
+.title {
+  font-size: 3rem;
+  color: #dc3545;
+  margin-bottom: 1rem;
+}
+
+.message {
+  font-size: 1.2rem;
+  color: black;
+  margin-bottom: 1.5rem;
+}
+
+.homeLink {
+  text-decoration: none;
+  color: blue;
+  font-weight: bold;
+}
