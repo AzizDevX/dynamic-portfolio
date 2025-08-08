@@ -2,6 +2,7 @@ import HomeData from "../models/HomeDataSchema.js";
 import StatsData from "../models/StatsShema.js";
 import AboutUsData from "../models/AboutUsShema.js";
 import AboutUsSlides from "../models/AboutUsSlidesSchema.js";
+import Project from "../models/ProjectShema.js";
 import express from "express";
 const Router = express.Router();
 Router.get("/home/main/data", async (req, res) => {
@@ -18,6 +19,7 @@ Router.get("/home/main/data", async (req, res) => {
     const AboutUsSlides = await AboutUsData.findOne()
       .populate("AboutUsSlides")
       .select("slideImage slideTitle slideDescription");
+    const FeaturedProjects = await Project.find({ Featured: true });
     const filteredData = {
       DisplayName: homeData.DisplayName,
       MainRoles: homeData.MainRoles,
@@ -27,6 +29,7 @@ Router.get("/home/main/data", async (req, res) => {
       Stats: StatsInfo.Stats,
       AboutUs: AboutUsInfo,
       AboutUsSlides: AboutUsSlides,
+      FeaturedProjects: FeaturedProjects,
     };
     return res.status(200).json(filteredData);
   } catch (error) {
