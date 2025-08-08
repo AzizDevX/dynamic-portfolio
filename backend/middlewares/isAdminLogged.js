@@ -5,14 +5,17 @@ function isAdminLogged(req, res, next) {
     const token = req.cookies.token;
     const isLogged = jwt.verify(token, process.env.JWT_SECRET);
     if (!isLogged) {
-      return res.status(401).json({ message: "Access Denied" });
+      const access = false;
+      return res.status(401).json({ message: "Access Denied ", access });
     }
     req.user = isLogged;
     next();
   } catch (err) {
-    return res
-      .status(401)
-      .json({ message: "Invalid or expired token You Need to LOGIN AGAIN" });
+    const access = false;
+    return res.status(401).json({
+      message: "Invalid or expired token You Need to LOGIN AGAIN",
+      access,
+    });
   }
 }
 
