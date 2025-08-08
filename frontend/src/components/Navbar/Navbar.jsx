@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
-import styles from './Navbar.module.css';
+import React, { useState, useEffect } from "react";
+import { Menu, X } from "lucide-react";
+import styles from "./Navbar.module.css";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,8 +11,8 @@ const Navbar = () => {
       setIsScrolled(window.scrollY > 50);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const toggleMenu = () => {
@@ -20,30 +20,26 @@ const Navbar = () => {
   };
 
   const navItems = [
-    { name: 'Home', href: '#home' },
-    { name: 'Projects', href: '#projects' },
-    { name: 'Skills', href: '#skills' },
-    { name: 'CV', href: '#cv' },
-    { name: 'Contact', href: '#contact' }
+    { name: "Home", href: "home" },
+    { name: "Projects", href: "projects" },
+    { name: "Skills", href: "skills" },
+    { name: "CV", href: "cv" },
+    { name: "Contact", href: "contact" },
   ];
 
   return (
-    <nav className={`${styles.navbar} ${isScrolled ? styles.scrolled : ''}`}>
+    <nav className={`${styles.navbar} ${isScrolled ? styles.scrolled : ""}`}>
       <div className={styles.container}>
         {/* Logo */}
         <div className={styles.logo}>
-          <span className={styles.logoText}>Portfolio</span>
+          <span className={styles.logoText}>My Portfolio</span>
           <span className={styles.logoDot}>.</span>
         </div>
 
         {/* Desktop Navigation */}
         <div className={styles.desktopNav}>
           {navItems.map((item, index) => (
-            <a
-              key={index}
-              href={item.href}
-              className={styles.navLink}
-            >
+            <a key={index} href={item.href} className={styles.navLink}>
               {item.name}
             </a>
           ))}
@@ -67,7 +63,11 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Navigation */}
-      <div className={`${styles.mobileNav} ${isMenuOpen ? styles.mobileNavOpen : ''}`}>
+      <div
+        className={`${styles.mobileNav} ${
+          isMenuOpen ? styles.mobileNavOpen : ""
+        }`}
+      >
         <div className={styles.mobileNavContent}>
           {navItems.map((item, index) => (
             <a
@@ -93,4 +93,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
