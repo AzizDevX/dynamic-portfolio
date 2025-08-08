@@ -3,7 +3,8 @@ import { Eye, EyeOff, Lock, User, AlertCircle } from "lucide-react";
 import styles from "./auth.module.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
+import { Frontend_Admin_Url } from "../../config/AdminUrl.json";
+const AdminDashboard = "/" + Frontend_Admin_Url;
 const AuthPage = () => {
   const [formData, setFormData] = useState({
     username: "",
@@ -46,7 +47,7 @@ const AuthPage = () => {
       // Handle successful login
       console.log("Login successful");
       // Redirect or handle success state here
-      navigate("/"); // Navigate here directly after success
+      navigate(`${AdminDashboard}/dashboard`); // Navigate here directly after success
     } catch (error) {
       // axios error handling - check if it's a response error
       if (error.response) {
