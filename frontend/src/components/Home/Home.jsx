@@ -3,17 +3,15 @@ import axios from "axios";
 import Navbar from "../Navbar/Navbar";
 import Footer from "../Footer/Footer";
 import "../../App.css";
-
+import { Backend_Root_Url } from "../../config/AdminUrl.json";
 import {
   ArrowRight,
   Download,
   Code,
-  Palette,
-  Zap,
+  Eye,
   Users,
   Star,
   ExternalLink,
-  Github,
 } from "lucide-react";
 import styles from "./Home.module.css";
 import developerPortrait from "../../assets/me.png";
@@ -28,7 +26,7 @@ const Home = () => {
     const fetchHomeData = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/home/main/data"
+          `${Backend_Root_Url}/api/home/main/data`
         );
         setMainHomeData(response.data); // assumes your API returns an object
         console.log("Home data fetched successfully:", response.data);
@@ -72,59 +70,70 @@ const Home = () => {
     return () => clearTimeout(timeout);
   }, [typedText, currentIndex, isDeleting, GetRoles]);
 
-  const statsArray = MainHomeData?.Stats?.[0]?.Stats || [""];
-
-  const services = [
+  const statsArray = MainHomeData?.Stats?.Stats || [
+    { StatsNumber: "NoData", StatsLabel: "Backend Issue" },
+  ];
+  const aboutUsData = MainHomeData?.AboutUs || {
+    AboutUsTitle: "Backend Not Running Or Invalid Database Connection",
+    AboutUsDescription:
+      "No data available. Please follow the installation guide in the GitHub repo or open an issue if you need help. https://github.com/AzizDevX/dynamic-portfolio",
+  };
+  const aboutUsDataSkills = aboutUsData.AboutSkills || [
+    "Not Found",
+    "Follow Github Guide",
+    "Ask For Help",
+    "Invalide DataBase Connection Url Or Down ?? ",
+    "AzizKammoun",
+    "AzizDevX",
+  ];
+  const SlidesData = MainHomeData?.AboutUsSlides?.AboutUsSlides || [
     {
-      icon: Code,
-      title: "Web Development",
-      description:
-        "Building responsive and performant web applications using modern technologies and best practices.",
+      slideTitle: "Backend Not Running",
+      slideDescription:
+        "No data available. Please follow the installation guide in the GitHub repo or open an issue if you need help.",
     },
     {
-      icon: Palette,
-      title: "UI/UX Design",
-      description:
-        "Creating intuitive and beautiful user interfaces that provide exceptional user experiences.",
+      slideTitle: "Setup Required",
+      slideDescription:
+        "Your backend is not connected. Check the The Guide On Github for setup instructions.",
     },
     {
-      icon: Zap,
-      title: "Performance Optimization",
-      description:
-        "Optimizing applications for speed, accessibility, and search engine visibility.",
+      slideTitle: "Need Assistance?",
+      slideDescription:
+        "Visit our GitHub issues page to report problems : https://github.com/AzizDevX/dynamic-portfolio/issues or ask for AzizDevX The Owner Of Project For Help. ",
     },
   ];
+  const SlidesIconsDir = `${Backend_Root_Url}/uploads/aboutimg/`;
 
-  const featuredProjects = [
+  const featuredProjects = MainHomeData?.FeaturedProjects || [
     {
-      id: 1,
-      title: "E-Commerce Platform",
-      description:
+      _id: 1,
+      Title: "E-Commerce Platform",
+      Description:
         "A full-stack e-commerce solution with React, Node.js, and MongoDB.",
-      image: "/api/placeholder/400/250",
-      technologies: ["React", "Node.js", "MongoDB", "Stripe"],
-      liveUrl: "#",
-      githubUrl: "#",
+      Image: "/api/placeholder/400/250",
+      Project_technologies: ["React", "Node.js", "MongoDB", "Stripe"],
+      ProjectLink: "#",
     },
+
     {
-      id: 2,
-      title: "Task Management App",
-      description:
-        "A collaborative task management application with real-time updates.",
-      image: "/api/placeholder/400/250",
-      technologies: ["Vue.js", "Firebase", "Tailwind CSS"],
-      liveUrl: "#",
-      githubUrl: "#",
+      _id: 2,
+      Title: "E-Commerce Platform",
+      Description:
+        "A full-stack e-commerce solution with React, Node.js, and MongoDB.",
+      Image: "/api/placeholder/400/250",
+      Project_technologies: ["React", "Node.js", "MongoDB", "Stripe"],
+      ProjectLink: "#",
     },
+
     {
-      id: 3,
-      title: "Analytics Dashboard",
-      description:
-        "A comprehensive analytics dashboard with data visualization.",
-      image: "/api/placeholder/400/250",
-      technologies: ["React", "D3.js", "Python", "PostgreSQL"],
-      liveUrl: "#",
-      githubUrl: "#",
+      _id: 3,
+      Title: "E-Commerce Platform",
+      Description:
+        "A full-stack e-commerce solution with React, Node.js, and MongoDB.",
+      Image: "/api/placeholder/400/250",
+      Project_technologies: ["React", "Node.js", "MongoDB", "Stripe"],
+      ProjectLink: "#",
     },
   ];
 
@@ -241,29 +250,28 @@ const Home = () => {
               <div className={styles.sectionHeader}>
                 <span className={styles.sectionTag}>About Me</span>
                 <h2 className={styles.sectionTitle}>
-                  Passionate about creating digital solutions
+                  {aboutUsData.AboutUsTitle}
                 </h2>
               </div>
 
               <p className={styles.aboutDescription}>
-                With over 3 years of experience in web development, I specialize
-                in creating modern, responsive, and user-friendly applications.
-                I'm passionate about clean code, innovative solutions, and
-                continuous learning.
+                {aboutUsData.AboutUsDescription}
               </p>
 
               <div className={styles.services}>
-                {services.map((service, index) => {
-                  const IconComponent = service.icon;
+                {SlidesData.map((AboutUsSlide, index) => {
+                  const SlideIcon = SlidesIconsDir + AboutUsSlide.slideImage;
                   return (
                     <div key={index} className={styles.serviceItem}>
                       <div className={styles.serviceIcon}>
-                        <IconComponent size={24} />
+                        <img src={SlideIcon}></img>
                       </div>
                       <div className={styles.serviceContent}>
-                        <h3 className={styles.serviceTitle}>{service.title}</h3>
+                        <h3 className={styles.serviceTitle}>
+                          {AboutUsSlide.slideTitle}
+                        </h3>
                         <p className={styles.serviceDescription}>
-                          {service.description}
+                          {AboutUsSlide.slideDescription}
                         </p>
                       </div>
                     </div>
@@ -274,14 +282,13 @@ const Home = () => {
 
             <div className={styles.aboutVisual}>
               <div className={styles.skillsCloud}>
-                <div className={styles.skillBubble}>React</div>
-                <div className={styles.skillBubble}>Node.js</div>
-                <div className={styles.skillBubble}>TypeScript</div>
-                <div className={styles.skillBubble}>Python</div>
-                <div className={styles.skillBubble}>MongoDB</div>
-                <div className={styles.skillBubble}>AWS</div>
-                <div className={styles.skillBubble}>Docker</div>
-                <div className={styles.skillBubble}>GraphQL</div>
+                {aboutUsDataSkills.map((skill, index) => {
+                  return (
+                    <div key={index} className={styles.skillBubble}>
+                      {skill}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -298,7 +305,7 @@ const Home = () => {
 
           <div className={styles.projectsGrid}>
             {featuredProjects.map((project) => (
-              <div key={project.id} className={styles.projectCard}>
+              <div key={project._id} className={styles.projectCard}>
                 <div className={styles.projectImage}>
                   <div className={styles.projectImagePlaceholder}>
                     <Code size={48} />
@@ -306,29 +313,31 @@ const Home = () => {
                   <div className={styles.projectOverlay}>
                     <div className={styles.projectActions}>
                       <a
-                        href={project.liveUrl}
+                        target="_blank"
+                        href={project.ProjectLink}
+                        className={styles.projectAction}
+                      >
+                        <Eye size={20} />
+                      </a>
+                      <a
+                        target="_blank"
+                        href={project.ProjectLink}
                         className={styles.projectAction}
                       >
                         <ExternalLink size={20} />
-                      </a>
-                      <a
-                        href={project.githubUrl}
-                        className={styles.projectAction}
-                      >
-                        <Github size={20} />
                       </a>
                     </div>
                   </div>
                 </div>
 
                 <div className={styles.projectContent}>
-                  <h3 className={styles.projectTitle}>{project.title}</h3>
+                  <h3 className={styles.projectTitle}>{project.Title}</h3>
                   <p className={styles.projectDescription}>
-                    {project.description}
+                    {project.Description}
                   </p>
 
                   <div className={styles.projectTech}>
-                    {project.technologies.map((tech, index) => (
+                    {project.Project_technologies.map((tech, index) => (
                       <span key={index} className={styles.techTag}>
                         {tech}
                       </span>

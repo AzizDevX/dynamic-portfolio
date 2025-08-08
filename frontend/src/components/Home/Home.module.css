@@ -393,7 +393,6 @@
   justify-content: center;
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #3b82f6, #06b6d4);
   border-radius: 12px;
   flex-shrink: 0;
 }
