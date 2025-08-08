@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import styles from "./DashboardFooter.module.css";
 import { verifyJWTToken } from "../utils/authUtils";
+import { useNavigate } from "react-router-dom";
+
 import {
   Edit3,
   Save,
@@ -21,13 +23,17 @@ import {
 } from "lucide-react";
 
 const DashboardFooter = () => {
-  // Authentication check
-  // useEffect(() => {
-  //   if (!verifyJWTToken()) {
-  //     window.location.href = "/denied";
-  //     return;
-  //   }
-  // }, []);
+  //Authentication check
+  const navigate = useNavigate();
+  useEffect(() => {
+    const checkAuth = async () => {
+      const isValid = await verifyJWTToken();
+      if (isValid === false) {
+        navigate("/denied");
+      }
+    };
+    checkAuth();
+  }, [navigate]);
 
   // Available social icons
   const availableIcons = [

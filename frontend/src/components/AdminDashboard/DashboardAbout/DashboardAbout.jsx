@@ -2,16 +2,21 @@ import React, { useState, useRef, useEffect } from "react";
 import styles from "./DashboardAbout.module.css";
 import { verifyJWTToken } from "../utils/authUtils";
 import { Plus, Edit3, Trash2, Upload, Save, X, Image } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const DashboardAbout = () => {
-  // Authentication check
-  // useEffect(() => {
-  //   if (!verifyJWTToken()) {
-  //     window.location.href = "/denied";
-  //     return;
-  //   }
-  // }, []);
+  //Authentication check
 
+  const navigate = useNavigate();
+  useEffect(() => {
+    const checkAuth = async () => {
+      const isValid = await verifyJWTToken();
+      if (isValid === false) {
+        navigate("/denied");
+      }
+    };
+    checkAuth();
+  }, [navigate]);
   // About section state
   const [aboutData, setAboutData] = useState({
     title: "About Me",

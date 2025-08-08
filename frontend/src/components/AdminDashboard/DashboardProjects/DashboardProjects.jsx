@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import styles from "./DashboardProjects.module.css";
 import { verifyJWTToken } from "../utils/authUtils";
+import { useNavigate } from "react-router-dom";
+
 import {
   Plus,
   Edit3,
@@ -15,13 +17,17 @@ import {
 } from "lucide-react";
 
 const DashboardProjects = () => {
-  // Authentication check
-  // useEffect(() => {
-  //   if (!verifyJWTToken()) {
-  //     window.location.href = "/denied";
-  //     return;
-  //   }
-  // }, []);
+  //Authentication check
+  const navigate = useNavigate();
+  useEffect(() => {
+    const checkAuth = async () => {
+      const isValid = await verifyJWTToken();
+      if (isValid === false) {
+        navigate("/denied");
+      }
+    };
+    checkAuth();
+  }, [navigate]);
 
   // Projects state
   const [projects, setProjects] = useState([

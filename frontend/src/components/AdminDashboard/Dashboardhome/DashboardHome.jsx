@@ -2,15 +2,20 @@ import React, { useState, useRef, useEffect } from "react";
 import styles from "./DashboardHome.module.css";
 import { verifyJWTToken } from "../utils/authUtils";
 import { Plus, Edit3, Trash2, Upload, Save, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const DashboardHome = () => {
-  // Authentication check
-  // useEffect(() => {
-  //   if (!verifyJWTToken()) {
-  //     window.location.href = "/denied";
-  //     return;
-  //   }
-  // }, []);
+  //Authentication check
+  const navigate = useNavigate();
+  useEffect(() => {
+    const checkAuth = async () => {
+      const isValid = await verifyJWTToken();
+      if (isValid === false) {
+        navigate("/denied");
+      }
+    };
+    checkAuth();
+  }, [navigate]);
 
   // Home section state
   const [homeData, setHomeData] = useState({
