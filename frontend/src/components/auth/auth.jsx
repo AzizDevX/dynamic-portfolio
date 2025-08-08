@@ -4,6 +4,9 @@ import styles from "./auth.module.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Frontend_Admin_Url } from "../../config/AdminUrl.json";
+import { verifyJWTToken } from "../AdminDashboard/utils/authUtils";
+import { useEffect } from "react";
+
 const AdminDashboard = "/" + Frontend_Admin_Url;
 const AuthPage = () => {
   const [formData, setFormData] = useState({
@@ -14,6 +17,16 @@ const AuthPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
+  //Authentication check
+  useEffect(() => {
+    const checkAuth = async () => {
+      const isValid = await verifyJWTToken();
+      if (isValid === true) {
+        navigate(`${AdminDashboard}/dashboard`);
+      }
+    };
+    checkAuth();
+  }, [navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
