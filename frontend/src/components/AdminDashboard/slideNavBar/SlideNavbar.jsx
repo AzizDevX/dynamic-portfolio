@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./SlideNavbar.module.css";
 import { useNavigate } from "react-router-dom";
 import { verifyJWTToken } from "../utils/authUtils";
@@ -25,6 +25,18 @@ const SlideNavbar = ({
   onLogout,
 }) => {
   const navigate = useNavigate();
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  // Track viewport changes
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleNavClick = async (sectionId) => {
     try {
@@ -38,8 +50,15 @@ const SlideNavbar = ({
       setActiveSection(sectionId);
       setMobileMenuOpen(false);
     } catch (error) {
+      console.error("❌ JWT verification error:", error);
+      console.log("🚨 Error details:", error.message, error.stack);
       navigate("/denied");
     }
+  };
+
+  // Universal click handler - handles ALL scenarios
+  const handleUniversalClick = (sectionId) => {
+    handleNavClick(sectionId);
   };
 
   // Navigation sections
@@ -81,7 +100,7 @@ const SlideNavbar = ({
         {sections.map((section) => {
           const Icon = section.icon;
           return (
-            <button
+            <div
               key={section.id}
               className={`${styles.navItem} ${
                 activeSection === section.id ? styles.active : ""
@@ -89,37 +108,48 @@ const SlideNavbar = ({
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                handleNavClick(section.id);
+                handleUniversalClick(section.id);
               }}
-              onTouchEnd={(e) => {
+              onMouseDown={(e) => {
                 e.preventDefault();
-                e.stopPropagation();
-                handleNavClick(section.id);
+                handleUniversalClick(section.id);
+              }}
+              onTouchStart={(e) => {
+                e.preventDefault();
+                handleUniversalClick(section.id);
               }}
               style={{
-                WebkitTouchCallout: "none",
-                WebkitUserSelect: "none",
-                KhtmlUserSelect: "none",
-                MozUserSelect: "none",
-                msUserSelect: "none",
+                cursor: "pointer",
                 userSelect: "none",
+                WebkitUserSelect: "none",
+                WebkitTapHighlightColor: "rgba(59, 130, 246, 0.2)",
                 touchAction: "manipulation",
+                position: "relative",
+                zIndex: 10,
               }}
             >
               <Icon size={20} />
               {(!sidebarCollapsed || mobileMenuOpen) && (
                 <span>{section.label}</span>
               )}
-            </button>
+            </div>
           );
         })}
       </nav>
 
       <div className={styles.sidebarFooter}>
-        <button className={styles.logoutBtn} onClick={onLogout}>
+        <div
+          className={styles.logoutBtn}
+          onClick={onLogout}
+          style={{
+            cursor: "pointer",
+            userSelect: "none",
+            WebkitUserSelect: "none",
+          }}
+        >
           <LogOut size={20} />
           {(!sidebarCollapsed || mobileMenuOpen) && <span>Logout</span>}
-        </button>
+        </div>
       </div>
     </div>
   );

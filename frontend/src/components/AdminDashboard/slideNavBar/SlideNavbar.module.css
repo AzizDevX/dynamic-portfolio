@@ -59,6 +59,8 @@
   position: fixed;
   height: 100vh;
   z-index: 1000;
+  top: 0;
+  left: 0;
 }
 
 .sidebar.collapsed {
@@ -113,6 +115,11 @@
   justify-content: center;
   width: 36px;
   height: 36px;
+  position: relative;
+  z-index: 10;
+  /* Ensure button is clickable */
+  pointer-events: auto;
+  touch-action: manipulation;
 }
 
 .collapseBtn:hover {
@@ -123,6 +130,9 @@
 .sidebarNav {
   flex: 1;
   padding: var(--spacing-lg) 0;
+  overflow-y: auto;
+  /* Ensure nav items are interactive */
+  pointer-events: auto;
 }
 
 .navItem {
@@ -140,11 +150,25 @@
   font-weight: 500;
   text-align: left;
   position: relative;
+  /* Critical for mobile interaction */
+  pointer-events: auto;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(59, 130, 246, 0.1);
+  min-height: 44px; /* Ensure minimum touch target size */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-.navItem:hover {
+.navItem:hover,
+.navItem:focus {
   background-color: var(--bg-hover);
   color: var(--text-primary);
+  outline: none;
+}
+
+.navItem:active {
+  background-color: var(--bg-active);
+  transform: scale(0.98);
 }
 
 .navItem.active {
@@ -160,6 +184,7 @@
   bottom: 0;
   width: 3px;
   background-color: var(--accent-primary);
+  pointer-events: none;
 }
 
 .collapsed .navItem span {
@@ -186,22 +211,45 @@
   transition: var(--transition-fast);
   font-size: 0.95rem;
   border-radius: var(--radius-md);
+  pointer-events: auto;
+  touch-action: manipulation;
+  min-height: 44px;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-.logoutBtn:hover {
+.logoutBtn:hover,
+.logoutBtn:focus {
   background-color: var(--accent-danger);
   color: var(--text-primary);
+  outline: none;
 }
 
-/* Mobile Responsive */
+.logoutBtn:active {
+  transform: scale(0.98);
+}
+
+/* Mobile Responsive - Enhanced for manual resize */
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(-100%);
     transition: transform var(--transition-normal);
+    /* Ensure sidebar stays on top */
+    z-index: 9999;
   }
 
   .sidebar.mobileOpen {
     transform: translateX(0);
+    /* Add backdrop blur effect */
+    backdrop-filter: blur(8px);
+  }
+
+  /* Ensure mobile menu buttons are always clickable */
+  .sidebar.mobileOpen .navItem,
+  .sidebar.mobileOpen .logoutBtn,
+  .sidebar.mobileOpen .collapseBtn {
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
   }
 
   .desktopOnly {
@@ -210,6 +258,17 @@
 
   .mobileOnly {
     display: flex !important;
+  }
+
+  /* Increase touch targets on mobile */
+  .navItem {
+    min-height: 48px;
+    padding: var(--spacing-lg) var(--spacing-lg);
+  }
+
+  .logoutBtn {
+    min-height: 48px;
+    padding: var(--spacing-lg) var(--spacing-md);
   }
 }
 
@@ -223,3 +282,23 @@
   }
 }
 
+/* Fix for manual browser resize issues */
+@media (max-width: 768px) and (pointer: coarse) {
+  /* This targets touch devices in mobile view */
+  .sidebar {
+    will-change: transform;
+  }
+
+  .navItem {
+    will-change: background-color, transform;
+  }
+}
+
+/* Ensure clickability across all screen sizes */
+.navItem,
+.logoutBtn,
+.collapseBtn {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
