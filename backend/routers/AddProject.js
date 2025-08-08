@@ -11,20 +11,13 @@ Router.post(
   validateProjectInput,
   async (req, res) => {
     try {
-      const IsUsedId = await Project.findOne({ projectId: req.body.projectId });
-      if (IsUsedId) {
-        return res
-          .status(400)
-          .json({ message: "Id Must be Unique Try Again with Other ID" });
-      }
       const NewProject = new Project({
-        projectId: req.body.projectId,
-        title: req.body.title,
-        description: req.body.description,
-        image: req.body.image,
-        githubLink: req.body.githubLink,
-        project_technologies: req.body.project_technologies,
-        createdAt: new Date(),
+        Title: req.body.Title,
+        Description: req.body.Description,
+        Image: req.body.Image,
+        ProjectLink: req.body.ProjectLink,
+        Project_technologies: req.body.Project_technologies,
+        Featured: req.body.Featured,
       });
       const savedProject = await NewProject.save();
       return res.status(201).json(savedProject);
@@ -44,12 +37,12 @@ Router.get("/show/projects", async (req, res) => {
       return res.status(404).json({ message: "No Projects Found" });
     }
     const FilteredData = Projects.map((doc) => ({
-      projectId: doc.projectId,
-      title: doc.title,
-      description: doc.description,
-      image: doc.image,
-      githubLink: doc.githubLink,
-      project_technologies: doc.project_technologies,
+      Title: doc.Title,
+      Description: doc.Description,
+      Image: doc.Image,
+      ProjectLink: doc.ProjectLink,
+      Project_technologies: doc.Project_technologies,
+      Featured: doc.Featured,
     }));
     return res.status(200).json(FilteredData);
   } catch (err) {

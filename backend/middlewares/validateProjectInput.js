@@ -1,12 +1,12 @@
 import Joi from "joi";
 function validateProjectInput(req, res, next) {
   const schema = Joi.object({
-    projectId: Joi.string().required(),
-    title: Joi.string().min(3).required(),
-    description: Joi.string().min(10).required(),
-    image: Joi.string().uri().required(),
-    githubLink: Joi.string().uri(),
-    technologies: Joi.array().items(Joi.string()),
+    Title: Joi.string().min(3).required(),
+    Description: Joi.string().min(10).required(),
+    Image: Joi.string().uri().required(),
+    ProjectLink: Joi.string().uri(),
+    Project_technologies: Joi.array().items(Joi.string()),
+    Featured: Joi.boolean().default(false),
   });
 
   const { error } = schema.validate(req.body);

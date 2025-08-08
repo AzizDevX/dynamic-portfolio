@@ -1,41 +1,37 @@
 import mongoose from "mongoose";
 const ProjectSchema = new mongoose.Schema(
   {
-    projectId: {
-      type: String,
-      unique: true,
-      required: true,
-    },
-    title: {
+    Title: {
       type: String,
       required: true,
       trim: true,
       minlength: 1,
       maxlength: 100,
     },
-    description: {
+    Description: {
       type: String,
       required: true,
       trim: true,
       minlength: 1,
       maxlength: 500,
     },
-    image: {
+    Image: {
       type: String,
       required: true,
       trim: true,
     },
-    githubLink: {
+    ProjectLink: {
       type: String,
       trim: true,
+      require: true,
     },
-    project_technologies: {
+    Project_technologies: {
       type: [String],
+      default: [],
     },
-    createdAt: {
-      //needs to remove or replacment
-      type: Date,
-      required: false,
+    Featured: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }
