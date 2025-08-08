@@ -4,6 +4,7 @@ import connectDB from "./config/dbConnect.js";
 import Stats from "./models/StatsShema.js";
 import AboutUsSlides from "./models/AboutUsSlidesSchema.js";
 import AboutUs from "./models/AboutUsShema.js";
+import FooterSocialLinks from "./models/FooterSocialLinksShema.js";
 async function ConnectDb() {
   try {
     await connectDB();
@@ -51,19 +52,19 @@ async function setupAboutSlides_DefaultValues() {
         slideImage: "defaulticon1.png",
         slideTitle: "Web Development",
         slideDescription:
-          "Building responsive and performant web applications using modern technologies and best practices.",
+          "Building responsive and performant web applications using modern technologies and best practices. Always You Can Change this default data from dashboard",
       },
       {
         slideImage: "defaulticon2.png",
         slideTitle: "UI/UX Design",
         slideDescription:
-          "Creating intuitive and beautiful user interfaces that provide exceptional user experiences.",
+          "Creating intuitive and beautiful user interfaces that provide exceptional user experiences. Always You Can Change this default data from dashboard",
       },
       {
         slideImage: "defaulticon3.png",
         slideTitle: "Performance Optimization",
         slideDescription:
-          "Optimizing applications for speed, accessibility, and search engine visibility.",
+          "Optimizing applications for speed, accessibility, and search engine visibility. Always You Can Change this default data from dashboard",
       },
     ];
     const SaveSlides = await AboutUsSlides.insertMany(SlidesData);
@@ -105,6 +106,41 @@ async function setupAboutUs_DefaultValues() {
   }
 }
 
+// async function setupFooterSocialLinks_DefaultValues() {
+//   try {
+//     const existingData = await FooterSocialLinks.findOne();
+//     if (existingData) {
+//       return console.log(
+//         "ℹ️ Social Links data already exists. Skipping seeding."
+//       );
+//     }
+
+//     const FooterSocialLinksData = [
+//       {
+//         SocialIcon: "defultgithub.png",
+//         SocialLink: "https://www.facebook.com/yourprofile",
+//       },
+//       {
+//         SocialIcon: "fa fa-twitter",
+//         SocialLink: "https://www.twitter.com/yourprofile",
+//       },
+//       {
+//         SocialIcon: "fa fa-instagram",
+//         SocialLink: "https://www.instagram.com/yourprofile",
+//       },
+//       {
+//         SocialIcon: "fa fa-linkedin",
+//         SocialLink: "https://www.linkedin.com/in/yourprofile",
+//       },
+//     ];
+
+//     await FooterSocialLinks.insertMany(FooterSocialLinksData);
+//     console.log("✅ Footer Social Links setup completed successfully.");
+//   } catch (err) {
+//     console.error("❌ Error setting up Footer Social Links data:", err);
+//   }
+// }
+
 async function setupHomeData_DefaultValues() {
   try {
     const existingData = await HomeData.findOne();
@@ -144,6 +180,7 @@ async function initializeData() {
   await setupStats_DefaultValues();
   await setupAboutSlides_DefaultValues();
   await setupAboutUs_DefaultValues();
+  // await setupFooterSocialLinks_DefaultValues();
   await setupHomeData_DefaultValues();
   mongoose.connection.close;
   process.exit(0);

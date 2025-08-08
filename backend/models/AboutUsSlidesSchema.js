@@ -3,6 +3,7 @@ const aboutUsSlidesSchema = mongoose.Schema(
   {
     slideImage: {
       type: String,
+      required: true,
     },
     slideTitle: {
       type: String,
