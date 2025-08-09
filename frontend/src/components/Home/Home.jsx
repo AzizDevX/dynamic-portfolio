@@ -14,7 +14,6 @@ import {
   ExternalLink,
 } from "lucide-react";
 import styles from "./Home.module.css";
-import developerPortrait from "../../assets/me.png";
 
 const Home = () => {
   const [typedText, setTypedText] = useState("");
@@ -28,8 +27,7 @@ const Home = () => {
         const response = await axios.get(
           `${Backend_Root_Url}/api/home/main/data`
         );
-        setMainHomeData(response.data); // assumes your API returns an object
-        console.log("Home data fetched successfully:", response.data);
+        setMainHomeData(response.data);
       } catch (error) {
         console.error("Error fetching home data:", error);
       }
@@ -70,7 +68,7 @@ const Home = () => {
     return () => clearTimeout(timeout);
   }, [typedText, currentIndex, isDeleting, GetRoles]);
 
-  const statsArray = MainHomeData?.Stats?.Stats || [
+  const statsArray = MainHomeData?.Stats || [
     { StatsNumber: "NoData", StatsLabel: "Backend Issue" },
   ];
   const aboutUsData = MainHomeData?.AboutUs || {
@@ -104,6 +102,7 @@ const Home = () => {
     },
   ];
   const SlidesIconsDir = `${Backend_Root_Url}/uploads/aboutimg/`;
+  const HomeLogo = `${Backend_Root_Url}/uploads/logo/` + MainHomeData?.HomeLogo;
 
   const featuredProjects = MainHomeData?.FeaturedProjects || [
     {
@@ -211,7 +210,7 @@ const Home = () => {
             <div className={styles.heroImage}>
               <div className={styles.imageContainer}>
                 <img
-                  src={developerPortrait}
+                  src={MainHomeData ? HomeLogo : "NotFound"}
                   alt="Home image "
                   className={styles.profileImage}
                 />
