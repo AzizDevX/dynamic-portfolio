@@ -4,6 +4,9 @@ import { upload } from "../controllers/storage.js";
 import HomeLogoFolder from "../middlewares/HomeLogo.js";
 import { access, unlink } from "fs/promises";
 import isAdminLogged from "../middlewares/isAdminLogged.js";
+import validateEditHomeData from "../middlewares/EditHomeDataValidation.js";
+import Stats from "../models/StatsShema.js";
+import validateAddStat from "../middlewares/AddStatValidation.js";
 const Router = express.Router();
 
 Router.put(
@@ -63,6 +66,80 @@ Router.put(
   }
 );
 
-Router.put("/edit/homedata", async (req, res) => {});
+Router.put(
+  "/edit/homedata",
+  isAdminLogged,
+  validateEditHomeData,
+  async (req, res) => {
+    try {
+      const NewData = req.body;
+
+      const FindOldData = await HomeData.findOne();
+      if (!FindOldData || FindOldData.length === 0) {
+        return res.status(404).json({ message: "No home data found" });
+      }
+      const UpdateData = await HomeData.findByIdAndUpdate(
+        FindOldData._id,
+        NewData,
+        { validation: true, runValidators: true, new: true }
+      );
+
+      if (!UpdateData) {
+        return res.status(404).json({ message: "Failed to update home data" });
+      }
+      return res.status(200).json({
+        message: "Home data updated successfully",
+        data: UpdateData,
+      });
+    } catch (err) {
+      res.status(500).json({ error: "Internal Server Error" });
+      return console.error("Error updating home data:", err);
+    }
+  }
+);
+
+Router.post(
+  "/homedata/add/stat",
+  isAdminLogged,
+  validateAddStat,
+  async (req, res) => {
+    try {
+      const NewStatData = new Stats({
+        StatsNumber: req.body.StatsNumber,
+        StatsLabel: req.body.StatsLabel,
+      });
+      const savedData = await NewStatData.save();
+
+      if (!savedData) {
+        return res.status(400).json({ message: "Failed to save stat data" });
+      }
+
+      const HomeDataRecord = await HomeData.findOne();
+      if (!HomeDataRecord) {
+        return res.status(404).json({ message: "Home data not found" });
+      }
+
+      HomeDataRecord.Stats.push(savedData._id);
+      await HomeDataRecord.save();
+
+      return res.status(201).json({ message: "Stat data added successfully" });
+    } catch (error) {
+      console.error("Error adding home data:", error);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+  }
+);
+
+// Router.delete(
+//   "/homedata/delete/stat/:id",
+//   isAdminLogged,
+// );
+
+// Router.put(
+//   "/homedata/update/stat/:id",
+//   isAdminLogged,
+//   validateAddStat,
+//   async (req, res) => {}
+// );
 
 export default Router;
