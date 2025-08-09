@@ -7,10 +7,12 @@ import isAdminLogged from "../middlewares/isAdminLogged.js";
 import validateEditHomeData from "../middlewares/EditHomeDataValidation.js";
 import Stats from "../models/StatsShema.js";
 import validateAddStat from "../middlewares/AddStatValidation.js";
+import mongoose from "mongoose";
+import validateEditStat from "../middlewares/editstatValidation.js";
 const Router = express.Router();
 
 Router.put(
-  "/update/logo",
+  "/home/update/logo",
   isAdminLogged,
   HomeLogoFolder,
   upload.single("image"),
@@ -67,7 +69,7 @@ Router.put(
 );
 
 Router.put(
-  "/edit/homedata",
+  "/home/edit/homedata",
   isAdminLogged,
   validateEditHomeData,
   async (req, res) => {
@@ -99,7 +101,7 @@ Router.put(
 );
 
 Router.post(
-  "/homedata/add/stat",
+  "/home/add/stat",
   isAdminLogged,
   validateAddStat,
   async (req, res) => {
@@ -123,23 +125,80 @@ Router.post(
       await HomeDataRecord.save();
 
       return res.status(201).json({ message: "Stat data added successfully" });
-    } catch (error) {
-      console.error("Error adding home data:", error);
+    } catch (err) {
+      console.error("Error adding home data:", err);
       return res.status(500).json({ message: "Internal Server Error" });
     }
   }
 );
 
-// Router.delete(
-//   "/homedata/delete/stat/:id",
-//   isAdminLogged,
-// );
+Router.delete("/home/delete/stat/:id", isAdminLogged, async (req, res) => {
+  try {
+    const id = req.params.id;
 
-// Router.put(
-//   "/homedata/update/stat/:id",
-//   isAdminLogged,
-//   validateAddStat,
-//   async (req, res) => {}
-// );
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid ID format" });
+    }
+
+    const findstat = await Stats.findByIdAndDelete(id);
+
+    if (!findstat) {
+      return res.status(404).json({ message: "Stat not found" });
+    }
+
+    const homeData = await HomeData.findOne();
+    if (!homeData) {
+      return res.status(404).json({ message: "Home data not found" });
+    }
+
+    homeData.Stats.pull(id);
+
+    await homeData.save();
+
+    return res.status(200).json({
+      message: "Stat deleted successfully",
+      data: findstat,
+    });
+  } catch (err) {
+    console.error("Error deleting stat:", err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+Router.put(
+  "/home/update/stat/:id",
+  isAdminLogged,
+  validateEditStat,
+  async (req, res) => {
+    try {
+      const id = req.params.id;
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+      const findstat = await Stats.findById(id);
+      if (!findstat) {
+        res.status(404).json({ message: "Stat not found" });
+      }
+      const updatedStat = await Stats.findByIdAndUpdate(
+        id,
+        {
+          StatsNumber: req.body.StatsNumber,
+          StatsLabel: req.body.StatsLabel,
+        },
+        { new: true, runValidators: true }
+      );
+      if (!updatedStat) {
+        return res.status(400).json({ message: "Failed to update stat" });
+      }
+      return res.status(200).json({
+        message: "Stat updated successfully",
+        data: updatedStat,
+      });
+    } catch (err) {
+      console.error("Error updating stat:", err);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+  }
+);
 
 export default Router;
