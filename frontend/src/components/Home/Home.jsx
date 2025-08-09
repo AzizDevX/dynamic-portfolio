@@ -177,11 +177,11 @@ const Home = () => {
               </p>
 
               <div className={styles.heroButtons}>
-                <a href="#projects" className={styles.primaryButton}>
+                <a href="projects" className={styles.primaryButton}>
                   View My Work
                   <ArrowRight size={20} />
                 </a>
-                <a href="#contact" className={styles.secondaryButton}>
+                <a href="contact" className={styles.secondaryButton}>
                   <Download size={20} />
                   Download CV
                 </a>
