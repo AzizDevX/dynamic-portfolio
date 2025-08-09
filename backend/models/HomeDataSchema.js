@@ -20,10 +20,13 @@ const homeDataSchema = mongoose.Schema({
     type: Number,
     default: 0,
   },
-  Stats: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Stats",
-  },
+  Stats: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Stats",
+    },
+  ],
+
   AboutUs: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "AboutUs",

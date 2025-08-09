@@ -22,16 +22,16 @@ async function setupStats_DefaultValues() {
       return console.log("ℹ️ Stats data already exists. Skipping seeding.");
     }
 
-    const MainStats = new Stats({
-      Stats: [
-        { StatsNumber: "1+", StatsLabel: "Projects Completed" },
-        { StatsNumber: "2+", StatsLabel: "Years Experience" },
-        { StatsNumber: "3+", StatsLabel: "Happy Clients" },
-        { StatsNumber: "4+", StatsLabel: "Technologies" },
-      ],
-    });
+    const StatsData = [
+      { StatsNumber: "1+", StatsLabel: "Projects Completed" },
 
-    await MainStats.save();
+      { StatsNumber: "2+", StatsLabel: "Years Experience" },
+
+      { StatsNumber: "3+", StatsLabel: "Happy Clients" },
+      { StatsNumber: "4+", StatsLabel: "Technologies" },
+    ];
+    await Stats.insertMany(StatsData);
+
     console.log("✅ Stats data setup completed successfully.");
   } catch (err) {
     return console.error("❌ Error setting up Stats data:", err);
@@ -148,7 +148,7 @@ async function setupHomeData_DefaultValues() {
       return console.log("ℹ️ Home data already exists. Skipping seeding.");
     }
 
-    const StatsData = await Stats.findOne();
+    const StatsData = await Stats.find();
     const AboutUsData = await AboutUs.findOne();
     const homeData = new HomeData({
       HomeLogo: "default.png",

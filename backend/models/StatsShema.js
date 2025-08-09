@@ -1,17 +1,18 @@
 import mongoose from "mongoose";
 
-const StatsSchema = mongoose.Schema({
-  Stats: [
-    {
-      StatsNumber: {
-        type: String,
-      },
-      StatsLabel: {
-        type: String,
-      },
+const StatsSchema = mongoose.Schema(
+  {
+    StatsNumber: {
+      type: String,
+      required: true,
     },
-  ],
-});
+    StatsLabel: {
+      type: String,
+      required: true,
+    },
+  },
+  { timestamps: true }
+);
 
 const Stats = mongoose.model("Stats", StatsSchema);
 export default Stats;

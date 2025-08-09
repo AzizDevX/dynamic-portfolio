@@ -11,7 +11,11 @@ Router.get("/home/main/data", async (req, res) => {
     if (!homeData) {
       return res.status(404).json({ message: "Home data not found" });
     }
-    const StatsInfo = await HomeData.findOne().populate("Stats");
+
+    const StatsInfo = await HomeData.findOne()
+      .populate("Stats")
+      .select("StatsNumber StatsLabel");
+
     const AboutUsInfo = await AboutUsData.findOne().select(
       "AboutUsTitle AboutUsDescription AboutSkills"
     );
@@ -21,6 +25,7 @@ Router.get("/home/main/data", async (req, res) => {
       .select("slideImage slideTitle slideDescription");
     const FeaturedProjects = await Project.find({ Featured: true });
     const filteredData = {
+      HomeLogo: homeData.HomeLogo,
       DisplayName: homeData.DisplayName,
       MainRoles: homeData.MainRoles,
       description: homeData.description,
