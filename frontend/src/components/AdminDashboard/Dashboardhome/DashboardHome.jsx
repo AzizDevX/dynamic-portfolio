@@ -3,6 +3,8 @@ import styles from "./DashboardHome.module.css";
 import { verifyJWTToken } from "../utils/authUtils";
 import { Plus, Edit3, Trash2, Upload, Save, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Backend_Root_Url } from "../../../config/AdminUrl.json";
 
 const DashboardHome = () => {
   //Authentication check
@@ -17,22 +19,57 @@ const DashboardHome = () => {
     checkAuth();
   }, [navigate]);
 
-  // Home section state
-  const [homeData, setHomeData] = useState({
-    displayName: "John Doe",
-    mainRoles: ["Full Stack Developer", "UI/UX Designer", "Tech Consultant"],
-    description:
-      "Passionate about creating digital solutions that make a difference",
-    profileImage: null,
-    clientsCounting: 50,
-    rating: 4.9,
-    stats: [
-      { id: 1, statNumber: "50+", statLabel: "Happy Clients" },
-      { id: 2, statNumber: "4.9", statLabel: "Rating" },
-      { id: 3, statNumber: "100+", statLabel: "Projects" },
-      { id: 4, statNumber: "3+", statLabel: "Years Experience" },
-    ],
-  });
+  const [MainHomeData, setMainHomeData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchHomeData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await axios.get(
+          `${Backend_Root_Url}/api/home/main/data`
+        );
+        setMainHomeData(response.data);
+        console.log("Home data fetched successfully:", response.data);
+      } catch (error) {
+        console.error("Error fetching home data:", error);
+        setError("Failed to fetch home data. Please check your connection.");
+        // Set fallback data when API is down
+        setMainHomeData({
+          DisplayName: "Your Name",
+          MainRoles: [
+            "Full Stack Developer",
+            "UI/UX Designer",
+            "Tech Consultant",
+          ],
+          description:
+            "Passionate about creating digital solutions that make a difference",
+          HomeLogo: "default.png",
+          Clients_Counting: 0,
+          Rateing: 0,
+          Stats: [],
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHomeData();
+  }, []);
+
+  // Safe data extraction with fallbacks
+  const statsArray = MainHomeData?.Stats || [];
+  const HomeLogoImg = MainHomeData?.HomeLogo
+    ? `${Backend_Root_Url}/uploads/logo/${MainHomeData.HomeLogo}`
+    : null;
+
+  const GetRoles = MainHomeData?.MainRoles
+    ? Array.isArray(MainHomeData.MainRoles)
+      ? MainHomeData.MainRoles
+      : Object.values(MainHomeData.MainRoles)
+    : [];
 
   // Slide panel state
   const [slidePanel, setSlidePanel] = useState({
@@ -53,6 +90,7 @@ const DashboardHome = () => {
   // Form states for slide panel
   const [formData, setFormData] = useState({});
   const [dragActive, setDragActive] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // File input refs
   const fileInputRef = useRef(null);
@@ -70,14 +108,34 @@ const DashboardHome = () => {
     if (data) {
       if (type === "editHome") {
         setFormData({
-          ...data,
-          mainRoles: data.mainRoles ? data.mainRoles.join(", ") : "",
+          DisplayName: data.DisplayName || "",
+          MainRoles: Array.isArray(data.MainRoles)
+            ? data.MainRoles.join(", ")
+            : data.MainRoles
+            ? Object.values(data.MainRoles).join(", ")
+            : "",
+          description: data.description || "",
+          Clients_Counting: data.Clients_Counting || 0,
+          Rateing: data.Rateing || 0,
+          HomeLogo: data.HomeLogo || "",
+        });
+      } else if (type === "editStat") {
+        setFormData({
+          StatsNumber: data.StatsNumber || "",
+          StatsLabel: data.StatsLabel || "",
         });
       } else {
         setFormData(data);
       }
     } else {
-      setFormData({});
+      if (type === "addStat") {
+        setFormData({
+          StatsNumber: "",
+          StatsLabel: "",
+        });
+      } else {
+        setFormData({});
+      }
     }
   };
 
@@ -89,6 +147,7 @@ const DashboardHome = () => {
       title: "",
     });
     setFormData({});
+    setSaving(false);
   };
 
   // Delete confirmation functions
@@ -110,14 +169,26 @@ const DashboardHome = () => {
     });
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     const { type, id } = deleteConfirmation;
 
     if (type === "stat") {
-      setHomeData((prev) => ({
-        ...prev,
-        stats: prev.stats.filter((s) => s.id !== id),
-      }));
+      try {
+        await axios.delete(`${Backend_Root_Url}/api/home/delete/stat/${id}`, {
+          withCredentials: true,
+        });
+
+        // Update local state
+        setMainHomeData((prev) => ({
+          ...prev,
+          Stats: prev.Stats.filter((s) => s._id !== id),
+        }));
+
+        console.log("Stat deleted successfully");
+      } catch (error) {
+        console.error("Error deleting stat:", error);
+        alert("Failed to delete stat. Please try again.");
+      }
     }
 
     closeDeleteConfirmation();
@@ -154,52 +225,197 @@ const DashboardHome = () => {
     reader.onload = (e) => {
       setFormData((prev) => ({
         ...prev,
-        profileImage: e.target.result,
+        HomeLogoImg: e.target.result,
         imageFile: file,
       }));
     };
     reader.readAsDataURL(file);
   };
 
-  // CRUD operations
-  const handleSave = () => {
-    const { type, data } = slidePanel;
+  // API operations
+  const updateHomeLogo = async (file) => {
+    try {
+      const formDataObj = new FormData();
+      formDataObj.append("image", file);
 
-    switch (type) {
-      case "editHome":
-        setHomeData((prev) => ({
-          ...prev,
-          ...formData,
-          mainRoles: formData.mainRoles
-            ? formData.mainRoles
-                .split(",")
-                .map((role) => role.trim())
-                .filter((role) => role)
-            : [],
-        }));
-        break;
-      case "addStat":
-        const newStat = {
-          id: Date.now(),
-          ...formData,
-        };
-        setHomeData((prev) => ({
-          ...prev,
-          stats: [...prev.stats, newStat],
-        }));
-        break;
-      case "editStat":
-        setHomeData((prev) => ({
-          ...prev,
-          stats: prev.stats.map((s) =>
-            s.id === data.id ? { ...s, ...formData } : s
-          ),
-        }));
-        break;
+      const response = await axios.put(
+        `${Backend_Root_Url}/api/home/update/logo?folder=logo`,
+        formDataObj,
+        {
+          withCredentials: true,
+        },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      return response.data.filename;
+    } catch (error) {
+      console.error("Error updating logo:", error);
+      throw error;
     }
-
-    closeSlidePanel();
   };
+
+  const updateHomeData = async (data) => {
+    try {
+      const response = await axios.put(
+        `${Backend_Root_Url}/api/home/edit/homedata`,
+        data,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error updating home data:", error);
+      throw error;
+    }
+  };
+
+  const addStat = async (statData) => {
+    try {
+      const response = await axios.post(
+        `${Backend_Root_Url}/api/home/add/stat`,
+        statData,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error adding stat:", error);
+      throw error;
+    }
+  };
+
+  const updateStat = async (id, statData) => {
+    try {
+      const response = await axios.put(
+        `${Backend_Root_Url}/api/home/update/stat/${id}`,
+        statData,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error updating stat:", error);
+      throw error;
+    }
+  };
+
+  // CRUD operations
+  const handleSave = async () => {
+    const { type, data } = slidePanel;
+    setSaving(true);
+
+    try {
+      switch (type) {
+        case "editHome":
+          // Handle logo upload if there's a new image
+          let logoFilename = formData.HomeLogo;
+          if (formData.imageFile) {
+            logoFilename = await updateHomeLogo(formData.imageFile);
+          }
+
+          // Prepare data for API
+          const homeDataToUpdate = {
+            DisplayName: formData.DisplayName,
+            MainRoles: formData.MainRoles
+              ? formData.MainRoles.split(",")
+                  .map((role) => role.trim())
+                  .filter((role) => role)
+              : [],
+            description: formData.description,
+            Clients_Counting: parseInt(formData.Clients_Counting) || 0,
+            Rateing: parseFloat(formData.Rateing) || 0,
+          };
+
+          await updateHomeData(homeDataToUpdate);
+
+          // Update local state
+          setMainHomeData((prev) => ({
+            ...prev,
+            ...homeDataToUpdate,
+            HomeLogo: logoFilename,
+          }));
+
+          console.log("Home data updated successfully");
+          break;
+
+        case "addStat":
+          // Validate required fields for addStat
+          if (!formData.StatsNumber || !formData.StatsLabel) {
+            alert("Stat Number and Stat Label are required.");
+            setSaving(false);
+            return;
+          }
+          const newStatData = {
+            StatsNumber: formData.StatsNumber,
+            StatsLabel: formData.StatsLabel,
+          };
+
+          await addStat(newStatData);
+
+          // Refresh data from server to get the new stat with ID
+          const response = await axios.get(
+            `${Backend_Root_Url}/api/home/main/data`
+          );
+          setMainHomeData(response.data);
+
+          console.log("Stat added successfully");
+          break;
+
+        case "editStat":
+          // Validate required fields for editStat
+          if (!formData.StatsNumber || !formData.StatsLabel) {
+            alert("Stat Number and Stat Label are required.");
+            setSaving(false);
+            return;
+          }
+          const updatedStatData = {
+            StatsNumber: formData.StatsNumber,
+            StatsLabel: formData.StatsLabel,
+          };
+
+          await updateStat(data._id, updatedStatData);
+
+          // Update local state
+          setMainHomeData((prev) => ({
+            ...prev,
+            Stats: prev.Stats.map((s) =>
+              s._id === data._id ? { ...s, ...updatedStatData } : s
+            ),
+          }));
+
+          console.log("Stat updated successfully");
+          break;
+      }
+
+      closeSlidePanel();
+    } catch (error) {
+      console.error("Error saving data:", error);
+      alert("Failed to save data. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className={styles.homeSection}>
+        <div className={styles.sectionHeader}>
+          <h2>Home Section</h2>
+        </div>
+        <div className={styles.loadingState}>
+          <p>Loading home data...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Render functions
   const renderDeleteConfirmation = () => {
@@ -250,11 +466,11 @@ const DashboardHome = () => {
                 <label>Display Name</label>
                 <input
                   type="text"
-                  value={formData.displayName || ""}
+                  value={formData.DisplayName || ""}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      displayName: e.target.value,
+                      DisplayName: e.target.value,
                     }))
                   }
                   placeholder="Enter your display name"
@@ -265,11 +481,11 @@ const DashboardHome = () => {
                 <label>Main Roles (comma separated)</label>
                 <input
                   type="text"
-                  value={formData.mainRoles || ""}
+                  value={formData.MainRoles || ""}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      mainRoles: e.target.value,
+                      MainRoles: e.target.value,
                     }))
                   }
                   placeholder="e.g., Full Stack Developer, UI/UX Designer"
@@ -292,6 +508,40 @@ const DashboardHome = () => {
               </div>
 
               <div className={styles.formGroup}>
+                <label>Clients Count</label>
+                <input
+                  type="number"
+                  value={formData.Clients_Counting || ""}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      Clients_Counting: e.target.value,
+                    }))
+                  }
+                  placeholder="Number of clients"
+                  min="0"
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Rating</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="5"
+                  value={formData.Rateing || ""}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      Rateing: e.target.value,
+                    }))
+                  }
+                  placeholder="Rating (0-5)"
+                />
+              </div>
+
+              <div className={styles.formGroup}>
                 <label>Profile Image</label>
                 <div
                   className={`${styles.uploadArea} ${
@@ -303,9 +553,13 @@ const DashboardHome = () => {
                   onDrop={handleDrop}
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  {formData.profileImage ? (
+                  {formData.HomeLogoImg ? (
                     <div className={styles.imagePreview}>
-                      <img src={formData.profileImage} alt="Profile preview" />
+                      <img src={formData.HomeLogoImg} alt="Profile preview" />
+                    </div>
+                  ) : HomeLogoImg ? (
+                    <div className={styles.imagePreview}>
+                      <img src={HomeLogoImg} alt="Current profile" />
                     </div>
                   ) : (
                     <div className={styles.uploadPlaceholder}>
@@ -331,14 +585,15 @@ const DashboardHome = () => {
                 <label>Stat Number</label>
                 <input
                   type="text"
-                  value={formData.statNumber || ""}
+                  value={formData.StatsNumber || ""}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      statNumber: e.target.value,
+                      StatsNumber: e.target.value,
                     }))
                   }
                   placeholder="e.g., 50+, 4.9"
+                  required // Added required attribute
                 />
               </div>
 
@@ -346,14 +601,15 @@ const DashboardHome = () => {
                 <label>Stat Label</label>
                 <input
                   type="text"
-                  value={formData.statLabel || ""}
+                  value={formData.StatsLabel || ""}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      statLabel: e.target.value,
+                      StatsLabel: e.target.value,
                     }))
                   }
                   placeholder="e.g., Happy Clients, Rating"
+                  required // Added required attribute
                 />
               </div>
             </div>
@@ -364,9 +620,13 @@ const DashboardHome = () => {
           <button className={styles.btnSecondary} onClick={closeSlidePanel}>
             Cancel
           </button>
-          <button className={styles.btnPrimary} onClick={handleSave}>
+          <button
+            className={styles.btnPrimary}
+            onClick={handleSave}
+            disabled={saving}
+          >
             <Save size={16} />
-            Save Changes
+            {saving ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </div>
@@ -377,10 +637,11 @@ const DashboardHome = () => {
     <div className={styles.homeSection}>
       <div className={styles.sectionHeader}>
         <h2>Home Section</h2>
+        {error && <div className={styles.errorMessage}>{error}</div>}
         <button
           className={styles.btnPrimary}
           onClick={() =>
-            openSlidePanel("editHome", homeData, "Edit Home Section")
+            openSlidePanel("editHome", MainHomeData, "Edit Home Section")
           }
         >
           <Edit3 size={16} />
@@ -396,24 +657,38 @@ const DashboardHome = () => {
           </div>
           <div className={styles.profileInfo}>
             <div className={styles.profileImage}>
-              {homeData.profileImage ? (
-                <img src={homeData.profileImage} alt="Profile" />
+              {HomeLogoImg ? (
+                <img src={HomeLogoImg} alt="Profile" />
               ) : (
                 <div className={styles.profilePlaceholder}>
-                  {homeData.displayName.charAt(0)}
+                  {MainHomeData?.DisplayName?.charAt(0) || "?"}
                 </div>
               )}
             </div>
             <div className={styles.profileDetails}>
-              <h4>{homeData.displayName}</h4>
+              <h4>{MainHomeData?.DisplayName || "Your Name"}</h4>
               <div className={styles.rolesList}>
-                {homeData.mainRoles.map((role, index) => (
+                {GetRoles.map((role, index) => (
                   <span key={index} className={styles.roleTag}>
                     {role}
                   </span>
                 ))}
               </div>
-              <p>{homeData.description}</p>
+              <p>{MainHomeData?.description || "Description Here"}</p>
+              <div className={styles.additionalInfo}>
+                <div className={styles.infoItem}>
+                  <span className={styles.infoLabel}>Clients:</span>
+                  <span className={styles.infoValue}>
+                    {MainHomeData?.Clients_Counting || 0}
+                  </span>
+                </div>
+                <div className={styles.infoItem}>
+                  <span className={styles.infoLabel}>Rating:</span>
+                  <span className={styles.infoValue}>
+                    {MainHomeData?.Rateing || 0}/5
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -433,32 +708,42 @@ const DashboardHome = () => {
             </button>
           </div>
           <div className={styles.statsList}>
-            {homeData.stats.map((stat) => (
-              <div key={stat.id} className={styles.statItem}>
-                <div className={styles.statInfo}>
-                  <div className={styles.statNumber}>{stat.statNumber}</div>
-                  <div className={styles.statLabel}>{stat.statLabel}</div>
+            {statsArray.length > 0 ? (
+              statsArray.map((stat) => (
+                <div key={stat._id} className={styles.statItem}>
+                  <div className={styles.statInfo}>
+                    <div className={styles.statNumber}>{stat.StatsNumber}</div>
+                    <div className={styles.statLabel}>{stat.StatsLabel}</div>
+                  </div>
+                  <div className={styles.statActions}>
+                    <button
+                      className={styles.iconBtn}
+                      onClick={() =>
+                        openSlidePanel("editStat", stat, "Edit Statistic")
+                      }
+                    >
+                      <Edit3 size={14} />
+                    </button>
+                    <button
+                      className={styles.iconBtn}
+                      onClick={() =>
+                        openDeleteConfirmation(
+                          "stat",
+                          stat._id,
+                          stat.StatsLabel
+                        )
+                      }
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
-                <div className={styles.statActions}>
-                  <button
-                    className={styles.iconBtn}
-                    onClick={() =>
-                      openSlidePanel("editStat", stat, "Edit Statistic")
-                    }
-                  >
-                    <Edit3 size={14} />
-                  </button>
-                  <button
-                    className={styles.iconBtn}
-                    onClick={() =>
-                      openDeleteConfirmation("stat", stat.id, stat.statLabel)
-                    }
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
+              ))
+            ) : (
+              <div className={styles.emptyState}>
+                <p>No statistics available. Add some stats to get started.</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>

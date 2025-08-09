@@ -67,6 +67,8 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--spacing-xl);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
 }
 
 .sectionHeader h2 {
@@ -74,6 +76,39 @@
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
+}
+
+/* Error Message */
+.errorMessage {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--accent-danger);
+  color: var(--accent-danger);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Loading State */
+.loadingState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl);
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+}
+
+/* Empty State */
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--text-muted);
+}
+
+.emptyState p {
+  margin: 0;
+  font-style: italic;
 }
 
 /* Grid Layout */
@@ -111,6 +146,8 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
 }
 
 .cardHeader h3 {
@@ -141,7 +178,11 @@
 .profilePlaceholder {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  background: linear-gradient(
+    135deg,
+    var(--accent-primary),
+    var(--accent-secondary)
+  );
   display: flex;
   align-items: center;
   justify-content: center;
@@ -180,6 +221,34 @@
 .profileDetails p {
   color: var(--text-secondary);
   line-height: 1.6;
+  margin-bottom: var(--spacing-md);
+}
+
+/* Additional Info */
+.additionalInfo {
+  display: flex;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.infoLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.infoValue {
+  font-size: 1rem;
+  color: var(--accent-secondary);
+  font-weight: 600;
 }
 
 /* Stats List */
@@ -245,9 +314,14 @@
   font-size: 0.9rem;
 }
 
-.btnPrimary:hover {
+.btnPrimary:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: var(--shadow-lg);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .btnSecondary {
@@ -321,6 +395,16 @@
   display: flex;
   flex-direction: column;
   box-shadow: var(--shadow-xl);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 .slidePanelHeader {
@@ -461,6 +545,16 @@
   align-items: center;
   justify-content: center;
   z-index: 2000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modal {
@@ -470,6 +564,18 @@
   max-width: 400px;
   width: 90%;
   box-shadow: var(--shadow-xl);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .modal h3 {
@@ -511,5 +617,29 @@
     gap: var(--spacing-md);
     align-items: stretch;
   }
+
+  .additionalInfo {
+    justify-content: center;
+  }
+
+  .cardHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
+@media (max-width: 480px) {
+  .homeSection {
+    padding: var(--spacing-md);
+  }
+
+  .card {
+    padding: var(--spacing-md);
+  }
+
+  .slidePanelContent,
+  .slidePanelHeader,
+  .slidePanelFooter {
+    padding: var(--spacing-md);
+  }
+}
