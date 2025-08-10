@@ -1,6 +1,6 @@
 import express from "express";
 import HomeData from "../models/HomeDataSchema.js";
-import { upload } from "../controllers/storage.js";
+import { upload, verifyFileType } from "../controllers/storage.js";
 import HomeLogoFolder from "../middlewares/HomeLogo.js";
 import { access, unlink } from "fs/promises";
 import isAdminLogged from "../middlewares/isAdminLogged.js";
@@ -16,6 +16,7 @@ Router.put(
   isAdminLogged,
   HomeLogoFolder,
   upload.single("image"),
+  verifyFileType,
   async (req, res) => {
     try {
       const image = req.file?.filename;
