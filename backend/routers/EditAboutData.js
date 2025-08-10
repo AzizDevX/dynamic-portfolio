@@ -8,55 +8,6 @@ import { upload, verifyFileType } from "../controllers/storage.js";
 import SlidesLogoFolderValidation from "../middlewares/SlidesLogo.js";
 import mongoose from "mongoose";
 import { access, unlink } from "fs/promises";
-Router.put(
-  "/aboutslide/update/icon/:id",
-  isAdminLogged,
-  SlidesLogoFolderValidation,
-  upload.single("image"),
-  verifyFileType,
-  async (req, res) => {
-    try {
-      const id = req.params.id;
-      if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: "Not Valid Id" });
-      }
-      const FindSlide = await AboutUsSlides.findById(id);
-      if (!FindSlide) {
-        return res.status(404).json({ message: "Slide Not Found" });
-      }
-      const image = req.file?.filename;
-      if (!image) {
-        return res.status(400).json({ error: "Image file is required" });
-      }
-      if (FindSlide.slideImage && FindSlide.slideImage !== "undefined") {
-        const Mainpath = process.cwd();
-        const OldIconPath =
-          `${Mainpath}` + `/uploads/aboutimg/` + `${FindSlide.slideImage}`;
-        try {
-          await access(OldIconPath);
-          await unlink(OldIconPath);
-        } catch (err) {
-          console.log("I cant Find The Old Icon");
-        }
-      }
-      const UpdateIcon = await AboutUsSlides.findByIdAndUpdate(
-        FindSlide._id,
-        {
-          slideImage: image,
-        },
-        { new: true }
-      );
-      if (!UpdateIcon) {
-        return res
-          .status(409)
-          .json({ message: "I Cant Update The Icon Something Wrong" });
-      }
-      return res.status(200).json({ message: "Icon Updated" });
-    } catch (err) {
-      return res.status(409).json({ message: "Something wrong" });
-    }
-  }
-);
 
 Router.post(
   "/aboutslide/add/slide",

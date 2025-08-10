@@ -3,10 +3,11 @@ import styles from "./DashboardAbout.module.css";
 import { verifyJWTToken } from "../utils/authUtils";
 import { Plus, Edit3, Trash2, Upload, Save, X, Image } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Backend_Root_Url } from "../../../config/AdminUrl.json";
 
 const DashboardAbout = () => {
   //Authentication check
-
   const navigate = useNavigate();
   useEffect(() => {
     const checkAuth = async () => {
@@ -17,44 +18,61 @@ const DashboardAbout = () => {
     };
     checkAuth();
   }, [navigate]);
+
   // About section state
-  const [aboutData, setAboutData] = useState({
-    title: "About Me",
-    description:
-      "With over 3 years of experience in web development, I specialize in creating modern, responsive web applications using cutting-edge technologies.",
-    slides: [
-      {
-        id: 1,
-        title: "Web Development",
-        description:
-          "Building responsive and performant web applications using modern frameworks",
-        image: null,
-      },
-      {
-        id: 2,
-        title: "UI/UX Design",
-        description:
-          "Creating beautiful and intuitive user experiences that delight users",
-        image: null,
-      },
-      {
-        id: 3,
-        title: "Performance Optimization",
-        description:
-          "Optimizing applications for speed, accessibility, and search engine visibility",
-        image: null,
-      },
-    ],
-    skills: [
-      "React",
-      "Node.js",
-      "JavaScript",
-      "TypeScript",
-      "Python",
-      "MongoDB",
-      "PostgreSQL",
-    ],
-  });
+  const [aboutData, setAboutData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch initial data
+  useEffect(() => {
+    const fetchAboutData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await axios.get(
+          `${Backend_Root_Url}/api/home/main/data`,
+          {
+            withCredentials: true,
+          }
+        );
+
+        // Extract About data from the response
+        const data = response.data;
+        setAboutData({
+          title: data.AboutUs?.AboutUsTitle || "About Me",
+          description: data.AboutUs?.AboutUsDescription || "Description here",
+          skills: data.AboutUs?.AboutSkills || [],
+          slides: data.AboutUsSlides?.AboutUsSlides || [],
+        });
+
+        console.log("About data fetched successfully:", data);
+      } catch (error) {
+        console.error("Error fetching about data:", error);
+        setError("Failed to fetch about data. Please check your connection.");
+        // Set fallback data when API is down
+        setAboutData({
+          title: "About Me",
+          description:
+            "With over 3 years of experience in web development, I specialize in creating modern, responsive web applications using cutting-edge technologies.",
+          skills: [
+            "React",
+            "Node.js",
+            "JavaScript",
+            "TypeScript",
+            "Python",
+            "MongoDB",
+            "PostgreSQL",
+          ],
+          slides: [],
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAboutData();
+  }, []);
 
   // Slide panel state
   const [slidePanel, setSlidePanel] = useState({
@@ -75,7 +93,7 @@ const DashboardAbout = () => {
   // Form states for slide panel
   const [formData, setFormData] = useState({});
   const [dragActive, setDragActive] = useState(false);
-  const [imageUploadMethod, setImageUploadMethod] = useState("");
+  const [saving, setSaving] = useState(false);
 
   // File input refs
   const fileInputRef = useRef(null);
@@ -93,18 +111,30 @@ const DashboardAbout = () => {
     if (data) {
       if (type === "editAbout") {
         setFormData({
-          ...data,
-          skills: data.skills ? data.skills.join(", ") : "",
+          AboutUsTitle: data.title || "",
+          AboutUsDescription: data.description || "",
+          AboutSkills: Array.isArray(data.skills) ? data.skills.join(", ") : "",
+        });
+      } else if (type === "editSlide") {
+        setFormData({
+          slideTitle: data.slideTitle || "",
+          slideDescription: data.slideDescription || "",
+          slideImage: data.slideImage || "",
         });
       } else {
         setFormData(data);
       }
     } else {
-      setFormData({});
+      if (type === "addSlide") {
+        setFormData({
+          slideTitle: "",
+          slideDescription: "",
+          slideImage: "",
+        });
+      } else {
+        setFormData({});
+      }
     }
-
-    // Reset image upload method
-    setImageUploadMethod("");
   };
 
   const closeSlidePanel = () => {
@@ -115,7 +145,7 @@ const DashboardAbout = () => {
       title: "",
     });
     setFormData({});
-    setImageUploadMethod("");
+    setSaving(false);
   };
 
   // Delete confirmation functions
@@ -137,14 +167,29 @@ const DashboardAbout = () => {
     });
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     const { type, id } = deleteConfirmation;
 
     if (type === "slide") {
-      setAboutData((prev) => ({
-        ...prev,
-        slides: prev.slides.filter((s) => s.id !== id),
-      }));
+      try {
+        await axios.delete(
+          `${Backend_Root_Url}/api/aboutslide/delete/slide/${id}`,
+          {
+            withCredentials: true,
+          }
+        );
+
+        // Update local state
+        setAboutData((prev) => ({
+          ...prev,
+          slides: prev.slides.filter((s) => s._id !== id),
+        }));
+
+        console.log("Slide deleted successfully");
+      } catch (error) {
+        console.error("Error deleting slide:", error);
+        alert("Failed to delete slide. Please try again.");
+      }
     }
 
     closeDeleteConfirmation();
@@ -184,79 +229,218 @@ const DashboardAbout = () => {
         imageUrl: e.target.result,
         imageFile: file,
       }));
-      setImageUploadMethod("drop");
     };
     reader.readAsDataURL(file);
   };
 
-  const handleImageUrlInput = (url) => {
-    setFormData((prev) => ({
-      ...prev,
-      imageUrl: url,
-      imageFile: null,
-    }));
-    setImageUploadMethod("url");
+  // API operations
+  const updateAboutData = async (data) => {
+    try {
+      const response = await axios.put(
+        `${Backend_Root_Url}/api/about/edit/aboutdata`,
+        data,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error updating about data:", error);
+      throw error;
+    }
   };
 
-  const clearImage = () => {
-    setFormData((prev) => ({
-      ...prev,
-      imageUrl: "",
-      imageFile: null,
-    }));
-    setImageUploadMethod("");
+  const addSlide = async (slideData) => {
+    try {
+      const formDataObj = new FormData();
+      formDataObj.append("slideTitle", slideData.slideTitle);
+      formDataObj.append("slideDescription", slideData.slideDescription);
+      formDataObj.append("image", slideData.imageFile);
+
+      const response = await axios.post(
+        `${Backend_Root_Url}/api/aboutslide/add/slide`,
+        formDataObj,
+        {
+          params: {
+            folder: "aboutimg",
+          },
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error adding slide:", error);
+      throw error;
+    }
+  };
+
+  const updateSlide = async (id, slideData) => {
+    try {
+      const formDataObj = new FormData();
+      if (slideData.slideTitle)
+        formDataObj.append("slideTitle", slideData.slideTitle);
+      if (slideData.slideDescription)
+        formDataObj.append("slideDescription", slideData.slideDescription);
+      if (slideData.imageFile) formDataObj.append("image", slideData.imageFile);
+
+      const response = await axios.put(
+        `${Backend_Root_Url}/api/aboutslide/edit/slide/${id}`,
+        formDataObj,
+        {
+          params: {
+            folder: "aboutimg",
+          },
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error updating slide:", error);
+      throw error;
+    }
   };
 
   // CRUD operations
-  const handleSave = () => {
+  const handleSave = async () => {
     const { type, data } = slidePanel;
+    setSaving(true);
 
-    // Validate image requirement for slides
-    if ((type === "addSlide" || type === "editSlide") && !formData.imageUrl) {
-      alert(
-        "Image/logo upload is required for slides. Please upload an image before saving."
-      );
-      return;
+    try {
+      switch (type) {
+        case "editAbout":
+          const aboutDataToUpdate = {
+            AboutUsTitle: formData.AboutUsTitle,
+            AboutUsDescription: formData.AboutUsDescription,
+            AboutSkills: formData.AboutSkills
+              ? formData.AboutSkills.split(",")
+                  .map((skill) => skill.trim())
+                  .filter((skill) => skill)
+              : [],
+          };
+
+          await updateAboutData(aboutDataToUpdate);
+
+          // Update local state
+          setAboutData((prev) => ({
+            ...prev,
+            title: aboutDataToUpdate.AboutUsTitle,
+            description: aboutDataToUpdate.AboutUsDescription,
+            skills: aboutDataToUpdate.AboutSkills,
+          }));
+
+          console.log("About data updated successfully");
+          break;
+
+        case "addSlide":
+          // Validate required fields for addSlide
+          if (
+            !formData.slideTitle ||
+            !formData.slideDescription ||
+            !formData.imageFile
+          ) {
+            alert("Slide Title, Slide Description, and Image are required.");
+            setSaving(false);
+            return;
+          }
+
+          const newSlideData = {
+            slideTitle: formData.slideTitle,
+            slideDescription: formData.slideDescription,
+            imageFile: formData.imageFile,
+          };
+
+          await addSlide(newSlideData);
+
+          // Refresh data from server to get the new slide with ID
+          const response = await axios.get(
+            `${Backend_Root_Url}/api/home/main/data`,
+            {
+              withCredentials: true,
+            }
+          );
+          const updatedData = response.data;
+          setAboutData((prev) => ({
+            ...prev,
+            slides: updatedData.AboutUsSlides?.AboutUsSlides || [],
+          }));
+
+          console.log("Slide added successfully");
+          break;
+
+        case "editSlide":
+          const updatedSlideData = {
+            slideTitle: formData.slideTitle,
+            slideDescription: formData.slideDescription,
+          };
+
+          if (formData.imageFile) {
+            updatedSlideData.imageFile = formData.imageFile;
+          }
+
+          const updateResponse = await updateSlide(data._id, updatedSlideData);
+
+          // If image was uploaded, refresh the entire data from server to ensure we get the latest image
+          if (formData.imageFile) {
+            const refreshResponse = await axios.get(
+              `${Backend_Root_Url}/api/home/main/data`,
+              {
+                withCredentials: true,
+              }
+            );
+            const refreshedData = refreshResponse.data;
+            setAboutData((prev) => ({
+              ...prev,
+              slides: refreshedData.AboutUsSlides?.AboutUsSlides || [],
+            }));
+          } else {
+            // If no image was uploaded, just update the text fields
+            setAboutData((prev) => ({
+              ...prev,
+              slides: prev.slides.map((s) =>
+                s._id === data._id
+                  ? {
+                      ...s,
+                      slideTitle: updatedSlideData.slideTitle || s.slideTitle,
+                      slideDescription:
+                        updatedSlideData.slideDescription || s.slideDescription,
+                    }
+                  : s
+              ),
+            }));
+          }
+
+          console.log("Slide updated successfully");
+          break;
+      }
+
+      closeSlidePanel();
+    } catch (error) {
+      console.error("Error saving data:", error);
+      alert("Failed to save data. Please try again.");
+    } finally {
+      setSaving(false);
     }
-
-    switch (type) {
-      case "editAbout":
-        setAboutData((prev) => ({
-          ...prev,
-          ...formData,
-          skills: formData.skills
-            ? formData.skills
-                .split(",")
-                .map((skill) => skill.trim())
-                .filter((skill) => skill)
-            : [],
-        }));
-        break;
-      case "addSlide":
-        const newSlide = {
-          id: Date.now(),
-          ...formData,
-          image: formData.imageUrl,
-        };
-        setAboutData((prev) => ({
-          ...prev,
-          slides: [...prev.slides, newSlide],
-        }));
-        break;
-      case "editSlide":
-        setAboutData((prev) => ({
-          ...prev,
-          slides: prev.slides.map((s) =>
-            s.id === data.id
-              ? { ...s, ...formData, image: formData.imageUrl }
-              : s
-          ),
-        }));
-        break;
-    }
-
-    closeSlidePanel();
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className={styles.aboutSection}>
+        <div className={styles.sectionHeader}>
+          <h2>About Section</h2>
+        </div>
+        <div className={styles.loadingState}>
+          <p>Loading about data...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Render functions
   const renderDeleteConfirmation = () => {
@@ -307,11 +491,11 @@ const DashboardAbout = () => {
                 <label>Title</label>
                 <input
                   type="text"
-                  value={formData.title || ""}
+                  value={formData.AboutUsTitle || ""}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      title: e.target.value,
+                      AboutUsTitle: e.target.value,
                     }))
                   }
                   placeholder="Section title"
@@ -321,11 +505,11 @@ const DashboardAbout = () => {
               <div className={styles.formGroup}>
                 <label>Description</label>
                 <textarea
-                  value={formData.description || ""}
+                  value={formData.AboutUsDescription || ""}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      description: e.target.value,
+                      AboutUsDescription: e.target.value,
                     }))
                   }
                   placeholder="About section description"
@@ -337,11 +521,11 @@ const DashboardAbout = () => {
                 <label>Skills (comma separated)</label>
                 <input
                   type="text"
-                  value={formData.skills || ""}
+                  value={formData.AboutSkills || ""}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      skills: e.target.value,
+                      AboutSkills: e.target.value,
                     }))
                   }
                   placeholder="e.g., React, Node.js, JavaScript"
@@ -353,38 +537,53 @@ const DashboardAbout = () => {
           {(type === "addSlide" || type === "editSlide") && (
             <div className={styles.form}>
               <div className={styles.formGroup}>
-                <label>Title</label>
+                <label>
+                  Title{" "}
+                  {type === "addSlide" && (
+                    <span className={styles.required}>*Required</span>
+                  )}
+                </label>
                 <input
                   type="text"
-                  value={formData.title || ""}
+                  value={formData.slideTitle || ""}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      title: e.target.value,
+                      slideTitle: e.target.value,
                     }))
                   }
                   placeholder="Slide title"
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Description</label>
-                <textarea
-                  value={formData.description || ""}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      description: e.target.value,
-                    }))
-                  }
-                  placeholder="Slide description"
-                  rows={3}
+                  required={type === "addSlide"}
                 />
               </div>
 
               <div className={styles.formGroup}>
                 <label>
-                  Image/Logo <span className={styles.required}>*Required</span>
+                  Description{" "}
+                  {type === "addSlide" && (
+                    <span className={styles.required}>*Required</span>
+                  )}
+                </label>
+                <textarea
+                  value={formData.slideDescription || ""}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      slideDescription: e.target.value,
+                    }))
+                  }
+                  placeholder="Slide description"
+                  rows={3}
+                  required={type === "addSlide"}
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>
+                  Image/Logo{" "}
+                  {type === "addSlide" && (
+                    <span className={styles.required}>*Required</span>
+                  )}
                 </label>
                 <div
                   className={`${styles.uploadArea} ${
@@ -399,21 +598,21 @@ const DashboardAbout = () => {
                   {formData.imageUrl ? (
                     <div className={styles.imagePreview}>
                       <img src={formData.imageUrl} alt="Slide preview" />
-                      <button
-                        className={styles.clearImageBtn}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          clearImage();
-                        }}
-                      >
-                        <X size={16} />
-                      </button>
+                    </div>
+                  ) : formData.slideImage && type === "editSlide" ? (
+                    <div className={styles.imagePreview}>
+                      <img
+                        src={`${Backend_Root_Url}/uploads/aboutimg/${formData.slideImage}`}
+                        alt="Current slide"
+                      />
                     </div>
                   ) : (
                     <div className={styles.uploadPlaceholder}>
                       <Upload size={24} />
                       <p>Click or drag image here</p>
-                      <small>Image is required for slides</small>
+                      {type === "addSlide" && (
+                        <small>Image is required for slides</small>
+                      )}
                     </div>
                   )}
                 </div>
@@ -425,18 +624,6 @@ const DashboardAbout = () => {
                   style={{ display: "none" }}
                 />
               </div>
-
-              <div className={styles.formGroup}>
-                <label>Or enter image URL</label>
-                <input
-                  type="url"
-                  value={
-                    imageUploadMethod === "url" ? formData.imageUrl || "" : ""
-                  }
-                  onChange={(e) => handleImageUrlInput(e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
             </div>
           )}
         </div>
@@ -445,9 +632,13 @@ const DashboardAbout = () => {
           <button className={styles.btnSecondary} onClick={closeSlidePanel}>
             Cancel
           </button>
-          <button className={styles.btnPrimary} onClick={handleSave}>
+          <button
+            className={styles.btnPrimary}
+            onClick={handleSave}
+            disabled={saving}
+          >
             <Save size={16} />
-            Save Changes
+            {saving ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </div>
@@ -458,6 +649,7 @@ const DashboardAbout = () => {
     <div className={styles.aboutSection}>
       <div className={styles.sectionHeader}>
         <h2>About Section</h2>
+        {error && <div className={styles.errorMessage}>{error}</div>}
         <button
           className={styles.btnPrimary}
           onClick={() =>
@@ -476,12 +668,12 @@ const DashboardAbout = () => {
             <h3>About Information</h3>
           </div>
           <div className={styles.aboutInfo}>
-            <h4>{aboutData.title}</h4>
-            <p>{aboutData.description}</p>
+            <h4>{aboutData?.title || "About Me"}</h4>
+            <p>{aboutData?.description || "Description here"}</p>
             <div className={styles.skillsList}>
               <h5>Skills:</h5>
               <div className={styles.tagList}>
-                {aboutData.skills.map((skill, index) => (
+                {(aboutData?.skills || []).map((skill, index) => (
                   <span key={index} className={styles.tag}>
                     {skill}
                   </span>
@@ -504,41 +696,54 @@ const DashboardAbout = () => {
             </button>
           </div>
           <div className={styles.slidesList}>
-            {aboutData.slides.map((slide) => (
-              <div key={slide.id} className={styles.slideItem}>
-                <div className={styles.slideImage}>
-                  {slide.image ? (
-                    <img src={slide.image} alt={slide.title} />
-                  ) : (
-                    <div className={styles.imagePlaceholder}>
-                      <Image size={20} />
-                    </div>
-                  )}
+            {(aboutData?.slides || []).length > 0 ? (
+              aboutData.slides.map((slide) => (
+                <div key={slide._id} className={styles.slideItem}>
+                  <div className={styles.slideImage}>
+                    {slide.slideImage ? (
+                      <img
+                        src={`${Backend_Root_Url}/uploads/aboutimg/${slide.slideImage}`}
+                        alt={slide.slideTitle}
+                      />
+                    ) : (
+                      <div className={styles.imagePlaceholder}>
+                        <Image size={20} />
+                      </div>
+                    )}
+                  </div>
+                  <div className={styles.slideContent}>
+                    <h4>{slide.slideTitle}</h4>
+                    <p>{slide.slideDescription}</p>
+                  </div>
+                  <div className={styles.slideActions}>
+                    <button
+                      className={styles.iconBtn}
+                      onClick={() =>
+                        openSlidePanel("editSlide", slide, "Edit Slide")
+                      }
+                    >
+                      <Edit3 size={14} />
+                    </button>
+                    <button
+                      className={styles.iconBtn}
+                      onClick={() =>
+                        openDeleteConfirmation(
+                          "slide",
+                          slide._id,
+                          slide.slideTitle
+                        )
+                      }
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
-                <div className={styles.slideContent}>
-                  <h4>{slide.title}</h4>
-                  <p>{slide.description}</p>
-                </div>
-                <div className={styles.slideActions}>
-                  <button
-                    className={styles.iconBtn}
-                    onClick={() =>
-                      openSlidePanel("editSlide", slide, "Edit Slide")
-                    }
-                  >
-                    <Edit3 size={14} />
-                  </button>
-                  <button
-                    className={styles.iconBtn}
-                    onClick={() =>
-                      openDeleteConfirmation("slide", slide.id, slide.title)
-                    }
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
+              ))
+            ) : (
+              <div className={styles.emptyState}>
+                <p>No slides available. Add some slides to get started.</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
