@@ -7,9 +7,11 @@ const aboutUsSlidesSchema = mongoose.Schema(
     },
     slideTitle: {
       type: String,
+      required: true,
     },
     slideDescription: {
       type: String,
+      required: true,
     },
   },
   { timestamps: true }

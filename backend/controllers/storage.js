@@ -58,7 +58,7 @@ const Storage = multer.diskStorage({
 export const upload = multer({
   storage: Storage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 5MB limit
+    fileSize: 10 * 1024 * 1024, // 10MB limit
   },
 });
 
@@ -90,7 +90,6 @@ export const verifyFileType = async (req, res, next) => {
     // Handle SVG specially
     if (fileExtension === "svg") {
       if (isSVG(buffer)) {
-        console.log(`✅ SVG file verified`);
         return next();
       } else {
         fs.unlinkSync(filePath);
@@ -118,11 +117,6 @@ export const verifyFileType = async (req, res, next) => {
         allowedTypes: allowedMimeTypes,
       });
     }
-
-    // If we reach here: extension is allowed + actual content is safe image/PDF
-    console.log(
-      `✅ File verified - Extension: ${fileExtension}, Actual: ${detectedType.ext}, MIME: ${detectedType.mime}`
-    );
 
     next();
   } catch (error) {
