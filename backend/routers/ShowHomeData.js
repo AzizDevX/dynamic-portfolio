@@ -3,6 +3,8 @@ import StatsData from "../models/StatsShema.js";
 import AboutUsData from "../models/AboutUsShema.js";
 import AboutUsSlides from "../models/AboutUsSlidesSchema.js";
 import Project from "../models/ProjectShema.js";
+import Footer from "../models/FooterShema.js";
+import FooterSocialLinksModel from "../models/FooterSocialLinksShema.js";
 import express from "express";
 const Router = express.Router();
 Router.get("/home/main/data", async (req, res) => {
@@ -24,6 +26,15 @@ Router.get("/home/main/data", async (req, res) => {
       .populate("AboutUsSlides")
       .select("slideImage slideTitle slideDescription");
     const FeaturedProjects = await Project.find({ Featured: true });
+
+    const FooterInfo = await Footer.findOne().select(
+      "FooterTitle FooterDescription OwnerEmail OwnerPhone OwnerAddress"
+    );
+
+    const footersociallinks = await Footer.findOne()
+      .populate("FooterSocialLinks")
+      .select("SocialIcon SocialLink");
+
     const filteredData = {
       HomeLogo: homeData.HomeLogo,
       DisplayName: homeData.DisplayName,
@@ -35,6 +46,8 @@ Router.get("/home/main/data", async (req, res) => {
       AboutUs: AboutUsInfo,
       AboutUsSlides: AboutUsSlides,
       FeaturedProjects: FeaturedProjects,
+      FooterInfo: FooterInfo,
+      footersociallinks: footersociallinks,
     };
     return res.status(200).json(filteredData);
   } catch (error) {

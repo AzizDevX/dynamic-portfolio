@@ -9,8 +9,8 @@ import MainHomeData from "./routers/ShowHomeData.js";
 import EditHomeData from "./routers/EditHomeData.js";
 import AdminDashboardSecurity from "./routers/AdminDashboard_securityRule.js";
 import EditAboutData from "./routers/EditAboutData.js";
+import EditFooter from "./routers/EditFooter.js";
 import cors from "cors";
-
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -42,6 +42,7 @@ app.use("/api/", AddProjectRouter);
 app.use("/api/", DeleteProject);
 app.use("/api/", EditHomeData);
 app.use("/api/", EditAboutData);
+app.use("/api/", EditFooter);
 app.use("/api/", AdminDashboardSecurity);
 
 app.listen(port, () => {

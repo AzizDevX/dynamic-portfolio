@@ -4,6 +4,7 @@ import connectDB from "./config/dbConnect.js";
 import Stats from "./models/StatsShema.js";
 import AboutUsSlides from "./models/AboutUsSlidesSchema.js";
 import AboutUs from "./models/AboutUsShema.js";
+import Footer from "./models/FooterShema.js";
 import FooterSocialLinks from "./models/FooterSocialLinksShema.js";
 async function ConnectDb() {
   try {
@@ -102,44 +103,71 @@ async function setupAboutUs_DefaultValues() {
     await AboutData.save();
     console.log("✅ ABOUT US data setup completed successfully.");
   } catch (err) {
-    return console.error("❌ Error setting up Stats data:", err);
+    return console.error("❌ Error setting up About Us data:", err);
   }
 }
 
-// async function setupFooterSocialLinks_DefaultValues() {
-//   try {
-//     const existingData = await FooterSocialLinks.findOne();
-//     if (existingData) {
-//       return console.log(
-//         "ℹ️ Social Links data already exists. Skipping seeding."
-//       );
-//     }
+async function setupFooterSocialLinks_DefaultValues() {
+  try {
+    const existingData = await FooterSocialLinks.findOne();
+    if (existingData) {
+      return console.log(
+        "ℹ️ Social Links data already exists. Skipping seeding."
+      );
+    }
 
-//     const FooterSocialLinksData = [
-//       {
-//         SocialIcon: "defultgithub.png",
-//         SocialLink: "https://www.facebook.com/yourprofile",
-//       },
-//       {
-//         SocialIcon: "fa fa-twitter",
-//         SocialLink: "https://www.twitter.com/yourprofile",
-//       },
-//       {
-//         SocialIcon: "fa fa-instagram",
-//         SocialLink: "https://www.instagram.com/yourprofile",
-//       },
-//       {
-//         SocialIcon: "fa fa-linkedin",
-//         SocialLink: "https://www.linkedin.com/in/yourprofile",
-//       },
-//     ];
+    const FooterSocialLinksData = [
+      {
+        SocialIcon: "Facebook",
+        SocialLink: "https://www.facebook.com/yourprofile",
+      },
+      {
+        SocialIcon: "Twitter",
+        SocialLink: "https://www.twitter.com/yourprofile",
+      },
+      {
+        SocialIcon: "Instagram",
+        SocialLink: "https://www.instagram.com/yourprofile",
+      },
+      {
+        SocialIcon: "LinkedIn",
+        SocialLink: "https://www.linkedin.com/in/yourprofile",
+      },
+    ];
 
-//     await FooterSocialLinks.insertMany(FooterSocialLinksData);
-//     console.log("✅ Footer Social Links setup completed successfully.");
-//   } catch (err) {
-//     console.error("❌ Error setting up Footer Social Links data:", err);
-//   }
-// }
+    await FooterSocialLinks.insertMany(FooterSocialLinksData);
+    console.log("✅ Footer Social Links setup completed successfully.");
+  } catch (err) {
+    console.error("❌ Error setting up Footer Social Links data:", err);
+  }
+}
+
+async function setupFooter_DefaultValues() {
+  try {
+    const existingData = await Footer.findOne();
+    if (existingData) {
+      return console.log(
+        "ℹ️ Main Footer data already exists. Skipping seeding."
+      );
+    }
+    const ImportSocialLinks = await FooterSocialLinks.find();
+
+    const FooterData = new Footer({
+      FooterTitle: "Portfolio",
+      FooterDescription:
+        "Crafting digital experiences with passion and precision. Let's build something amazing together.",
+      OwnerEmail: "contact@portfolio.com",
+      OwnerPhone: "+216 1234567",
+      OwnerAddress: "Tunisia, Tn",
+      FooterSocialLinks: ImportSocialLinks,
+    });
+
+    await FooterData.save();
+    console.log("✅ Main Footer data setup completed successfully.");
+  } catch (err) {
+    return console.error("❌ Error setting up Main Footer Data:", err);
+  }
+}
 
 async function setupHomeData_DefaultValues() {
   try {
@@ -180,7 +208,8 @@ async function initializeData() {
   await setupStats_DefaultValues();
   await setupAboutSlides_DefaultValues();
   await setupAboutUs_DefaultValues();
-  // await setupFooterSocialLinks_DefaultValues();
+  await setupFooterSocialLinks_DefaultValues();
+  await setupFooter_DefaultValues();
   await setupHomeData_DefaultValues();
   mongoose.connection.close;
   process.exit(0);
