@@ -47,7 +47,7 @@ const Navbar = () => {
 
         {/* CTA Button */}
         <div className={styles.ctaContainer}>
-          <a href="#contact" className={styles.ctaButton}>
+          <a href="contact" className={styles.ctaButton}>
             Let's Talk
           </a>
         </div>

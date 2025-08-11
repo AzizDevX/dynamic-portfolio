@@ -9,6 +9,7 @@ import {
   Heart,
 } from "lucide-react";
 import styles from "./Footer.module.css";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -130,8 +131,10 @@ const Footer = () => {
           </div>
           <div className={styles.madeWith}>
             <p>
-              Made with <Heart size={16} className={styles.heartIcon} /> by
-              Developer
+              Made By <Heart size={16} className={styles.heartIcon} />
+              <Link to="https://github.com/AzizDevX/dynamic-portfolio">
+                AzizDevX
+              </Link>
             </p>
           </div>
         </div>

@@ -348,7 +348,7 @@ const Home = () => {
           </div>
 
           <div className={styles.projectsCta}>
-            <a href="#projects" className={styles.viewAllButton}>
+            <a href="projects" className={styles.viewAllButton}>
               View All Projects
               <ArrowRight size={20} />
             </a>

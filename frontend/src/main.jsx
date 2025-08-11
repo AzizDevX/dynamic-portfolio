@@ -9,6 +9,8 @@ import DeniedPage from "./components/AccesDenied/DeniedPage";
 import SkillsPage from "./components/SkillsPage/SkillsPage";
 import ProjectsPage from "./components/PorjectsPage/ProjectsPage";
 import Page404 from "./components/404/404page";
+import CV from "./components/MyCv/cv";
+import Contact from "./components/contact/Contact";
 const adminUrl = "/" + Frontend_Admin_Url;
 const adminDashboard_Url = adminUrl + "/dashboard";
 
@@ -18,9 +20,9 @@ createRoot(document.getElementById("root")).render(
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/projects" element={<ProjectsPage />} />
-
         <Route path="/skills" element={<SkillsPage />} />
-
+        <Route path="/cv" element={<CV />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path={adminUrl} element={<AuthPage />} />
         <Route path={adminDashboard_Url} element={<Dashboard />} />
         <Route path="/denied" element={<DeniedPage />} />
