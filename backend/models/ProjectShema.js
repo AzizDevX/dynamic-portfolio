@@ -8,6 +8,13 @@ const ProjectSchema = new mongoose.Schema(
       minlength: 1,
       maxlength: 100,
     },
+    ShortDescription: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 1,
+      maxlength: 200,
+    },
     Description: {
       type: String,
       required: true,
@@ -17,16 +24,35 @@ const ProjectSchema = new mongoose.Schema(
     },
     Image: {
       type: String,
-      required: true,
+      default: "Nothing",
       trim: true,
     },
-    ProjectLink: {
+    ProjectLiveUrl: {
       type: String,
       trim: true,
       require: true,
     },
     Project_technologies: {
       type: [String],
+      default: [],
+    },
+    Porject_Status: {
+      type: String,
+      enum: [
+        "completed",
+        "in progress",
+        "planning",
+        "planned",
+        "on hold",
+        "canceled",
+        "prototype",
+        "launched",
+        "metrics",
+        "awarded",
+        "passed",
+        "achievement",
+        "archived",
+      ],
       default: [],
     },
     Featured: {
@@ -36,5 +62,6 @@ const ProjectSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
 const Project = mongoose.model("Projects", ProjectSchema);
 export default Project;
