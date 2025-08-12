@@ -298,6 +298,61 @@
     grid-template-columns: 1fr;
     gap: 2rem;
     margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  /* Center all sections on mobile */
+  .brandSection,
+  .linksSection,
+  .contactSection,
+  .newsletterSection {
+    text-align: center;
+    max-width: none;
+  }
+
+  /* Center section titles and their underlines */
+  .sectionTitle {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .sectionTitle::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* Center social links */
+  .socialLinks {
+    justify-content: center;
+  }
+
+  /* Center contact items */
+  .contactList {
+    align-items: center;
+  }
+
+  .contactItem {
+    justify-content: center;
+  }
+
+  .contactItem:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Center footer links */
+  .linksList {
+    text-align: center;
+  }
+
+  .footerLink:hover {
+    padding-left: 0;
+    transform: translateY(-2px);
+  }
+
+  .footerLink::before {
+    display: none;
   }
 
   .footerBottom {
@@ -306,12 +361,10 @@
     text-align: center;
   }
 
-  .socialLinks {
-    justify-content: flex-start;
-  }
-
   .newsletterForm {
     flex-direction: row;
+    max-width: 400px;
+    margin: 0 auto;
   }
 
   .emailInput {
@@ -330,18 +383,40 @@
 
   .logo {
     font-size: 1.5rem;
+    justify-content: center;
+  }
+
+  .brandDescription {
+    text-align: center;
   }
 
   .newsletterForm {
     flex-direction: column;
+    max-width: 300px;
   }
 
   .socialLinks {
     gap: 0.75rem;
+    justify-content: center;
   }
 
   .socialLink {
     width: 40px;
     height: 40px;
+  }
+
+  /* Ensure all content is centered on very small screens */
+  .footerContent > * {
+    text-align: center;
+  }
+
+  .contactItem {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+
+  .contactItem svg {
+    margin: 0 auto;
   }
 }

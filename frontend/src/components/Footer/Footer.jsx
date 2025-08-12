@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Github,
   Linkedin,
@@ -7,14 +7,86 @@ import {
   Phone,
   MapPin,
   Heart,
+  Facebook,
+  Instagram,
+  Youtube,
+  Twitch,
+  Globe,
+  MessageCircle,
+  Send,
+  Palette,
+  Briefcase,
+  Zap,
+  Music,
+  Camera,
+  Video,
+  Users,
+  Share2,
 } from "lucide-react";
 import styles from "./Footer.module.css";
 import { Link } from "react-router-dom";
+import { Backend_Root_Url } from "../../config/AdminUrl.json";
 
 const Footer = () => {
+  const [footerData, setFooterData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const currentYear = new Date().getFullYear();
 
-  const socialLinks = [
+  // Dynamic icon mapping for Lucide React icons
+  const iconMap = {
+    // Main social media platforms
+    Facebook,
+    Twitter,
+    Instagram,
+    LinkedIn: Linkedin,
+    Github,
+    Youtube,
+    Mail,
+    Twitch,
+    Globe,
+
+    // Additional social media and platforms
+    Discord: MessageCircle, // Discord icon alternative
+    Telegram: Send, // Telegram icon alternative
+    Pinterest: Palette, // Pinterest icon alternative
+    Fiverr: Briefcase, // Fiverr icon alternative
+    Reddit: Share2, // Reddit icon alternative
+    TikTok: Music, // TikTok icon alternative
+    Snapchat: Camera, // Snapchat icon alternative
+    Vimeo: Video, // Vimeo icon alternative
+    WhatsApp: MessageCircle, // WhatsApp icon alternative
+    Slack: Users, // Slack icon alternative
+    Dribbble: Zap, // Dribbble icon alternative
+    Behance: Palette, // Behance icon alternative
+
+    // Generic fallbacks
+    Website: Globe,
+    Email: Mail,
+    Phone: Phone,
+  };
+
+  // Fetch data from API
+  useEffect(() => {
+    const fetchFooterData = async () => {
+      try {
+        const API_ENDPOINT = `${Backend_Root_Url}/api/home/main/data`;
+        const response = await fetch(API_ENDPOINT);
+        const data = await response.json();
+        setFooterData(data);
+      } catch (error) {
+        console.error("Error fetching footer data:", error);
+        // Fallback to static data if API fails
+        setFooterData(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFooterData();
+  }, []);
+
+  // Static fallback data
+  const staticSocialLinks = [
     { icon: Github, href: "#", label: "GitHub" },
     { icon: Linkedin, href: "#", label: "LinkedIn" },
     { icon: Twitter, href: "#", label: "Twitter" },
@@ -29,7 +101,7 @@ const Footer = () => {
     { name: "Contact", href: "#contact" },
   ];
 
-  const contactInfo = [
+  const staticContactInfo = [
     {
       icon: Mail,
       text: "contact@portfolio.com",
@@ -39,6 +111,56 @@ const Footer = () => {
     { icon: MapPin, text: "Tunisia, Tn", href: "#" },
   ];
 
+  // Get dynamic data or fallback to static
+  const footerInfo = footerData?.FooterInfo || {
+    FooterTitle: "Portfolio",
+    FooterDescription:
+      "Crafting digital experiences with passion and precision. Let's build something amazing together.",
+    OwnerEmail: "contact@portfolio.com",
+    OwnerPhone: "+216 1234567",
+    OwnerAddress: "Tunisia, Tn",
+  };
+
+  const socialLinks =
+    footerData?.footersociallinks?.FooterSocialLinks?.map((link) => {
+      const IconComponent = iconMap[link.SocialIcon] || Mail; // Fallback to Mail icon
+      return {
+        icon: IconComponent,
+        href: link.SocialLink,
+        label: link.SocialIcon,
+      };
+    }) || staticSocialLinks;
+
+  const contactInfo = [
+    {
+      icon: Mail,
+      text: footerInfo.OwnerEmail,
+      href: `mailto:${footerInfo.OwnerEmail}`,
+    },
+    {
+      icon: Phone,
+      text: footerInfo.OwnerPhone,
+      href: `tel:${footerInfo.OwnerPhone}`,
+    },
+    {
+      icon: MapPin,
+      text: footerInfo.OwnerAddress,
+      href: "#",
+    },
+  ];
+
+  if (loading) {
+    return (
+      <footer className={styles.footer}>
+        <div className={styles.container}>
+          <div className={styles.footerContent}>
+            <div>Loading...</div>
+          </div>
+        </div>
+      </footer>
+    );
+  }
+
   return (
     <footer className={styles.footer}>
       <div className={styles.container}>
@@ -47,12 +169,11 @@ const Footer = () => {
           {/* Brand Section */}
           <div className={styles.brandSection}>
             <div className={styles.logo}>
-              <span className={styles.logoText}>Portfolio</span>
+              <span className={styles.logoText}>{footerInfo.FooterTitle}</span>
               <span className={styles.logoDot}>.</span>
             </div>
             <p className={styles.brandDescription}>
-              Crafting digital experiences with passion and precision. Let's
-              build something amazing together.
+              {footerInfo.FooterDescription}
             </p>
             <div className={styles.socialLinks}>
               {socialLinks.map((social, index) => {
@@ -116,10 +237,15 @@ const Footer = () => {
             <div className={styles.newsletterForm}>
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Email Subscription Coming Soon..."
                 className={styles.emailInput}
+                disabled
               />
-              <button className={styles.subscribeButton}>Subscribe</button>
+              <button className={styles.subscribeButton} disabled>
+                {" "}
+                {/* Disabled Because Future Not Ready Yet*/}
+                Subscribe
+              </button>
             </div>
           </div>
         </div>
@@ -127,7 +253,9 @@ const Footer = () => {
         {/* Footer Bottom */}
         <div className={styles.footerBottom}>
           <div className={styles.copyright}>
-            <p>© {currentYear} Portfolio. All rights reserved.</p>
+            <p>
+              © {currentYear} {footerInfo.FooterTitle}. All rights reserved.
+            </p>
           </div>
           <div className={styles.madeWith}>
             <p>
