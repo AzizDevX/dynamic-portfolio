@@ -1,8 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import dbconnection from "./config/dbConnect.js";
-import AddProjectRouter from "./routers/AddProject.js";
-import DeleteProject from "./routers/DeleteProject.js";
+import AddProjectRouter from "./routers/EditProjectData.js";
 import AdminLogin from "./routers/auth.js";
 import cookieParser from "cookie-parser";
 import MainHomeData from "./routers/ShowHomeData.js";
@@ -39,7 +38,6 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/auth/", AdminLogin);
 app.use("/api/", MainHomeData);
 app.use("/api/", AddProjectRouter);
-app.use("/api/", DeleteProject);
 app.use("/api/", EditHomeData);
 app.use("/api/", EditAboutData);
 app.use("/api/", EditFooter);

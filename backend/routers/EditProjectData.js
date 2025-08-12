@@ -132,11 +132,13 @@ Router.get("/show/projects", async (req, res) => {
       return res.status(404).json({ message: "No Projects Found" });
     }
     const FilteredData = Projects.map((doc) => ({
+      _id: doc._id,
       Title: doc.Title,
       ShortDescription: doc.ShortDescription,
       Description: doc.Description,
       Image: doc.Image,
       ProjectLink: doc.ProjectLink,
+      ProjectLiveUrl: doc.ProjectLiveUrl,
       Project_technologies: doc.Project_technologies,
       Porject_Status: doc.Porject_Status,
       Featured: doc.Featured,

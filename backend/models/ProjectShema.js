@@ -30,7 +30,8 @@ const ProjectSchema = new mongoose.Schema(
     ProjectLiveUrl: {
       type: String,
       trim: true,
-      require: true,
+      require: false,
+      default: "",
     },
     Project_technologies: {
       type: [String],

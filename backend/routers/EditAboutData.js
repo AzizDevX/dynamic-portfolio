@@ -59,7 +59,6 @@ Router.post(
     }
   }
 );
-
 Router.delete(
   "/aboutslide/delete/slide/:id",
   isAdminLogged,
@@ -91,6 +90,18 @@ Router.delete(
         return res.status(404).json({
           message: "Slide not found in About Us page",
         });
+      }
+
+      try {
+        const findImg = await AboutUsSlides.findById(id);
+        const path = process.cwd();
+        const DeleteImage =
+          `${path}` + `/uploads/aboutimg/` + `${findImg.slideImage}`;
+        await access(DeleteImage);
+        await unlink(DeleteImage);
+        console.log("Old slideImage Removed");
+      } catch (err) {
+        console.log("I Cant Remove Old slide Image");
       }
 
       FetchAboutSlides.AboutUsSlides.pull(FindSlide._id);

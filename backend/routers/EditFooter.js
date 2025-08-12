@@ -14,19 +14,12 @@ Router.post(
   async (req, res) => {
     try {
       const FindFooterData = await Footer.findOne();
-      const FooterSocialLinks = await FooterSocialLinksModel.findOne();
       if (!FindFooterData) {
         return res.status(404).json({
           message: "Main Footer Data Not Found You Need To Setup Backend ",
         });
       }
 
-      if (!FooterSocialLinks) {
-        return res.status(404).json({
-          message:
-            "FooterSocialLinks Data Not Found You Need To Setup Backend ",
-        });
-      }
       const NewSocialLink = new FooterSocialLinksModel({
         SocialIcon: req.body.SocialIcon,
         SocialLink: req.body.SocialLink,
