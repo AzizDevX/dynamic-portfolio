@@ -31,7 +31,7 @@ Router.post(
       const savedProject = await NewProject.save();
       return res.status(201).json(savedProject);
     } catch (error) {
-      res
+      return res
         .status(500)
         .json({ message: "Internal Server Error", error: error.message });
     }
@@ -39,31 +39,37 @@ Router.post(
 );
 
 Router.delete("/projects/delete/:id", async (req, res) => {
-  const id = req.params.id;
+  try {
+    const id = req.params.id;
 
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ message: "Not Valid Id" });
-  }
-  const FindProject = await Project.findById(id);
-  if (!FindProject) {
-    return res.status(404).json({ message: "Project Not Found" });
-  }
-
-  if (FindProject.Image != "Nothing") {
-    try {
-      const path = process.cwd();
-      const DeleteImage =
-        `${path}` + `/uploads/projectsimg/` + `${FindProject.Image}`;
-      await access(DeleteImage);
-      await unlink(DeleteImage);
-      console.log("Old Project image Removed");
-    } catch (err) {
-      console.log("I Cant Remove Old Project image");
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Not Valid Id" });
     }
-  }
-  await Project.findByIdAndDelete(id);
+    const FindProject = await Project.findById(id);
+    if (!FindProject) {
+      return res.status(404).json({ message: "Project Not Found" });
+    }
 
-  return res.status(200).json({ message: `Project Deleted ` });
+    if (FindProject.Image != "Nothing") {
+      try {
+        const path = process.cwd();
+        const DeleteImage =
+          `${path}` + `/uploads/projectsimg/` + `${FindProject.Image}`;
+        await access(DeleteImage);
+        await unlink(DeleteImage);
+        console.log("Old Project image Removed");
+      } catch (err) {
+        console.log("I Cant Remove Old Project image");
+      }
+    }
+    await Project.findByIdAndDelete(id);
+
+    return res.status(200).json({ message: `Project Deleted ` });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
+  }
 });
 
 Router.put(

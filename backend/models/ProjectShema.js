@@ -6,21 +6,18 @@ const ProjectSchema = new mongoose.Schema(
       required: true,
       trim: true,
       minlength: 1,
-      maxlength: 100,
     },
     ShortDescription: {
       type: String,
       required: true,
       trim: true,
       minlength: 1,
-      maxlength: 200,
     },
     Description: {
       type: String,
       required: true,
       trim: true,
       minlength: 1,
-      maxlength: 500,
     },
     Image: {
       type: String,
