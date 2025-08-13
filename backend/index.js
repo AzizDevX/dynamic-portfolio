@@ -9,6 +9,7 @@ import EditHomeData from "./routers/EditHomeData.js";
 import AdminDashboardSecurity from "./routers/AdminDashboard_securityRule.js";
 import EditAboutData from "./routers/EditAboutData.js";
 import EditFooter from "./routers/EditFooter.js";
+import EditSkills from "./routers/EditSkillsData.js";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -35,13 +36,14 @@ app.get("/", (req, res) => {
 });
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-app.use("/auth/", AdminLogin);
 app.use("/api/", MainHomeData);
-app.use("/api/", AddProjectRouter);
+app.use("/auth/", AdminLogin);
+app.use("/api/", AdminDashboardSecurity);
 app.use("/api/", EditHomeData);
 app.use("/api/", EditAboutData);
+app.use("/api/", AddProjectRouter);
+app.use("/api/", EditSkills);
 app.use("/api/", EditFooter);
-app.use("/api/", AdminDashboardSecurity);
 
 app.listen(port, () => {
   console.log(`Server Alive At port ${port}`);
