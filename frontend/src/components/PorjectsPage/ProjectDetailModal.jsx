@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import styles from "./ProjectDetailModal.module.css";
 
 const ProjectDetailModal = ({ project, onClose }) => {
@@ -24,36 +24,71 @@ const ProjectDetailModal = ({ project, onClose }) => {
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
-      case "completed":
-        return styles.statusCompleted;
-      case "in progress":
-        return styles.statusInProgress;
-      case "planning":
-        return styles.statusPlanning;
-      case "planned":
-        return styles.statusPlanned;
-      case "on hold":
-        return styles.statusOnHold;
-      case "canceled":
-        return styles.statusCanceled;
-      case "prototype":
-        return styles.statusPrototype;
-      case "launched":
-        return styles.statusLaunched;
-      case "metrics":
-        return styles.statusMetrics;
-      case "awarded":
-        return styles.statusAwarded;
-      case "passed":
-        return styles.statusPassed;
-      case "achievement":
-        return styles.statusAchievement;
-      default:
-        return styles.statusDefault;
-    }
-  };
+  // Enhanced helper function to convert markdown-like text to HTML - unified with DashboardProjects
+  const formatDescription = useCallback((text) => {
+    if (!text) return "";
+
+    let formattedText = text
+      // Convert **text** to bold
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      // Convert *text* to italic
+      .replace(/\*(.*?)\*/g, "<em>$1</em>")
+      // Convert ## Heading to h3
+      .replace(/^## (.*$)/gm, "<h3>$1</h3>")
+      // Convert # Heading to h2
+      .replace(/^# (.*$)/gm, "<h2>$1</h2>")
+      // Convert * List items to li (but not ** bold)
+      .replace(/^(?!\*\*)\* (.*$)/gm, "<li>$1</li>")
+      // Convert line breaks to br tags
+      .replace(/\n/g, "<br/>");
+
+    // Wrap consecutive li elements in ul
+    formattedText = formattedText.replace(
+      /(<li>.*?<\/li>)(<br\/>)*(<li>.*?<\/li>)*/gs,
+      (match) => {
+        const items = match.match(/<li>.*?<\/li>/g);
+        return items ? `<ul>${items.join("")}</ul>` : match;
+      }
+    );
+
+    // Clean up extra br tags after lists and headings
+    formattedText = formattedText
+      .replace(/<\/(ul|h[23])><br\/>/g, "</$1>")
+      .replace(/<br\/><(h[23]|ul)>/g, "<$1>");
+
+    return formattedText;
+  }, []);
+
+  // Helper function to get status class name (consistent with DashboardProjects)
+  const getStatusClassName = useCallback((status) => {
+    if (!status) return styles.statusDefault;
+
+    const statusMap = {
+      completed: styles.statusCompleted,
+      "in progress": styles.statusInProgress,
+      inprogress: styles.statusInProgress,
+      planning: styles.statusPlanning,
+      planned: styles.statusPlanned,
+      "on hold": styles.statusOnHold,
+      onhold: styles.statusOnHold,
+      canceled: styles.statusCanceled,
+      cancelled: styles.statusCanceled,
+      prototype: styles.statusPrototype,
+      launched: styles.statusLaunched,
+      metrics: styles.statusMetrics,
+      awarded: styles.statusAwarded,
+      passed: styles.statusPassed,
+      achievement: styles.statusAchievement,
+      archived: styles.statusArchived,
+    };
+
+    const normalizedStatus = status.toLowerCase().replace(/\s+/g, "");
+    return (
+      statusMap[status.toLowerCase()] ||
+      statusMap[normalizedStatus] ||
+      styles.statusDefault
+    );
+  }, []);
 
   if (!project) return null;
 
@@ -76,7 +111,7 @@ const ProjectDetailModal = ({ project, onClose }) => {
         </button>
 
         <div className={styles.modalContent}>
-          {/* Image Section - Conditional rendering with better layout */}
+          {/* Image Section - Enhanced with better layout */}
           {project.image ? (
             <div className={styles.projectImageContainer}>
               <img
@@ -88,6 +123,20 @@ const ProjectDetailModal = ({ project, onClose }) => {
                   e.target.parentNode.classList.add(styles.imageError);
                 }}
               />
+              {/* Featured Badge - consistent with main page */}
+              {project.featured && (
+                <div className={styles.featuredBadge}>
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                  Featured
+                </div>
+              )}
             </div>
           ) : (
             <div className={styles.projectHeaderNoImage}>
@@ -107,6 +156,20 @@ const ProjectDetailModal = ({ project, onClose }) => {
                   <polyline points="21,15 16,10 5,21" />
                 </svg>
               </div>
+              {/* Featured Badge for no-image case */}
+              {project.featured && (
+                <div className={styles.featuredBadgeNoImage}>
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                  Featured
+                </div>
+              )}
             </div>
           )}
 
@@ -115,9 +178,18 @@ const ProjectDetailModal = ({ project, onClose }) => {
               <div className={styles.titleStatusRow}>
                 <div className={styles.titleStatusLeft}>
                   <h1 className={styles.projectTitle}>{project.title}</h1>
+
+                  {/* Short Description - consistent with main page */}
+                  {project.shortDescription && (
+                    <p className={styles.shortDescription}>
+                      {project.shortDescription}
+                    </p>
+                  )}
+
+                  {/* Status Badge */}
                   {project.status && (
                     <span
-                      className={`${styles.statusBadge} ${getStatusColor(
+                      className={`${styles.statusBadge} ${getStatusClassName(
                         project.status
                       )}`}
                     >
@@ -125,6 +197,8 @@ const ProjectDetailModal = ({ project, onClose }) => {
                     </span>
                   )}
                 </div>
+
+                {/* Live Demo Button */}
                 {project.demoUrl && project.demoUrl.trim() !== "" && (
                   <a
                     href={project.demoUrl}
@@ -152,20 +226,25 @@ const ProjectDetailModal = ({ project, onClose }) => {
                         strokeWidth="2"
                       />
                     </svg>
-                    Live URL
+                    Live Demo
                   </a>
                 )}
               </div>
             </div>
 
+            {/* Full Description - Enhanced to show all content with consistent formatting */}
             {project.description && (
               <div className={styles.descriptionSection}>
-                <p className={styles.projectDescription}>
-                  {project.description}
-                </p>
+                <div
+                  className={styles.projectDescription}
+                  dangerouslySetInnerHTML={{
+                    __html: formatDescription(project.description),
+                  }}
+                />
               </div>
             )}
 
+            {/* Technologies Section - Enhanced styling consistent with main page */}
             {project.technologies && project.technologies.length > 0 && (
               <div className={styles.tagsSection}>
                 <h3 className={styles.sectionTitle}>Technologies Used</h3>

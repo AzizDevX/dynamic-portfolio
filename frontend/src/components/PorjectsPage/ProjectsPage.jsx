@@ -4,7 +4,8 @@ import Footer from "../Footer/Footer";
 import ProjectDetailModal from "./ProjectDetailModal";
 import styles from "./ProjectsPage.module.css";
 import { Eye, ExternalLink, ImageOff } from "lucide-react";
-// import axios from 'axios'; // Uncomment when ready to use API
+import axios from "axios";
+import { Backend_Root_Url } from "../../config/AdminUrl.json";
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState([]);
@@ -13,181 +14,44 @@ const ProjectsPage = () => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Placeholder data structure - replace with API call later
-  const placeholderProjects = [
-    {
-      id: 1,
-      title: "E-Commerce Platform",
-      description:
-        "A full-stack e-commerce solution with React, Node.js, and MongoDB.",
-      shortDescription: "Modern e-commerce platform with advanced features",
-      image:
-        "https://repository-images.githubusercontent.com/384091706/a1614500-e03f-11eb-986a-30f6f0d4f1cc",
-      technologies: ["React", "Node.js", "MongoDB", "Stripe"],
-      category: "Web Development",
-      status: "Completed",
-      demoUrl: "https://demo.example.com",
-      githubUrl: "https://github.com/example/ecommerce",
-      features: [
-        "User authentication and authorization",
-        "Shopping cart and checkout system",
-        "Payment integration with Stripe",
-        "Admin dashboard for product management",
-        "Responsive design for all devices",
-      ],
-      challenges:
-        "Implementing secure payment processing and optimizing database queries for large product catalogs.",
-      solution:
-        "Used Stripe for secure payments and implemented database indexing and caching strategies.",
-      duration: "3 months",
-      teamSize: "Solo project",
-    },
-    {
-      id: 2,
-      title: "Task Management App",
-      description:
-        "🗂️ TaskFlow – Smart Task Management App Stay on top of your work and personal life with TaskFlow — a sleek and intuitive task management app designed to boost your productivity 🚀. ✅ Organize Effortlessly – Create, edit, and prioritize tasks in seconds.📅 Plan Ahead – Set deadlines, start dates, and reminders so nothing slips through the cracks.🤝 Collaborate Seamlessly – Share projects with teammates and track progress in real time.🎯 Stay Focused – Break big goals into manageable steps with subtasks.🌙 Work Your Way – Light & dark themes for comfortable viewing anytime.Perfect for students, professionals, and teams, TaskFlow makes productivity feel effortless ✨.🗂️ TaskFlow – Smart Task Management App Stay on top of your work and personal life with TaskFlow — a sleek and intuitive task management app designed to boost your productivity 🚀. ✅ Organize Effortlessly – Create, edit, and prioritize tasks in seconds.📅 Plan Ahead – Set deadlines, start dates, and reminders so nothing slips through the cracks.🤝 Collaborate Seamlessly – Share projects with teammates and track progress in real time.🎯 Stay Focused – Break big goals into manageable steps with subtasks.🌙 Work Your Way – Light & dark themes for comfortable viewing anytime.Perfect for students, professionals, and teams, TaskFlow makes productivity feel effortless ✨.",
-      shortDescription: "Real-time collaborative task management",
-      image: null, // No image for this project
-      technologies: ["React", "Socket.io", "Express", "PostgreSQL"],
-      category: "Web Application",
-      status: "In Progress",
-      demoUrl: "",
-      githubUrl: "https://github.com/example/taskmanager",
-      features: [
-        "Real-time collaboration",
-        "Drag and drop task management",
-        "Team member assignments",
-        "Progress tracking and analytics",
-        "File attachments and comments",
-      ],
-      challenges:
-        "Implementing real-time synchronization across multiple users without conflicts.",
-      solution:
-        "Used Socket.io for real-time communication and implemented conflict resolution algorithms.",
-      duration: "2 months",
-      teamSize: "2 developers",
-    },
-    {
-      id: 3,
-      title: "Portfolio Website",
-      description: "A modern portfolio website showcasing projects and skills.",
-      shortDescription: "Personal portfolio with modern design",
-      image: "/api/placeholder/400/300",
-      technologies: ["React", "CSS3", "Framer Motion", "Netlify"],
-      category: "Portfolio",
-      status: "Completed",
-      demoUrl: "https://portfolio.example.com",
-      githubUrl: "https://github.com/example/portfolio",
-      features: [
-        "Responsive design",
-        "Smooth animations",
-        "Contact form integration",
-        "SEO optimization",
-        "Fast loading performance",
-      ],
-      challenges:
-        "Creating smooth animations while maintaining performance across all devices.",
-      solution:
-        "Used Framer Motion for optimized animations and implemented lazy loading for images.",
-      duration: "1 month",
-      teamSize: "Solo project",
-    },
-    {
-      id: 4,
-      title: "Weather Dashboard",
-      description:
-        "A comprehensive weather dashboard with forecasts and analytics.",
-      shortDescription: "Advanced weather tracking dashboard",
-      image: "", // Empty string for this project
-      technologies: ["Vue.js", "Chart.js", "OpenWeather API", "Tailwind"],
-      category: "Dashboard",
-      status: "Completed",
-      demoUrl: "https://weather.example.com",
-      githubUrl: "https://github.com/example/weather",
-      features: [
-        "Current weather conditions",
-        "7-day weather forecast",
-        "Interactive weather maps",
-        "Historical weather data",
-        "Location-based weather alerts",
-      ],
-      challenges:
-        "Handling large amounts of weather data and creating intuitive data visualizations.",
-      solution:
-        "Implemented data caching and used Chart.js for responsive and interactive charts.",
-      duration: "6 weeks",
-      teamSize: "Solo project",
-    },
-    {
-      id: 5,
-      title: "Social Media Analytics",
-      description: "Analytics platform for social media performance tracking.",
-      shortDescription: "Comprehensive social media analytics tool",
-      image: "/api/placeholder/400/300",
-      technologies: ["React", "D3.js", "Python", "FastAPI", "Redis"],
-      category: "Analytics",
-      status: "In Progress",
-      demoUrl: "https://analytics.example.com",
-      githubUrl: "https://github.com/example/analytics",
-      features: [
-        "Multi-platform data aggregation",
-        "Custom dashboard creation",
-        "Automated reporting",
-        "Engagement metrics tracking",
-        "Competitor analysis",
-      ],
-      challenges:
-        "Integrating multiple social media APIs and processing large datasets efficiently.",
-      solution:
-        "Built a robust data pipeline with Redis for caching and FastAPI for high-performance backend.",
-      duration: "4 months",
-      teamSize: "3 developers",
-    },
-    {
-      id: 6,
-      title: "Mobile Fitness App",
-      description: "Cross-platform fitness tracking app with workout plans.",
-      shortDescription: "Comprehensive fitness tracking mobile app",
-      image: undefined, // Undefined for this project
-      technologies: ["React Native", "Firebase", "Redux", "Expo"],
-      category: "Mobile App",
-      status: "Completed",
-      demoUrl: "https://fitness.example.com",
-      githubUrl: "https://github.com/example/fitness",
-      features: [
-        "Workout tracking and planning",
-        "Progress visualization",
-        "Social features and challenges",
-        "Nutrition tracking",
-        "Offline mode support",
-      ],
-      challenges:
-        "Ensuring smooth performance on both iOS and Android while maintaining native feel.",
-      solution:
-        "Used React Native with platform-specific optimizations and implemented efficient state management.",
-      duration: "5 months",
-      teamSize: "2 developers + 1 designer",
-    },
-  ];
-
   useEffect(() => {
-    // Simulate API call - replace with actual Axios call later
     const fetchProjects = async () => {
       try {
         setLoading(true);
+        setError(null);
 
-        // TODO: Replace with actual API call
-        // const response = await axios.get('YOUR_PROJECTS_API_ENDPOINT');
-        // setProjects(response.data);
+        const response = await axios.get(
+          `${Backend_Root_Url}/api/show/projects`
+        );
 
-        // Simulate loading delay
-        setTimeout(() => {
-          setProjects(placeholderProjects);
-          setLoading(false);
-        }, 1000);
+        // Transform API data to match component structure
+        const transformedProjects = response.data.map((project) => ({
+          id: project._id,
+          title: project.Title,
+          description: project.Description,
+          shortDescription: project.ShortDescription,
+          image:
+            project.Image === "Nothing"
+              ? null
+              : `${Backend_Root_Url}/uploads/projectsimg/${project.Image}`,
+          technologies: project.Project_technologies || [],
+          category: "Project", // Default category since not provided by API
+          status: project.Porject_Status,
+          demoUrl: project.ProjectLiveUrl || "",
+          githubUrl: "", // Not provided by API
+          features: [], // Not provided by API
+          challenges: "", // Not provided by API
+          solution: "", // Not provided by API
+          duration: "", // Not provided by API
+          teamSize: "", // Not provided by API
+          featured: project.Featured,
+        }));
+
+        setProjects(transformedProjects);
+        setLoading(false);
       } catch (err) {
-        setError("Failed to load projects");
+        console.error("Error fetching projects:", err);
+        setError("Failed to load projects. Please try again later.");
         setLoading(false);
       }
     };
@@ -213,6 +77,26 @@ const ProjectsPage = () => {
         return styles.statusInProgress;
       case "planning":
         return styles.statusPlanning;
+      case "planned":
+        return styles.statusPlanned;
+      case "on hold":
+        return styles.statusOnHold;
+      case "canceled":
+        return styles.statusCanceled;
+      case "prototype":
+        return styles.statusPrototype;
+      case "launched":
+        return styles.statusLaunched;
+      case "metrics":
+        return styles.statusMetrics;
+      case "awarded":
+        return styles.statusAwarded;
+      case "passed":
+        return styles.statusPassed;
+      case "achievement":
+        return styles.statusAchievement;
+      case "archived":
+        return styles.statusArchived;
       default:
         return styles.statusDefault;
     }
@@ -223,6 +107,42 @@ const ProjectsPage = () => {
     e.target.parentNode.classList.add(styles.imageError);
   };
 
+  const retryFetch = () => {
+    setError(null);
+    window.location.reload();
+  };
+
+  // Calculate statistics
+  const calculateStats = () => {
+    const totalProjects = projects.length;
+    const completedProjects = projects.filter(
+      (p) => p.status.toLowerCase() === "completed"
+    ).length;
+    const projectsWithLiveUrl = projects.filter(
+      (p) => p.demoUrl && p.demoUrl.trim() !== ""
+    ).length;
+
+    // Get unique technologies
+    const allTechnologies = projects.flatMap((p) => p.technologies);
+    const uniqueTechnologies = [...new Set(allTechnologies)].length;
+
+    // Calculate completion percentage
+    const completionPercentage =
+      totalProjects > 0
+        ? Math.round((completedProjects / totalProjects) * 100)
+        : 0;
+
+    return {
+      totalProjects,
+      completedProjects,
+      uniqueTechnologies,
+      projectsWithLiveUrl,
+      completionPercentage,
+    };
+  };
+
+  const stats = calculateStats();
+
   if (loading) {
     return (
       <div className={styles.pageContainer}>
@@ -230,25 +150,6 @@ const ProjectsPage = () => {
         <div className={styles.loadingContainer}>
           <div className={styles.loader}></div>
           <p className={styles.loadingText}>Loading projects...</p>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className={styles.pageContainer}>
-        <Navbar />
-        <div className={styles.errorContainer}>
-          <h2 className={styles.errorTitle}>Oops! Something went wrong</h2>
-          <p className={styles.errorMessage}>{error}</p>
-          <button
-            className={styles.retryButton}
-            onClick={() => window.location.reload()}
-          >
-            Try Again
-          </button>
         </div>
         <Footer />
       </div>
@@ -276,92 +177,175 @@ const ProjectsPage = () => {
 
           {/* Projects Grid */}
           <section className={styles.projectsSection}>
-            <div className={styles.projectsGrid}>
-              {projects.map((project) => (
-                <div key={project.id} className={styles.projectCard}>
-                  <div className={styles.projectImage}>
-                    {project.image && project.image.trim() !== "" ? (
-                      <>
-                        <img
-                          src={project.image}
-                          alt={project.title}
-                          onError={handleImageError}
-                        />
-                        <div className={styles.projectOverlay}>
-                          <button
-                            className={styles.viewButton}
-                            onClick={() => handleProjectClick(project)}
-                            aria-label={`View details for ${project.title}`}
-                          >
-                            <Eye size={24} />
-                          </button>
-                          <a
-                            href={project.githubUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={styles.githubButton}
-                            aria-label={`View source code for ${project.title}`}
-                          >
-                            <ExternalLink size={24} />
-                          </a>
-                        </div>
-                      </>
-                    ) : (
-                      <div className={styles.imagePlaceholder}>
-                        <div className={styles.placeholderIcon}>
-                          <ImageOff size={48} />
-                        </div>
-
-                        <div className={styles.placeholderOverlay}>
-                          <button
-                            className={styles.viewButton}
-                            onClick={() => handleProjectClick(project)}
-                            aria-label={`View details for ${project.title}`}
-                          >
-                            <Eye size={24} />
-                          </button>
-                          <a
-                            href={project.githubUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={styles.githubButton}
-                            aria-label={`View source code for ${project.title}`}
-                          >
-                            <ExternalLink size={24} />
-                          </a>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className={styles.projectContent}>
-                    <div className={styles.projectHeader}>
-                      <h3 className={styles.projectTitle}>{project.title}</h3>
-                      <span
-                        className={`${styles.statusBadge} ${getStatusColor(
-                          project.status
-                        )}`}
-                      >
-                        {project.status}
-                      </span>
-                    </div>
-
-                    <p className={styles.projectDescription}>
-                      {project.shortDescription}
-                    </p>
-
-                    <div className={styles.projectTechnologies}>
-                      {project.technologies.map((tech, index) => (
-                        <span key={index} className={styles.techTag}>
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+            {projects.length === 0 ? (
+              <div className={styles.emptyState}>
+                <div className={styles.emptyIcon}>
+                  <svg
+                    width="64"
+                    height="64"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  >
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                    <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" />
+                  </svg>
                 </div>
-              ))}
-            </div>
+                <h3 className={styles.emptyTitle}>No Projects Available Yet</h3>
+                <p className={styles.emptyDescription}>
+                  New exciting projects are coming soon! Stay tuned for updates
+                  as I continue to build and create innovative solutions.
+                </p>
+                <div className={styles.emptyActions}>
+                  <button className={styles.refreshButton} onClick={retryFetch}>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <polyline points="23,4 23,10 17,10" />
+                      <polyline points="1,20 1,14 7,14" />
+                      <path d="M20.49,9A9,9,0,0,0,5.64,5.64L1,10m22,4L18.36,18.36A9,9,0,0,1,3.51,15" />
+                    </svg>
+                    Refresh
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className={styles.projectsGrid}>
+                {projects.map((project) => (
+                  <div key={project.id} className={styles.projectCard}>
+                    <div className={styles.projectImage}>
+                      {project.image && project.image.trim() !== "" ? (
+                        <>
+                          <img
+                            src={project.image}
+                            alt={project.title}
+                            onError={handleImageError}
+                          />
+                          <div className={styles.projectOverlay}>
+                            <button
+                              className={styles.viewButton}
+                              onClick={() => handleProjectClick(project)}
+                              aria-label={`View details for ${project.title}`}
+                            >
+                              <Eye size={24} />
+                            </button>
+                            {project.demoUrl && (
+                              <a
+                                href={project.demoUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles.githubButton}
+                                aria-label={`View live demo for ${project.title}`}
+                              >
+                                <ExternalLink size={24} />
+                              </a>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <div className={styles.imagePlaceholder}>
+                          <div className={styles.placeholderIcon}>
+                            <ImageOff size={48} />
+                          </div>
+
+                          <div className={styles.placeholderOverlay}>
+                            <button
+                              className={styles.viewButton}
+                              onClick={() => handleProjectClick(project)}
+                              aria-label={`View details for ${project.title}`}
+                            >
+                              <Eye size={24} />
+                            </button>
+                            {project.demoUrl && (
+                              <a
+                                href={project.demoUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles.githubButton}
+                                aria-label={`View live demo for ${project.title}`}
+                              >
+                                <ExternalLink size={24} />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className={styles.projectContent}>
+                      <div className={styles.projectHeader}>
+                        <h3 className={styles.projectTitle}>{project.title}</h3>
+                        <span
+                          className={`${styles.statusBadge} ${getStatusColor(
+                            project.status
+                          )}`}
+                        >
+                          {project.status}
+                        </span>
+                      </div>
+
+                      <p className={styles.projectDescription}>
+                        {project.shortDescription}
+                      </p>
+
+                      <div className={styles.projectTechnologies}>
+                        {project.technologies.map((tech, index) => (
+                          <span key={index} className={styles.techTag}>
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
+
+          {/* Stats Section - Only show when there are projects */}
+          {projects.length > 0 && (
+            <section className={styles.statsSection}>
+              <div className={styles.statsHeader}>
+                <h2 className={styles.statsTitle}>Projects Statistics</h2>
+                <p className={styles.statsSubtitle}>
+                  Overview of my project portfolio and achievements
+                </p>
+              </div>
+              <div className={styles.statsGrid}>
+                <div className={styles.statCard}>
+                  <div className={styles.statNumber}>{stats.totalProjects}</div>
+                  <div className={styles.statLabel}>Total Projects</div>
+                </div>
+                <div className={styles.statCard}>
+                  <div className={styles.statNumber}>
+                    {stats.completedProjects}
+                  </div>
+                  <div className={styles.statLabel}>Projects Completed</div>
+                </div>
+                <div className={styles.statCard}>
+                  <div className={styles.statNumber}>
+                    {stats.uniqueTechnologies}
+                  </div>
+                  <div className={styles.statLabel}>Technologies Used</div>
+                </div>
+                <div className={styles.statCard}>
+                  <div className={styles.statNumber}>
+                    {stats.completionPercentage}%
+                  </div>
+                  <div className={styles.statLabel}>Completion Rate</div>
+                </div>
+              </div>
+            </section>
+          )}
         </div>
       </main>
 
