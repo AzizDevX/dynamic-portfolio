@@ -2,73 +2,51 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../Navbar/Navbar";
 import Footer from "../Footer/Footer";
 import styles from "./SkillsPage.module.css";
-// import axios from 'axios'; // Uncomment when ready to use API
+import axios from "axios";
+import { Backend_Root_Url } from "../../config/AdminUrl.json";
 
 const SkillsPage = () => {
   const [skillsData, setSkillsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Placeholder data structure - replace with API call later
-  const placeholderSkills = [
-    {
-      category: "Frontend Development",
-      skills: [
-        { name: "React", level: 90 },
-        { name: "JavaScript", level: 95 },
-        { name: "HTML/CSS", level: 98 },
-        { name: "TypeScript", level: 85 },
-        { name: "Vue.js", level: 75 },
-      ],
-    },
-    {
-      category: "Backend Development",
-      skills: [
-        { name: "Node.js", level: 88 },
-        { name: "Python", level: 92 },
-        { name: "Express.js", level: 85 },
-        { name: "MongoDB", level: 80 },
-        { name: "PostgreSQL", level: 78 },
-      ],
-    },
-    {
-      category: "Design & Tools",
-      skills: [
-        { name: "Figma", level: 90 },
-        { name: "Adobe Photoshop", level: 85 },
-        { name: "Git/GitHub", level: 95 },
-        { name: "Docker", level: 70 },
-        { name: "AWS", level: 75 },
-      ],
-    },
-    {
-      category: "Mobile Development",
-      skills: [
-        { name: "React Native", level: 82 },
-        { name: "Flutter", level: 70 },
-        { name: "iOS Development", level: 65 },
-        { name: "Android Development", level: 68 },
-      ],
-    },
-  ];
-
   useEffect(() => {
-    // Simulate API call - replace with actual Axios call later
     const fetchSkills = async () => {
       try {
         setLoading(true);
+        setError(null);
 
-        // TODO: Replace with actual API call
-        // const response = await axios.get('YOUR_API_ENDPOINT');
-        // setSkillsData(response.data);
+        const response = await axios.get(`${Backend_Root_Url}/api/show/skills`);
 
-        // Simulate loading delay
-        setTimeout(() => {
-          setSkillsData(placeholderSkills);
-          setLoading(false);
-        }, 1000);
+        // Transform API data to match component structure
+        const apiSkills = response.data.SkillsData || [];
+
+        // Group skills by category
+        const groupedSkills = apiSkills.reduce((acc, skill) => {
+          const category = skill.Category;
+          if (!acc[category]) {
+            acc[category] = [];
+          }
+          acc[category].push({
+            name: skill.SkillName,
+            level: skill.Skill_Level,
+          });
+          return acc;
+        }, {});
+
+        // Convert to array format expected by component
+        const formattedSkills = Object.entries(groupedSkills).map(
+          ([category, skills]) => ({
+            category,
+            skills,
+          })
+        );
+
+        setSkillsData(formattedSkills);
       } catch (err) {
-        setError("Failed to load skills data");
+        console.error("Failed to fetch skills:", err);
+        setError("Failed to load skills data. Please try again later.");
+      } finally {
         setLoading(false);
       }
     };
@@ -89,6 +67,27 @@ const SkillsPage = () => {
     if (level >= 60) return "Intermediate";
     return "Beginner";
   };
+
+  const calculateStats = () => {
+    const totalSkills = skillsData.reduce(
+      (total, category) => total + category.skills.length,
+      0
+    );
+    const allSkills = skillsData.flatMap((category) => category.skills);
+    const averageLevel =
+      allSkills.length > 0
+        ? Math.round(
+            allSkills.reduce((sum, skill) => sum + skill.level, 0) /
+              allSkills.length
+          )
+        : 0;
+    const expertSkills = allSkills.filter((skill) => skill.level >= 75).length;
+    const categories = skillsData.length;
+
+    return { totalSkills, averageLevel, expertSkills, categories };
+  };
+
+  const stats = calculateStats();
 
   if (loading) {
     return (
@@ -117,6 +116,44 @@ const SkillsPage = () => {
             Try Again
           </button>
         </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (skillsData.length === 0) {
+    return (
+      <div className={styles.pageContainer}>
+        <Navbar />
+        <main className={styles.mainContent}>
+          <div className={styles.container}>
+            {/* Header Section */}
+            <section className={styles.headerSection}>
+              <div className={styles.headerContent}>
+                <span className={styles.greeting}>👋 My Expertise</span>
+                <h1 className={styles.title}>Skills & Technologies</h1>
+                <p className={styles.subtitle}>
+                  A comprehensive overview of my technical skills and
+                  proficiency levels across various technologies and tools.
+                </p>
+              </div>
+            </section>
+
+            {/* No Skills Message */}
+            <section className={styles.noSkillsSection}>
+              <div className={styles.noSkillsContainer}>
+                <div className={styles.noSkillsIcon}>
+                  <span className={styles.iconEmoji}>🚀</span>
+                </div>
+                <h3 className={styles.noSkillsTitle}>Skills Coming Soon!</h3>
+                <p className={styles.noSkillsText}>
+                  I'm currently building an amazing portfolio of skills and
+                  technologies. Check back soon to see my expertise in action!
+                </p>
+              </div>
+            </section>
+          </div>
+        </main>
         <Footer />
       </div>
     );
@@ -190,6 +227,28 @@ const SkillsPage = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          </section>
+
+          {/* Stats Section */}
+          <section className={styles.statsSection}>
+            <div className={styles.statsGrid}>
+              <div className={styles.statCard}>
+                <div className={styles.statNumber}>{stats.totalSkills}</div>
+                <div className={styles.statLabel}>Total Skills</div>
+              </div>
+              <div className={styles.statCard}>
+                <div className={styles.statNumber}>{stats.categories}</div>
+                <div className={styles.statLabel}>Categories</div>
+              </div>
+              <div className={styles.statCard}>
+                <div className={styles.statNumber}>{stats.expertSkills}</div>
+                <div className={styles.statLabel}>High-Level</div>
+              </div>
+              <div className={styles.statCard}>
+                <div className={styles.statNumber}>{stats.averageLevel}%</div>
+                <div className={styles.statLabel}>Average Level</div>
+              </div>
             </div>
           </section>
         </div>
