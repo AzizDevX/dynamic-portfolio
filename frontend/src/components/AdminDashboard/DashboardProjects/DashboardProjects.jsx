@@ -23,6 +23,12 @@ import {
   Github,
   Image,
   ImageOff,
+  Bold,
+  Italic,
+  List,
+  Hash,
+  Eye,
+  Edit,
 } from "lucide-react";
 
 const DashboardProjects = () => {
@@ -45,6 +51,11 @@ const DashboardProjects = () => {
   const [imageErrors, setImageErrors] = useState({});
   const [featuredLoading, setFeaturedLoading] = useState({});
 
+  // Rich text editor state
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [expandedDescriptions, setExpandedDescriptions] = useState({});
+  const textareaRef = useRef(null);
+
   // Project status options - memoized to prevent re-creation
   const projectStatusOptions = useMemo(
     () => [
@@ -64,6 +75,293 @@ const DashboardProjects = () => {
     ],
     []
   );
+
+  // Helper function to get status class name
+  const getStatusClassName = useCallback((status) => {
+    if (!status) return styles.statusDefault;
+
+    const statusMap = {
+      completed: styles.statusCompleted,
+      "in progress": styles.statusInProgress,
+      inprogress: styles.statusInProgress,
+      planning: styles.statusPlanning,
+      planned: styles.statusPlanned,
+      "on hold": styles.statusOnHold,
+      onhold: styles.statusOnHold,
+      canceled: styles.statusCanceled,
+      cancelled: styles.statusCanceled,
+      prototype: styles.statusPrototype,
+      launched: styles.statusLaunched,
+      metrics: styles.statusMetrics,
+      awarded: styles.statusAwarded,
+      passed: styles.statusPassed,
+      achievement: styles.statusAchievement,
+      archived: styles.statusArchived,
+    };
+
+    const normalizedStatus = status.toLowerCase().replace(/\s+/g, "");
+    return (
+      statusMap[status.toLowerCase()] ||
+      statusMap[normalizedStatus] ||
+      styles.statusDefault
+    );
+  }, []);
+
+  // Enhanced helper function to convert markdown-like text to HTML - unified across all components
+  const formatDescription = useCallback((text, isFullView = false) => {
+    if (!text) return "";
+
+    let formattedText = text
+      // Convert **text** to bold
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      // Convert *text* to italic
+      .replace(/\*(.*?)\*/g, "<em>$1</em>")
+      // Convert ## Heading to h3
+      .replace(/^## (.*$)/gm, "<h3>$1</h3>")
+      // Convert # Heading to h2
+      .replace(/^# (.*$)/gm, "<h2>$1</h2>")
+      // Convert * List items to li (but not ** bold)
+      .replace(/^(?!\*\*)\* (.*$)/gm, "<li>$1</li>")
+      // Convert line breaks to br tags
+      .replace(/\n/g, "<br/>");
+
+    // Wrap consecutive li elements in ul
+    formattedText = formattedText.replace(
+      /(<li>.*?<\/li>)(<br\/>)*(<li>.*?<\/li>)*/gs,
+      (match) => {
+        const items = match.match(/<li>.*?<\/li>/g);
+        return items ? `<ul>${items.join("")}</ul>` : match;
+      }
+    );
+
+    // Clean up extra br tags after lists and headings
+    formattedText = formattedText
+      .replace(/<\/(ul|h[23])><br\/>/g, "</$1>")
+      .replace(/<br\/><(h[23]|ul)>/g, "<$1>");
+
+    // ✅ Truncate but keep HTML structure when not full view
+    if (!isFullView) {
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = formattedText;
+
+      let charCount = 0;
+      const truncateNode = (node) => {
+        if (charCount >= 300) {
+          return null;
+        }
+        if (node.nodeType === Node.TEXT_NODE) {
+          const remaining = 300 - charCount;
+          const text = node.textContent.slice(0, remaining);
+          charCount += text.length;
+          return document.createTextNode(text);
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          const clone = node.cloneNode(false);
+          for (const child of node.childNodes) {
+            const truncatedChild = truncateNode(child);
+            if (truncatedChild) clone.appendChild(truncatedChild);
+            if (charCount >= 100) break;
+          }
+          return clone;
+        }
+        return null;
+      };
+
+      const truncatedFragment = truncateNode(tempDiv);
+      if (truncatedFragment) {
+        const container = document.createElement("div");
+        container.appendChild(truncatedFragment);
+        container.innerHTML += "...";
+        return container.innerHTML;
+      }
+    }
+
+    return formattedText;
+  }, []);
+
+  // Rich text formatting functions with smart assistance
+  const insertFormatting = useCallback(
+    (before, after = "", smartMode = false) => {
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selectedText = textarea.value.substring(start, end);
+
+      let replacement;
+      let newCursorPos;
+
+      if (smartMode && selectedText) {
+        // Smart mode: just wrap selected text
+        replacement = before + selectedText + after;
+        newCursorPos =
+          start + before.length + selectedText.length + after.length;
+      } else if (smartMode && !selectedText) {
+        // Smart mode: insert placeholder text
+        const placeholders = {
+          "**": "Bold text",
+          "*": "Italic text",
+          "## ": "Heading text",
+          "* ": "List item",
+        };
+        const placeholder = placeholders[before] || "text";
+        replacement = before + placeholder + after;
+        newCursorPos = start + before.length;
+      } else {
+        // Normal mode
+        replacement = before + selectedText + after;
+        newCursorPos = selectedText
+          ? start + before.length + selectedText.length + after.length
+          : start + before.length;
+      }
+
+      const newValue =
+        textarea.value.substring(0, start) +
+        replacement +
+        textarea.value.substring(end);
+
+      setFormData((prev) => ({
+        ...prev,
+        description: newValue,
+      }));
+
+      // Set cursor position after formatting
+      setTimeout(() => {
+        textarea.focus();
+        if (smartMode && !selectedText) {
+          // Select the placeholder text for easy replacement
+          const placeholderLength =
+            replacement.length - before.length - after.length;
+          textarea.setSelectionRange(
+            start + before.length,
+            start + before.length + placeholderLength
+          );
+        } else {
+          textarea.setSelectionRange(newCursorPos, newCursorPos);
+        }
+      }, 0);
+    },
+    []
+  );
+
+  // Smart formatting functions
+  const handleBold = () => insertFormatting("**", "**", true);
+  const handleItalic = () => insertFormatting("*", "*", true);
+  const handleHeading = () => insertFormatting("## ", "", true);
+  const handleList = () => insertFormatting("* ", "", true);
+
+  // Auto-format on Enter key for lists
+  const handleKeyDown = useCallback((e) => {
+    if (e.key === "Enter") {
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+
+      const start = textarea.selectionStart;
+      const value = textarea.value;
+
+      // Find the current line
+      const beforeCursor = value.substring(0, start);
+      const lines = beforeCursor.split("\n");
+      const currentLine = lines[lines.length - 1];
+
+      // Check if current line is a list item
+      const listMatch = currentLine.match(/^(\s*\* )(.*)/);
+      if (listMatch) {
+        e.preventDefault();
+        const indent = listMatch[1];
+        const content = listMatch[2];
+
+        if (content.trim() === "") {
+          // Empty list item, remove it and exit list mode
+          const newValue =
+            value.substring(0, start - currentLine.length) +
+            value.substring(start);
+          setFormData((prev) => ({
+            ...prev,
+            description: newValue,
+          }));
+
+          setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(
+              start - currentLine.length,
+              start - currentLine.length
+            );
+          }, 0);
+        } else {
+          // Add new list item
+          const newValue =
+            value.substring(0, start) + "\n" + indent + value.substring(start);
+          setFormData((prev) => ({
+            ...prev,
+            description: newValue,
+          }));
+
+          setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(
+              start + 1 + indent.length,
+              start + 1 + indent.length
+            );
+          }, 0);
+        }
+      }
+    }
+  }, []);
+
+  // Insert quick templates
+  const insertTemplate = useCallback((template) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const templates = {
+      dashboard: `## 📊 Project Name
+A comprehensive dashboard built for [purpose], featuring:
+* 📈 **Feature 1** – Description here
+* 📦 **Feature 2** – Description here
+* 👥 **Feature 3** – Description here
+
+✨ Includes **modern design** and **responsive layout**.`,
+
+      designer: `## 🎨 BMW Poster Project
+A high-end design project that includes:
+* 🎯 **Striking Visuals** – Sleek automotive photography and dynamic composition
+* ✏️ **Creative Typography** – Bold fonts and brand-aligned style
+* 🖌️ **Color & Mood** – Premium color palette reflecting BMW elegance
+* 🗂️ **Organized Layers** – Easy to modify and adapt for different formats
+
+Crafted with precision, creativity, and attention to detail for a stunning brand showcase.`,
+
+      mobile: `## 📱 Mobile Application
+Cross-platform mobile app featuring:
+* 🎨 **Modern UI/UX** – Intuitive user interface
+* ⚡ **Performance** – Fast and responsive
+* 🔄 **Sync** – Real-time data synchronization
+
+Available for iOS and Android platforms.`,
+    };
+
+    const start = textarea.selectionStart;
+    const template_text = templates[template] || "";
+
+    const newValue =
+      textarea.value.substring(0, start) +
+      template_text +
+      textarea.value.substring(start);
+
+    setFormData((prev) => ({
+      ...prev,
+      description: newValue,
+    }));
+
+    setTimeout(() => {
+      textarea.focus();
+      // Select "Project Name" for easy replacement
+      const projectNameStart = start + template_text.indexOf("Project Name");
+      const projectNameEnd = projectNameStart + "Project Name".length;
+      textarea.setSelectionRange(projectNameStart, projectNameEnd);
+    }, 0);
+  }, []);
 
   // Load projects on component mount
   useEffect(() => {
@@ -119,6 +417,14 @@ const DashboardProjects = () => {
     setImageErrors((prev) => ({
       ...prev,
       [projectId]: true,
+    }));
+  }, []);
+
+  // Toggle description expansion
+  const toggleDescription = useCallback((projectId) => {
+    setExpandedDescriptions((prev) => ({
+      ...prev,
+      [projectId]: !prev[projectId],
     }));
   }, []);
 
@@ -201,11 +507,12 @@ const DashboardProjects = () => {
       });
     } else {
       setFormData({
-        projectStatus: "completed", // Default status
+        projectStatus: "", // No default status - show placeholder
       });
     }
 
     setFormErrors({});
+    setIsPreviewMode(false); // Reset preview mode
   }, []);
 
   const closeSlidePanel = useCallback(() => {
@@ -217,6 +524,7 @@ const DashboardProjects = () => {
     });
     setFormData({});
     setFormErrors({});
+    setIsPreviewMode(false);
   }, []);
 
   // Delete confirmation functions
@@ -511,23 +819,142 @@ const DashboardProjects = () => {
 
               <div className={styles.formGroup}>
                 <label>Description *</label>
-                <textarea
-                  value={formData.description || ""}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      description: e.target.value,
-                    }))
-                  }
-                  placeholder="Project description"
-                  rows={4}
-                  className={formErrors.description ? styles.errorInput : ""}
-                />
+                <div className={styles.richTextContainer}>
+                  <div className={styles.richTextToolbar}>
+                    <button
+                      type="button"
+                      className={styles.toolbarBtn}
+                      onClick={handleBold}
+                      title="Bold - Wraps selected text or adds placeholder"
+                    >
+                      <Bold size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.toolbarBtn}
+                      onClick={handleItalic}
+                      title="Italic - Wraps selected text or adds placeholder"
+                    >
+                      <Italic size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.toolbarBtn}
+                      onClick={handleHeading}
+                      title="Heading - Adds heading format"
+                    >
+                      <Hash size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.toolbarBtn}
+                      onClick={handleList}
+                      title="List - Creates list item (Enter for new item)"
+                    >
+                      <List size={16} />
+                    </button>
+                    <div className={styles.toolbarDivider}></div>
+
+                    {/* Quick Templates */}
+                    <div className={styles.templateDropdown}>
+                      <button
+                        type="button"
+                        className={styles.templateBtn}
+                        title="Quick Templates"
+                      >
+                        📝 Templates
+                      </button>
+                      <div className={styles.templateMenu}>
+                        <button
+                          type="button"
+                          onClick={() => insertTemplate("dashboard")}
+                          className={styles.templateOption}
+                        >
+                          📊 Dashboard Project
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => insertTemplate("designer")}
+                          className={styles.templateOption}
+                        >
+                          🚀 Designer project
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => insertTemplate("mobile")}
+                          className={styles.templateOption}
+                        >
+                          📱 Mobile App
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className={styles.toolbarDivider}></div>
+                    <button
+                      type="button"
+                      className={`${styles.toolbarBtn} ${
+                        isPreviewMode ? styles.active : ""
+                      }`}
+                      onClick={() => setIsPreviewMode(!isPreviewMode)}
+                      title="Toggle Preview"
+                    >
+                      {isPreviewMode ? <Edit size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+
+                  {isPreviewMode ? (
+                    <div
+                      className={styles.richTextPreview}
+                      dangerouslySetInnerHTML={{
+                        __html: formatDescription(
+                          formData.description || "",
+                          true
+                        ),
+                      }}
+                    />
+                  ) : (
+                    <textarea
+                      ref={textareaRef}
+                      value={formData.description || ""}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          description: e.target.value,
+                        }))
+                      }
+                      onKeyDown={handleKeyDown}
+                      placeholder={`Project description with smart formatting:
+
+🎯 Click buttons above for easy formatting!
+📝 Use templates for quick start!
+
+Manual formatting:
+## Main Heading
+**Bold text** or *Italic text*
+* List item (press Enter for new item)
+
+Try selecting text and clicking format buttons! ✨`}
+                      rows={12}
+                      className={`${styles.richTextarea} ${
+                        formErrors.description ? styles.errorInput : ""
+                      }`}
+                    />
+                  )}
+                </div>
                 {formErrors.description && (
                   <span className={styles.errorText}>
                     {formErrors.description}
                   </span>
                 )}
+                <div className={styles.formattingHelp}>
+                  <small>
+                    💡 <strong>Smart Tips:</strong> • Select text and click
+                    format buttons for instant formatting • Use templates for
+                    quick project setup • Press Enter in lists to create new
+                    items automatically • Click preview to see how it looks! ✨
+                  </small>
+                </div>
               </div>
 
               <div className={styles.formGroup}>
@@ -605,6 +1032,16 @@ const DashboardProjects = () => {
                   {formData.imageUrl ? (
                     <div className={styles.imagePreview}>
                       <img src={formData.imageUrl} alt="Project preview" />
+                      <button
+                        type="button"
+                        className={styles.clearImageBtn}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          clearImage();
+                        }}
+                      >
+                        <X size={14} />
+                      </button>
                     </div>
                   ) : (
                     <div className={styles.uploadPlaceholder}>
@@ -674,6 +1111,14 @@ const DashboardProjects = () => {
     closeSlidePanel,
     handleSave,
     loading,
+    isPreviewMode,
+    formatDescription,
+    handleBold,
+    handleItalic,
+    handleHeading,
+    handleList,
+    insertTemplate,
+    handleKeyDown,
   ]);
 
   if (loading && projects.length === 0) {
@@ -706,110 +1151,142 @@ const DashboardProjects = () => {
       </div>
 
       <div className={styles.projectsGrid}>
-        {projects.map((project) => (
-          <div key={project.projectId} className={styles.projectCard}>
-            <div className={styles.projectImage}>
-              {project.imageUrl && !imageErrors[project.projectId] ? (
-                <img
-                  src={project.imageUrl}
-                  alt={project.title}
-                  onError={() => handleImageError(project.projectId)}
-                />
-              ) : (
-                <div className={styles.imageNotAvailable}>
-                  <ImageOff size={32} />
-                  <span>Image Not Available</span>
-                </div>
-              )}
-              {project.featured && (
-                <div className={styles.featuredBadge}>
-                  <Star size={12} />
-                  Featured
-                </div>
-              )}
-              <div className={styles.projectActions}>
-                <button
-                  className={`${styles.iconBtn} ${
-                    project.featured ? styles.featured : ""
-                  } ${
-                    featuredLoading[project.projectId] ? styles.loading : ""
-                  }`}
-                  onClick={() => toggleFeatured(project.projectId)}
-                  title="Toggle Featured"
-                  disabled={featuredLoading[project.projectId]}
-                >
-                  <Star size={16} />
-                </button>
-                <button
-                  className={styles.iconBtn}
-                  onClick={() =>
-                    openSlidePanel("editProject", project, "Edit Project")
-                  }
-                  title="Edit Project"
-                  disabled={loading}
-                >
-                  <Edit3 size={16} />
-                </button>
-                <button
-                  className={styles.iconBtn}
-                  onClick={() =>
-                    openDeleteConfirmation(
-                      "project",
-                      project.projectId,
-                      project.title
-                    )
-                  }
-                  title="Delete Project"
-                  disabled={loading}
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            </div>
-            <div className={styles.projectContent}>
-              <h3>{project.title}</h3>
-              <p className={styles.shortDescription}>
-                {project.shortDescription}
-              </p>
-              <p className={styles.description}>{project.description}</p>
-              <div className={styles.projectMeta}>
-                <span
-                  className={`${styles.statusBadge} ${
-                    styles[project.projectStatus?.replace(/\s+/g, "")]
-                  }`}
-                >
-                  {project.projectStatus}
-                </span>
-              </div>
-              {project.technoligue && project.technoligue.length > 0 && (
-                <div className={styles.techStack}>
-                  {project.technoligue.map((tech, techIndex) => (
-                    <span key={techIndex} className={styles.techTag}>
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              )}
-              <div className={styles.projectLinks}>
-                {project.liveUrl && (
-                  <a
-                    href={
-                      project.liveUrl.startsWith("http")
-                        ? project.liveUrl
-                        : `https://${project.liveUrl}`
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.liveUrlBtn}
-                  >
-                    <ExternalLink size={16} />
-                    Live URL
-                  </a>
-                )}
-              </div>
-            </div>
+        {projects.length === 0 ? (
+          <div className={styles.emptyMessage}>
+            <p>No Projects added yet. Click "Add Project" to get started.</p>
           </div>
-        ))}
+        ) : (
+          projects.map((project) => (
+            <div key={project.projectId} className={styles.projectCard}>
+              <div className={styles.projectImage}>
+                {project.imageUrl && !imageErrors[project.projectId] ? (
+                  <img
+                    src={project.imageUrl}
+                    alt={project.title}
+                    onError={() => handleImageError(project.projectId)}
+                  />
+                ) : (
+                  <div className={styles.imageNotAvailable}>
+                    <ImageOff size={32} />
+                    <span>Image Not Available</span>
+                  </div>
+                )}
+                {project.featured && (
+                  <div className={styles.featuredBadge}>
+                    <Star size={12} />
+                    Featured
+                  </div>
+                )}
+                <div className={styles.projectActions}>
+                  <button
+                    className={`${styles.iconBtn} ${
+                      project.featured ? styles.featured : ""
+                    } ${
+                      featuredLoading[project.projectId] ? styles.loading : ""
+                    }`}
+                    onClick={() => toggleFeatured(project.projectId)}
+                    title="Toggle Featured"
+                    disabled={featuredLoading[project.projectId]}
+                  >
+                    <Star size={16} />
+                  </button>
+                  <button
+                    className={styles.iconBtn}
+                    onClick={() =>
+                      openSlidePanel("editProject", project, "Edit Project")
+                    }
+                    title="Edit Project"
+                    disabled={loading}
+                  >
+                    <Edit3 size={16} />
+                  </button>
+                  <button
+                    className={styles.iconBtn}
+                    onClick={() =>
+                      openDeleteConfirmation(
+                        "project",
+                        project.projectId,
+                        project.title
+                      )
+                    }
+                    title="Delete Project"
+                    disabled={loading}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+              <div className={styles.projectContent}>
+                <h3>{project.title}</h3>
+                <p className={styles.shortDescription}>
+                  {project.shortDescription}
+                </p>
+                <div
+                  className={`${styles.description} ${
+                    expandedDescriptions[project.projectId]
+                      ? styles.expanded
+                      : ""
+                  }`}
+                >
+                  <div
+                    className={styles.descriptionContent}
+                    dangerouslySetInnerHTML={{
+                      __html: formatDescription(
+                        project.description,
+                        expandedDescriptions[project.projectId]
+                      ),
+                    }}
+                  />
+                  {project.description && project.description.length > 50 && (
+                    <button
+                      className={styles.toggleDescription}
+                      onClick={() => toggleDescription(project.projectId)}
+                    >
+                      {expandedDescriptions[project.projectId]
+                        ? "Show Less"
+                        : "Show More"}
+                    </button>
+                  )}
+                </div>
+                <div className={styles.projectMeta}>
+                  <span
+                    className={`${styles.statusBadge} ${getStatusClassName(
+                      project.projectStatus
+                    )}`}
+                  >
+                    {project.projectStatus}
+                  </span>
+                </div>
+                {project.technoligue && project.technoligue.length > 0 && (
+                  <div className={styles.techStack}>
+                    {project.technoligue.map((tech, techIndex) => (
+                      <span key={techIndex} className={styles.techTag}>
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <div className={styles.projectLinks}>
+                  {project.liveUrl && (
+                    <a
+                      href={
+                        project.liveUrl.startsWith("http")
+                          ? project.liveUrl
+                          : `https://${project.liveUrl}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.liveUrlBtn}
+                    >
+                      <ExternalLink size={16} />
+                      Live URL
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {renderSlidePanel()}
