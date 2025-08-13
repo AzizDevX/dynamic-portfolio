@@ -3,6 +3,8 @@ import styles from "./DashboardSkills.module.css";
 import { verifyJWTToken } from "../utils/authUtils";
 import { Plus, Edit3, Trash2, Save, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Backend_Root_Url } from "../../../config/AdminUrl.json";
 
 const DashboardSkills = () => {
   //Authentication check
@@ -12,22 +14,120 @@ const DashboardSkills = () => {
       const isValid = await verifyJWTToken();
       if (isValid === false) {
         navigate("/denied");
+      } else {
+        fetchSkills();
       }
     };
     checkAuth();
   }, [navigate]);
 
+  // API Functions
+  const fetchSkills = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${Backend_Root_Url}/api/show/skills`, {
+        withCredentials: true,
+      });
+
+      // Transform API data to match component structure
+      const transformedData = response.data.SkillsData.map((skill) => ({
+        id: skill._id,
+        name: skill.SkillName,
+        level: skill.Skill_Level,
+        category: skill.Category,
+      }));
+
+      setSkillsData(transformedData);
+      setError("");
+    } catch (error) {
+      console.error("Failed to fetch skills:", error);
+      setError("Failed to load skills. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addSkill = async (skillData) => {
+    try {
+      const response = await axios.post(
+        `${Backend_Root_Url}/api/skills/add/skill`,
+        {
+          Category: skillData.category,
+          SkillName: skillData.name,
+          Skill_Level: parseInt(skillData.level),
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
+      // Refresh skills after successful add
+      await fetchSkills();
+      return { success: true };
+    } catch (error) {
+      console.error("Failed to add skill:", error);
+      return {
+        success: false,
+        error: error.response?.data?.message || "Failed to add skill",
+      };
+    }
+  };
+
+  const editSkill = async (skillId, skillData) => {
+    try {
+      const updateData = {};
+      if (skillData.category) updateData.Category = skillData.category;
+      if (skillData.name) updateData.SkillName = skillData.name;
+      if (skillData.level) updateData.Skill_Level = parseInt(skillData.level);
+
+      const response = await axios.put(
+        `${Backend_Root_Url}/api/skills/edit/skill/${skillId}`,
+        updateData,
+        {
+          withCredentials: true,
+        }
+      );
+
+      // Refresh skills after successful edit
+      await fetchSkills();
+      return { success: true };
+    } catch (error) {
+      console.error("Failed to edit skill:", error);
+      return {
+        success: false,
+        error: error.response?.data?.message || "Failed to edit skill",
+      };
+    }
+  };
+
+  const deleteSkill = async (skillId) => {
+    try {
+      const response = await axios.delete(
+        `${Backend_Root_Url}/api/skills/delete/skill/${skillId}`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      // Refresh skills after successful delete
+      await fetchSkills();
+      return { success: true };
+    } catch (error) {
+      console.error("Failed to delete skill:", error);
+      return {
+        success: false,
+        error: error.response?.data?.message || "Failed to delete skill",
+      };
+    }
+  };
+
   // Skills state
-  const [skillsData, setSkillsData] = useState([
-    { id: 1, name: "JavaScript", level: 95, category: "Frontend" },
-    { id: 2, name: "React", level: 90, category: "Frontend" },
-    { id: 3, name: "Node.js", level: 85, category: "Backend" },
-    { id: 4, name: "Python", level: 80, category: "Backend" },
-    { id: 5, name: "TypeScript", level: 85, category: "Frontend" },
-    { id: 6, name: "MongoDB", level: 75, category: "Database" },
-    { id: 7, name: "PostgreSQL", level: 70, category: "Database" },
-    { id: 8, name: "AWS", level: 65, category: "Cloud" },
-  ]);
+  const [skillsData, setSkillsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Form validation state
+  const [validationErrors, setValidationErrors] = useState({});
 
   // Slide panel state
   const [slidePanel, setSlidePanel] = useState({
@@ -60,8 +160,15 @@ const DashboardSkills = () => {
     if (data) {
       setFormData(data);
     } else {
-      setFormData({});
+      setFormData({
+        name: "",
+        category: "",
+        level: 50,
+      });
     }
+
+    // Clear validation errors when opening panel
+    setValidationErrors({});
   };
 
   const closeSlidePanel = () => {
@@ -72,6 +179,7 @@ const DashboardSkills = () => {
       title: "",
     });
     setFormData({});
+    setValidationErrors({});
   };
 
   // Delete confirmation functions
@@ -93,45 +201,62 @@ const DashboardSkills = () => {
     });
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     const { type, id } = deleteConfirmation;
 
     if (type === "skill") {
-      setSkillsData((prev) => prev.filter((s) => s.id !== id));
+      const result = await deleteSkill(id);
+      if (!result.success) {
+        setError(result.error);
+      }
     }
 
     closeDeleteConfirmation();
   };
 
+  // Form validation
+  const validateForm = () => {
+    const errors = {};
+
+    if (!formData.name || formData.name.trim() === "") {
+      errors.name = "Skill name is required";
+    }
+
+    if (!formData.category || formData.category.trim() === "") {
+      errors.category = "Category is required";
+    }
+
+    if (!formData.level || formData.level < 1 || formData.level > 100) {
+      errors.level = "Skill level must be between 1 and 100";
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   // CRUD operations
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
     const { type, data } = slidePanel;
+    let result;
 
     switch (type) {
       case "addSkill":
-        const newSkill = {
-          id: Date.now(),
-          ...formData,
-          level: parseInt(formData.level) || 50,
-        };
-        setSkillsData((prev) => [...prev, newSkill]);
+        result = await addSkill(formData);
         break;
       case "editSkill":
-        setSkillsData((prev) =>
-          prev.map((s) =>
-            s.id === data.id
-              ? {
-                  ...s,
-                  ...formData,
-                  level: parseInt(formData.level) || s.level,
-                }
-              : s
-          )
-        );
+        result = await editSkill(data.id, formData);
         break;
     }
 
-    closeSlidePanel();
+    if (result && result.success) {
+      closeSlidePanel();
+    } else if (result && !result.success) {
+      setError(result.error);
+    }
   };
 
   // Group skills by category
@@ -188,8 +313,10 @@ const DashboardSkills = () => {
         <div className={styles.slidePanelContent}>
           {(type === "addSkill" || type === "editSkill") && (
             <div className={styles.form}>
+              {error && <div className={styles.errorMessage}>{error}</div>}
+
               <div className={styles.formGroup}>
-                <label>Skill Name</label>
+                <label>Skill Name *</label>
                 <input
                   type="text"
                   value={formData.name || ""}
@@ -200,12 +327,19 @@ const DashboardSkills = () => {
                     }))
                   }
                   placeholder="e.g., JavaScript, React"
+                  className={validationErrors.name ? styles.inputError : ""}
                 />
+                {validationErrors.name && (
+                  <span className={styles.errorText}>
+                    {validationErrors.name}
+                  </span>
+                )}
               </div>
 
               <div className={styles.formGroup}>
-                <label>Category</label>
-                <select
+                <label>Category *</label>
+                <input
+                  type="text"
                   value={formData.category || ""}
                   onChange={(e) =>
                     setFormData((prev) => ({
@@ -213,24 +347,21 @@ const DashboardSkills = () => {
                       category: e.target.value,
                     }))
                   }
-                >
-                  <option value="">Select category</option>
-                  <option value="Frontend">Frontend</option>
-                  <option value="Backend">Backend</option>
-                  <option value="Database">Database</option>
-                  <option value="Cloud">Cloud</option>
-                  <option value="DevOps">DevOps</option>
-                  <option value="Mobile">Mobile</option>
-                  <option value="Design">Design</option>
-                  <option value="Other">Other</option>
-                </select>
+                  placeholder="e.g., Frontend, Backend, Database"
+                  className={validationErrors.category ? styles.inputError : ""}
+                />
+                {validationErrors.category && (
+                  <span className={styles.errorText}>
+                    {validationErrors.category}
+                  </span>
+                )}
               </div>
 
               <div className={styles.formGroup}>
-                <label>Skill Level ({formData.level || 50}%)</label>
+                <label>Skill Level ({formData.level || 50}%) *</label>
                 <input
                   type="range"
-                  min="0"
+                  min="1"
                   max="100"
                   value={formData.level || 50}
                   onChange={(e) =>
@@ -239,12 +370,19 @@ const DashboardSkills = () => {
                       level: e.target.value,
                     }))
                   }
-                  className={styles.rangeInput}
+                  className={`${styles.rangeInput} ${
+                    validationErrors.level ? styles.inputError : ""
+                  }`}
                 />
                 <div className={styles.rangeLabels}>
-                  <span>Beginner</span>
-                  <span>Expert</span>
+                  <span>Beginner (1%)</span>
+                  <span>Expert (100%)</span>
                 </div>
+                {validationErrors.level && (
+                  <span className={styles.errorText}>
+                    {validationErrors.level}
+                  </span>
+                )}
               </div>
             </div>
           )}
@@ -276,56 +414,79 @@ const DashboardSkills = () => {
         </button>
       </div>
 
-      <div className={styles.skillsContainer}>
-        {Object.entries(groupedSkills).map(([category, skills]) => (
-          <div key={category} className={styles.categorySection}>
-            <h3 className={styles.categoryTitle}>{category}</h3>
-            <div className={styles.skillsGrid}>
-              {skills.map((skill) => (
-                <div key={skill.id} className={styles.skillCard}>
-                  <div className={styles.skillHeader}>
-                    <div className={styles.skillInfo}>
-                      <h4>{skill.name}</h4>
-                      <span className={styles.skillCategory}>
-                        {skill.category}
+      {loading ? (
+        <div className={styles.loadingMessage}>Loading skills...</div>
+      ) : error && skillsData.length === 0 ? (
+        <div className={styles.errorMessage}>
+          {error}
+          <button
+            className={styles.btnSecondary}
+            onClick={fetchSkills}
+            style={{ marginLeft: "1rem" }}
+          >
+            Retry
+          </button>
+        </div>
+      ) : skillsData.length === 0 ? (
+        <div className={styles.emptyMessage}>
+          No skills added yet. Click "Add Skill" to get started.
+        </div>
+      ) : (
+        <div className={styles.skillsContainer}>
+          {Object.entries(groupedSkills).map(([category, skills]) => (
+            <div key={category} className={styles.categorySection}>
+              <h3 className={styles.categoryTitle}>{category}</h3>
+              <div className={styles.skillsGrid}>
+                {skills.map((skill) => (
+                  <div key={skill.id} className={styles.skillCard}>
+                    <div className={styles.skillHeader}>
+                      <div className={styles.skillInfo}>
+                        <h4>{skill.name}</h4>
+                        <span className={styles.skillCategory}>
+                          {skill.category}
+                        </span>
+                      </div>
+                      <div className={styles.skillActions}>
+                        <button
+                          className={styles.iconBtn}
+                          onClick={() =>
+                            openSlidePanel("editSkill", skill, "Edit Skill")
+                          }
+                        >
+                          <Edit3 size={14} />
+                        </button>
+                        <button
+                          className={styles.iconBtn}
+                          onClick={() =>
+                            openDeleteConfirmation(
+                              "skill",
+                              skill.id,
+                              skill.name
+                            )
+                          }
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                    <div className={styles.skillLevel}>
+                      <div className={styles.skillBar}>
+                        <div
+                          className={styles.skillProgress}
+                          style={{ width: `${skill.level}%` }}
+                        />
+                      </div>
+                      <span className={styles.skillPercentage}>
+                        {skill.level}%
                       </span>
                     </div>
-                    <div className={styles.skillActions}>
-                      <button
-                        className={styles.iconBtn}
-                        onClick={() =>
-                          openSlidePanel("editSkill", skill, "Edit Skill")
-                        }
-                      >
-                        <Edit3 size={14} />
-                      </button>
-                      <button
-                        className={styles.iconBtn}
-                        onClick={() =>
-                          openDeleteConfirmation("skill", skill.id, skill.name)
-                        }
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
                   </div>
-                  <div className={styles.skillLevel}>
-                    <div className={styles.skillBar}>
-                      <div
-                        className={styles.skillProgress}
-                        style={{ width: `${skill.level}%` }}
-                      />
-                    </div>
-                    <span className={styles.skillPercentage}>
-                      {skill.level}%
-                    </span>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {renderSlidePanel()}
       {renderDeleteConfirmation()}
