@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 import HomeData from "./models/HomeDataSchema.js";
 import connectDB from "./config/dbConnect.js";
-import Stats from "./models/StatsShema.js";
+import Stats from "./models/StatsSchema.js";
 import AboutUsSlides from "./models/AboutUsSlidesSchema.js";
-import AboutUs from "./models/AboutUsShema.js";
-import Footer from "./models/FooterShema.js";
-import FooterSocialLinks from "./models/FooterSocialLinksShema.js";
+import AboutUs from "./models/AboutUsSchema.js";
+import Footer from "./models/FooterSchema.js";
+import FooterSocialLinks from "./models/FooterSocialLinksSchema.js";
 async function ConnectDb() {
   try {
     await connectDB();

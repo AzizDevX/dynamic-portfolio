@@ -1,6 +1,6 @@
 import express from "express";
 const Router = express.Router();
-import aboutUsShema from "../models/AboutUsShema.js";
+import aboutUsShema from "../models/AboutUsSchema.js";
 import AboutUsSlides from "../models/AboutUsSlidesSchema.js";
 import isAdminLogged from "../middlewares/isAdminLogged.js";
 import validateAboutData from "../middlewares/editaboutValidation.js";

@@ -1,10 +1,10 @@
 import HomeData from "../models/HomeDataSchema.js";
-import StatsData from "../models/StatsShema.js";
-import AboutUsData from "../models/AboutUsShema.js";
+import StatsData from "../models/StatsSchema.js";
+import AboutUsData from "../models/AboutUsSchema.js";
 import AboutUsSlides from "../models/AboutUsSlidesSchema.js";
-import Project from "../models/ProjectShema.js";
-import Footer from "../models/FooterShema.js";
-import FooterSocialLinksModel from "../models/FooterSocialLinksShema.js";
+import Project from "../models/ProjectSchema.js";
+import Footer from "../models/FooterSchema.js";
+import FooterSocialLinksModel from "../models/FooterSocialLinksSchema.js";
 import express from "express";
 const Router = express.Router();
 Router.get("/home/main/data", async (req, res) => {

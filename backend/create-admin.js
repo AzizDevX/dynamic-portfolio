@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import bcrypt from "bcrypt";
 import readline from "readline";
 import dbconnection from "./config/dbConnect.js";
-import Admin from "./models/AdminShema.js";
+import Admin from "./models/AdminSchema.js";
 import mongoose from "mongoose";
 dotenv.config();
 

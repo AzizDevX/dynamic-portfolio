@@ -3,7 +3,7 @@ function validateSocialLinksData(req, res, next) {
   if (!req.body || Object.keys(req.body).length === 0) {
     return res.status(400).json({ message: "No data provided for validation" });
   }
-  const shema = Joi.object({
+  const schema = Joi.object({
     SocialIcon: Joi.string()
       .valid(
         "Facebook",
@@ -34,7 +34,7 @@ function validateSocialLinksData(req, res, next) {
       .required(),
     SocialLink: Joi.string().uri().required(),
   });
-  const { error } = shema.validate(req.body);
+  const { error } = schema.validate(req.body);
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
   }

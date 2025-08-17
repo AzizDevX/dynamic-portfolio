@@ -1,6 +1,6 @@
 import express from "express";
 const Router = express.Router();
-import Project from "../models/ProjectShema.js";
+import Project from "../models/ProjectSchema.js";
 import validateProjectInput from "../middlewares/validateProjectInput.js";
 import isAdminLogged from "../middlewares/isAdminLogged.js";
 import { upload, verifyFileType } from "../controllers/storage.js";

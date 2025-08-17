@@ -5,7 +5,7 @@ import HomeLogoFolder from "../middlewares/HomeLogo.js";
 import { access, unlink } from "fs/promises";
 import isAdminLogged from "../middlewares/isAdminLogged.js";
 import validateEditHomeData from "../middlewares/EditHomeDataValidation.js";
-import Stats from "../models/StatsShema.js";
+import Stats from "../models/StatsSchema.js";
 import validateAddStat from "../middlewares/AddStatValidation.js";
 import mongoose from "mongoose";
 import validateEditStat from "../middlewares/editstatValidation.js";

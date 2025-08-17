@@ -1,5 +1,5 @@
 import express from "express";
-import Skills from "../models/SkillsShema.js";
+import Skills from "../models/SkillsSchema.js";
 import isAdminLogged from "../middlewares/isAdminLogged.js";
 import validateAddSkill from "../middlewares/AddSkillsValidation.js";
 import mongoose from "mongoose";
