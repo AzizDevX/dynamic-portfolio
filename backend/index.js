@@ -11,6 +11,7 @@ import EditAboutData from "./routers/EditAboutData.js";
 import EditFooter from "./routers/EditFooter.js";
 import EditSkills from "./routers/EditSkillsData.js";
 import EdirCv from "./routers/EditCv.js";
+import Contact from "./routers/Contact.js";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -47,6 +48,7 @@ app.use("/api/", AddProjectRouter);
 app.use("/api/", EditSkills);
 app.use("/api/", EdirCv);
 app.use("/api/", EditFooter);
+app.use("/api/", Contact);
 
 app.listen(port, () => {
   console.log(`Server Alive At port ${port}`);

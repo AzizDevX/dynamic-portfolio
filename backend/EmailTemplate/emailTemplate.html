@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>New Contact Message</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      background-color: #f4f7fa;
+      font-family: Arial, sans-serif;
+      color: #333;
+    "
+  >
+    <table
+      role="presentation"
+      cellspacing="0"
+      cellpadding="0"
+      border="0"
+      width="100%"
+      style="background-color: #f4f7fa; padding: 20px 0"
+    >
+      <tr>
+        <td align="center">
+          <table
+            role="presentation"
+            cellspacing="0"
+            cellpadding="0"
+            border="0"
+            width="600"
+            style="
+              background-color: #ffffff;
+              border-radius: 10px;
+              overflow: hidden;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            "
+          >
+            <!-- Header -->
+            <tr>
+              <td
+                style="
+                  background: linear-gradient(90deg, #0f172a, #1e293b);
+                  padding: 20px;
+                  text-align: center;
+                  color: #ffffff;
+                  font-size: 24px;
+                  font-weight: bold;
+                "
+              >
+                ✉️ New Contact Message
+              </td>
+            </tr>
+
+            <!-- Body -->
+            <tr>
+              <td style="padding: 30px">
+                <p style="font-size: 16px; margin: 0 0 15px 0">
+                  Hello {{AdminName}},
+                </p>
+                <p style="font-size: 15px; margin: 0 0 25px 0">
+                  You’ve received a new message from your portfolio website.
+                </p>
+
+                <table
+                  role="presentation"
+                  width="100%"
+                  cellspacing="0"
+                  cellpadding="12"
+                  style="
+                    background-color: #f9fafb;
+                    border: 1px solid #e5e7eb;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    line-height: 1.6;
+                  "
+                >
+                  <tr>
+                    <td
+                      width="120"
+                      style="font-weight: bold; vertical-align: top"
+                    >
+                      👤 Full Name
+                    </td>
+                    <td style="word-wrap: break-word; overflow-wrap: anywhere">
+                      {{fullname}}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      width="120"
+                      style="font-weight: bold; vertical-align: top"
+                    >
+                      📧 Email
+                    </td>
+                    <td style="word-wrap: break-word; overflow-wrap: anywhere">
+                      {{email}}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      width="120"
+                      style="font-weight: bold; vertical-align: top"
+                    >
+                      📝 Subject
+                    </td>
+                    <td style="word-wrap: break-word; overflow-wrap: anywhere">
+                      {{subject}}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      width="120"
+                      style="font-weight: bold; vertical-align: top"
+                    >
+                      💬 Message
+                    </td>
+                    <td
+                      style="
+                        line-height: 1.6;
+                        word-wrap: break-word;
+                        overflow-wrap: anywhere;
+                        white-space: pre-line;
+                      "
+                    >
+                      {{message}}
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="margin-top: 30px; font-size: 13px; color: #6b7280">
+                  This message was sent via your portfolio contact form.
+                </p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td
+                style="
+                  background: #f1f5f9;
+                  padding: 15px;
+                  text-align: center;
+                  font-size: 12px;
+                  color: #6b7280;
+                "
+              >
+                © {{year}} Your Portfolio — All rights reserved.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
