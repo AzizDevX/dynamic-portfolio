@@ -18,10 +18,12 @@ import { fileURLToPath } from "url";
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const port = process.env.port || 5000;
-const ipv6Local = `http://[::1]:${port}`;
-const ipv4Local = `http://127.0.0.1:${port}`;
-const Hostname = `http://localhost:${port}`;
+const BACKEND_PORT = process.env.BACKEND_PORT || 5000;
+const FRONTEND_PORT = process.env.FRONTEND_PORT || 3000;
+
+const ipv6Local = `http://[::1]:${FRONTEND_PORT}`;
+const ipv4Local = `http://127.0.0.1:${FRONTEND_PORT}`;
+const Hostname = `http://localhost:${FRONTEND_PORT}`;
 const CustomDomain = process.env.CUSTOM_DOMAIN || "";
 
 const app = express();
@@ -53,6 +55,6 @@ app.use("/api/", EdirCv);
 app.use("/api/", EditFooter);
 app.use("/api/", Contact);
 
-app.listen(port, () => {
-  console.log(`Server Alive At port ${port}`);
+app.listen(BACKEND_PORT, () => {
+  console.log(`Server Alive At port ${BACKEND_PORT}`);
 });
