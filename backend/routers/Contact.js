@@ -4,10 +4,12 @@ import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
 import HomeData from "../models/HomeDataSchema.js";
+import contactLimiter from "../middlewares/RateLimit.js";
 dotenv.config();
 
 const Router = express.Router();
-const resend = new Resend(process.env.RESEND_API);
+const resend = new Resend(process.env.RESEND_API || "missing-api-key");
+
 const AdminMail = process.env.ADMIN_MAIL;
 
 async function getEmailTemplate({ fullname, address, subject, message }) {
@@ -32,7 +34,7 @@ async function getEmailTemplate({ fullname, address, subject, message }) {
   return template;
 }
 
-Router.post("/contact", async (req, res) => {
+Router.post("/contact", contactLimiter, async (req, res) => {
   try {
     if (!resend) {
       console.error("ContactRouter: Missing Resend API config");

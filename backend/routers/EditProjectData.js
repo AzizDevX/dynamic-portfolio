@@ -155,4 +155,47 @@ Router.get("/show/projects", async (req, res) => {
     return console.log("Something Wrong ", err);
   }
 });
+
+Router.put("/projects/image/remove/:id", isAdminLogged, async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid ID format" });
+    }
+
+    const FindProject = await Project.findById(id);
+    if (!FindProject) {
+      return res.status(404).json({ message: "Project Not Found" });
+    }
+
+    try {
+      const path = process.cwd();
+      const DeleteImage =
+        `${path}` + `/uploads/projectsimg/` + `${FindProject.Image}`;
+      await access(DeleteImage);
+      await unlink(DeleteImage);
+      console.log("Old Project Icon Removed");
+    } catch (err) {}
+
+    const UpdateProject = await Project.findByIdAndUpdate(
+      FindProject._id,
+      {
+        Image: "Nothing",
+      },
+      { new: true }
+    );
+
+    if (!UpdateProject) {
+      return res.status(409).json({ message: `Project Image Update Failed` });
+    }
+
+    return res.status(200).json({
+      message: `Project Image Removed Successfully`,
+    });
+  } catch (err) {
+    console.error("Error updating Image Project:", err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+});
 export default Router;
