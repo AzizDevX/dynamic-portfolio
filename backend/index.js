@@ -15,23 +15,26 @@ import Contact from "./routers/Contact.js";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
-
+dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const port = process.env.port || 5000;
+const ipv6Local = `http://[::1]:${port}`;
+const ipv4Local = `http://127.0.0.1:${port}`;
+const Hostname = `http://localhost:${port}`;
+const CustomDomain = process.env.CUSTOM_DOMAIN || "";
 
 const app = express();
 app.use(cookieParser());
 app.use(express.json());
-dotenv.config();
 app.use(
   cors({
-    origin: ["http://127.0.0.1:3000", "http://localhost:3000"],
+    origin: [ipv6Local, ipv4Local, Hostname, CustomDomain],
     credentials: true,
   })
 );
 
 dbconnection();
-const port = process.env.port;
 app.set("trust proxy", true); // for cloudflare or etc ..
 
 app.get("/", (req, res) => {
