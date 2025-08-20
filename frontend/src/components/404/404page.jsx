@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import styles from "./404page.module.css";
+import "../../../src/App.css";
 
 const NotFoundPage = () => {
   const [glitchActive, setGlitchActive] = useState(false);
