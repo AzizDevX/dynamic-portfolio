@@ -1,0 +1,270 @@
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  background-attachment: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  min-height: 100vh;
+  width: 100vw;
+}
+
+/* Loading container - centered content */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  position: relative;
+}
+
+/* Loading spinner - blue ring animation */
+.loading-spinner {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin-bottom: 2rem;
+}
+
+.spinner-ring {
+  width: 100%;
+  height: 100%;
+  border: 3px solid rgba(59, 130, 246, 0.2);
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  position: relative;
+}
+
+.spinner-ring::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border: 2px solid transparent;
+  border-top: 2px solid #60a5fa;
+  border-radius: 50%;
+  animation: spin 1.5s linear infinite reverse;
+}
+
+.spinner-ring::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: #3b82f6;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulse 2s ease-in-out infinite;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+/* Loading text - portfolio style */
+.loading-text {
+  color: #94a3b8;
+  font-size: 1.125rem;
+  font-weight: 400;
+  letter-spacing: 0.025em;
+  margin: 0;
+  opacity: 0;
+  animation: fadeInUp 0.8s ease-out 0.3s forwards;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .loading-container {
+    padding: 1.5rem;
+  }
+
+  .loading-spinner {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 1.5rem;
+  }
+
+  .spinner-ring::after {
+    width: 6px;
+    height: 6px;
+  }
+
+  .loading-text {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .loading-container {
+    padding: 1rem;
+  }
+
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 1.25rem;
+  }
+
+  .spinner-ring {
+    border-width: 2px;
+  }
+
+  .spinner-ring::before {
+    border-width: 1.5px;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+  }
+
+  .spinner-ring::after {
+    width: 5px;
+    height: 5px;
+  }
+
+  .loading-text {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 320px) {
+  .loading-spinner {
+    width: 45px;
+    height: 45px;
+  }
+
+  .loading-text {
+    font-size: 0.9rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .loading-spinner {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 2.5rem;
+  }
+
+  .spinner-ring::after {
+    width: 10px;
+    height: 10px;
+  }
+
+  .loading-text {
+    font-size: 1.25rem;
+  }
+}
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .spinner-ring {
+    border-width: 2px;
+  }
+
+  .spinner-ring::before {
+    border-width: 1px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner-ring,
+  .spinner-ring::before {
+    animation-duration: 3s;
+  }
+
+  .spinner-ring::after {
+    animation: none;
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .loading-text {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .loading-overlay {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+  }
+
+  .loading-text {
+    color: #cbd5e1;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .loading-overlay {
+    background: #000000;
+  }
+
+  .spinner-ring {
+    border-color: rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+  }
+
+  .spinner-ring::before {
+    border-top-color: #ffffff;
+  }
+
+  .spinner-ring::after {
+    background: #ffffff;
+    box-shadow: none;
+  }
+
+  .loading-text {
+    color: #ffffff;
+    font-weight: 500;
+  }
+}

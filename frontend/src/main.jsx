@@ -1,32 +1,116 @@
+import React from "react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./components/Home/Home";
-import AuthPage from "./components/auth/auth";
-import { Frontend_Admin_Url } from "./config/AdminUrl.json";
-import Dashboard from "./components/AdminDashboard/main/Dashboard_Restructured";
-import DeniedPage from "./components/AccesDenied/DeniedPage";
-import SkillsPage from "./components/SkillsPage/SkillsPage";
-import ProjectsPage from "./components/PorjectsPage/ProjectsPage";
-import Page404 from "./components/404/404page";
-import CV from "./components/MyCv/cv";
-import Contact from "./components/contact/Contact";
+import { Frontend_Admin_Url } from "./config/AdminUrl.js";
 const adminUrl = "/" + Frontend_Admin_Url;
 const adminDashboard_Url = adminUrl + "/dashboard";
+import "../src/LazyLoding.css";
+
+// Lazy loading
+const LazyRoute = ({ importFunc }) => {
+  const LazyComponent = React.lazy(importFunc);
+
+  return (
+    <React.Suspense
+      fallback={
+        <div className="loading-overlay">
+          <div className="loading-container">
+            <div className="loading-spinner">
+              <div className="spinner-ring"></div>
+            </div>
+            <p className="loading-text">Loading Page...</p>
+          </div>
+        </div>
+      }
+    >
+      <LazyComponent />
+    </React.Suspense>
+  );
+};
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="">
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/projects" element={<ProjectsPage />} />
-        <Route path="/skills" element={<SkillsPage />} />
-        <Route path="/cv" element={<CV />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path={adminUrl} element={<AuthPage />} />
-        <Route path={adminDashboard_Url} element={<Dashboard />} />
-        <Route path="/denied" element={<DeniedPage />} />
-        <Route path="*" element={<Page404 />} />
+        <Route
+          path="/"
+          element={
+            <LazyRoute
+              importFunc={() => import("./components/Home/Home.jsx")}
+            />
+          }
+        />
+        <Route
+          path="/projects"
+          element={
+            <LazyRoute
+              importFunc={() =>
+                import("./components/PorjectsPage/ProjectsPage.jsx")
+              }
+            />
+          }
+        />
+        <Route
+          path="/skills"
+          element={
+            <LazyRoute
+              importFunc={() =>
+                import("./components/SkillsPage/SkillsPage.jsx")
+              }
+            />
+          }
+        />
+        <Route
+          path="/cv"
+          element={
+            <LazyRoute importFunc={() => import("./components/MyCv/cv.jsx")} />
+          }
+        />
+        <Route
+          path="/contact"
+          element={
+            <LazyRoute
+              importFunc={() => import("./components/contact/Contact.jsx")}
+            />
+          }
+        />
+        <Route
+          path={adminUrl}
+          element={
+            <LazyRoute
+              importFunc={() => import("./components/auth/auth.jsx")}
+            />
+          }
+        />
+        <Route
+          path={adminDashboard_Url}
+          element={
+            <LazyRoute
+              importFunc={() =>
+                import(
+                  "./components/AdminDashboard/main/Dashboard_Restructured.jsx"
+                )
+              }
+            />
+          }
+        />
+        <Route
+          path="/denied"
+          element={
+            <LazyRoute
+              importFunc={() =>
+                import("./components/AccesDenied/DeniedPage.jsx")
+              }
+            />
+          }
+        />
+        <Route
+          path="*"
+          element={
+            <LazyRoute importFunc={() => import("./components/404/404page")} />
+          }
+        />
       </Routes>
     </BrowserRouter>
   </StrictMode>
