@@ -1,0 +1,11 @@
+{
+  "name": "portfolio-app",
+  "version": "1.0.0",
+  "description": "Full-stack portfolio application",
+  "scripts": {
+    "start": "npm install && concurrently \"cd backend && npm install && npm run start\" \"cd frontend && npm run production\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
