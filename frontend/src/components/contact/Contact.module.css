@@ -18,6 +18,22 @@
   padding: 0 2rem;
 }
 
+/* Loading Container */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+}
+
+.loadingContainer p {
+  margin-top: 1rem;
+  color: #94a3b8;
+  font-size: 1.1rem;
+}
+
 /* Header Section */
 .headerSection {
   text-align: center;
@@ -173,6 +189,14 @@
   color: #ef4444;
   font-size: 0.85rem;
   margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.errorText::before {
+  content: "⚠";
+  font-size: 0.8rem;
 }
 
 .textarea {
@@ -242,18 +266,32 @@
   font-size: 0.9rem;
   font-weight: 500;
   margin-bottom: 1.5rem;
+  animation: slideInDown 0.4s ease-out;
 }
 
 .successMessage {
   background: rgba(34, 197, 94, 0.1);
   border: 1px solid rgba(34, 197, 94, 0.3);
   color: #22c55e;
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.1);
 }
 
 .errorMessage {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
   color: #ef4444;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.1);
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Info Container */
@@ -313,6 +351,7 @@
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(59, 130, 246, 0.3);
   transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
 }
 
 .contactIcon {
@@ -362,6 +401,7 @@
 .socialLinks {
   display: flex;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .socialLink {
@@ -376,13 +416,36 @@
   color: #ffffff;
   text-decoration: none;
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.socialLink::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--social-color, #3b82f6);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 0;
+}
+
+.socialLink:hover::before {
+  opacity: 1;
 }
 
 .socialLink:hover {
-  background: var(--social-color, #3b82f6);
   border-color: var(--social-color, #3b82f6);
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+.socialLink svg {
+  position: relative;
+  z-index: 1;
 }
 
 /* Response Time */
@@ -586,6 +649,11 @@
   .spinner {
     animation: none;
   }
+
+  .successMessage,
+  .errorMessage {
+    animation: none;
+  }
 }
 
 /* High contrast mode support */
@@ -599,4 +667,3 @@
     border: 2px solid #ffffff;
   }
 }
-

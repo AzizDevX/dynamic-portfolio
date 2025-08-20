@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import styles from "./Navbar.module.css";
-
+import { Link } from "react-router-dom";
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -32,7 +32,9 @@ const Navbar = () => {
       <div className={styles.container}>
         {/* Logo */}
         <div className={styles.logo}>
-          <span className={styles.logoText}>My Portfolio</span>
+          <span className={styles.logoText}>
+            <a href={navItems[0].href}>My Portfolio</a>
+          </span>
           <span className={styles.logoDot}>.</span>
         </div>
 

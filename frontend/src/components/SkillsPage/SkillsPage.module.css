@@ -467,80 +467,163 @@
   }
 }
 
-/* No Skills Section */
 .noSkillsSection {
-  margin-bottom: 4rem;
+  margin-bottom: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 50vh;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+}
+
+.noSkillsSection::before {
+  display: none;
 }
 
 .noSkillsContainer {
   text-align: center;
-  max-width: 600px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
-  padding: 3rem 3rem;
-  backdrop-filter: blur(10px);
+  max-width: 500px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 2rem;
+  backdrop-filter: none;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+  z-index: 1;
+}
+.noSkillsContainer::before {
+  display: none;
 }
 
-.noSkillsContainer::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #3b82f6, #1d4ed8, #7c3aed);
-  border-radius: 24px 24px 0 0;
+.noSkillsSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem 2rem;
+  min-height: 400px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
 }
 
 .noSkillsIcon {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #3b82f6, #7c3aed);
-  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 2rem;
-  animation: float 3s ease-in-out infinite;
+  animation: none;
+  color: #60a5fa;
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  justify-content: center;
+  position: relative;
+}
+.noSkillsIcon::before {
+  display: none;
 }
 
 .iconEmoji {
-  font-size: 2rem;
+  font-size: 2.5rem;
+  color: white;
 }
 
 .noSkillsTitle {
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 600;
   color: #ffffff;
   margin-bottom: 1rem;
-  background: linear-gradient(135deg, #ffffff, #e2e8f0);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .noSkillsText {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #94a3b8;
   line-height: 1.6;
-  margin-bottom: 3rem;
   max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-bottom: 2rem;
 }
 
 .noSkillsFeatures {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
+  display: none;
+}
+
+/* Add these new keyframe animations: */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.refreshButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #3b82f6;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  margin-top: 25px;
+  margin-left: auto;
+  margin-right: auto;
+  width: fit-content;
+}
+
+.refreshButton:hover {
+  background: rgba(59, 130, 246, 0.3);
+  border-color: rgba(59, 130, 246, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+.refreshButton:hover::before {
+  left: 100%;
+}
+
+.refreshButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(59, 130, 246, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.refreshButton:active {
+  transform: translateY(0px);
+}
+
+.refreshIcon {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s ease;
+}
+
+.refreshButton:hover .refreshIcon {
+  transform: rotate(180deg);
 }
 
 .featureItem {
@@ -686,4 +769,11 @@
   .featureItem:hover {
     transform: none;
   }
+}
+
+.calendarIcon {
+  color: #60a5fa;
+  width: 32px;
+  height: 32px;
+  stroke-width: 1.5;
 }

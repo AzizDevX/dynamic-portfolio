@@ -1,5 +1,5 @@
-/* CV Page CSS Module */
-.pageContainer {
+/* CV Page Styles */
+.cvPage {
   min-height: 100vh;
   background: linear-gradient(135deg, #0f1419 0%, #1a2332 50%, #0f1419 100%);
   color: #ffffff;
@@ -7,31 +7,32 @@
     sans-serif;
 }
 
-.mainContent {
-  padding-top: 2rem;
-  padding-bottom: 4rem;
+.fullscreenMode {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background: #0f172a;
 }
 
-.container {
-  max-width: 1200px;
+/* Main Container */
+.cvContainer {
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 2rem;
+  min-height: calc(100vh - 200px);
 }
 
-/* Header Section */
-.headerSection {
+/* Expertise Section */
+.expertiseSection {
   text-align: center;
-  margin-bottom: 3rem;
-  padding-top: 3rem;
+  padding: 2rem 0;
 }
 
-.headerContent {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.greeting {
-  margin-top: 25px;
+.expertiseHeader {
+  margin-top: 40px;
   display: inline-block;
   background: rgba(59, 130, 246, 0.1);
   color: #3b82f6;
@@ -43,427 +44,226 @@
   border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
-.title {
+.expertiseTitle {
   font-size: 3.5rem;
-  font-weight: 700;
+  font-weight: 800;
   margin-bottom: 1.5rem;
-  background: linear-gradient(135deg, #ffffff, #e2e8f0);
+  background: linear-gradient(135deg, #f8fafc, #cbd5e1);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   line-height: 1.2;
 }
 
-.subtitle {
-  font-size: 1.2rem;
+.expertiseDescription {
+  font-size: 1.25rem;
   color: #94a3b8;
-  line-height: 1.6;
-  max-width: 500px;
+  max-width: 600px;
   margin: 0 auto;
+  line-height: 1.6;
+  font-weight: 400;
 }
 
-/* CV Section */
-.cvSection {
-  margin-bottom: 4rem;
+/* Content Layout */
+.contentLayout {
+  display: grid;
+  gap: 2rem;
+  align-items: start;
 }
 
-.cvContainer {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
+/* PDF Viewer Section */
+.pdfViewerSection {
+  background: rgba(30, 41, 59, 0.3);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 1rem;
   overflow: hidden;
   backdrop-filter: blur(10px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-}
-
-/* Controls Bar */
-.controlsBar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem 2rem;
-  background: rgba(15, 23, 42, 0.8);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.pageControls,
-.viewControls,
-.actionControls {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.controlButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  color: #ffffff;
-  cursor: pointer;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
-.controlButton:hover:not(.disabled) {
-  background: rgba(59, 130, 246, 0.2);
+.pdfViewerSection:hover {
   border-color: rgba(59, 130, 246, 0.4);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
 }
 
-.controlButton.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+/* Controls */
+.pdfControlsBar {
+  background: rgba(15, 23, 42, 0.9);
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.pageInfo,
-.zoomInfo {
-  color: #94a3b8;
-  font-size: 0.9rem;
-  font-weight: 500;
-  min-width: 80px;
-  text-align: center;
-}
-
-.downloadButton {
+.controlsGroup {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, #3b82f6, #06b6d4);
-  color: #ffffff;
-  border: none;
-  border-radius: 12px;
-  padding: 0.75rem 1.5rem;
-  font-weight: 600;
-  font-size: 0.9rem;
+}
+
+.controlButton {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  color: #60a5fa;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.5rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-}
-
-.downloadButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
-}
-
-/* PDF Viewer */
-.pdfViewer {
-  padding: 2rem;
-  background: rgba(255, 255, 255, 0.02);
-  min-height: 600px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-.pdfContainer {
-  max-width: 100%;
-  overflow: auto;
-  border-radius: 12px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  background: #ffffff;
-}
-
-.pdfCanvas {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  border-radius: 12px;
-}
-
-/* Loading States */
-.loadingContainer {
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
-  gap: 1.5rem;
 }
 
-.loader {
-  width: 50px;
-  height: 50px;
-  border: 4px solid rgba(59, 130, 246, 0.3);
-  border-top: 4px solid #3b82f6;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.loadingText {
-  color: #94a3b8;
-  font-size: 1.2rem;
-  font-weight: 500;
-}
-
-/* Error States */
-.errorContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-  text-align: center;
-  gap: 1.5rem;
-  padding: 2rem;
-}
-
-.errorIcon {
-  color: #ef4444;
-  margin-bottom: 1rem;
-}
-
-.errorTitle {
-  font-size: 2.5rem;
+.downloadButton {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border: none;
+  color: white;
+  padding: 0.6rem 1.1rem;
+  border-radius: 0.5rem;
   font-weight: 600;
-  color: #ef4444;
-  margin-bottom: 0.5rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.errorMessage {
-  color: #94a3b8;
-  font-size: 1.1rem;
-  line-height: 1.6;
-  margin-bottom: 2rem;
+/* PDF Display area + wrapper */
+.pdfDisplayArea {
+  position: relative;
+  height: 85vh;
+  min-height: 520px;
+  background: #1e293b;
+  overflow: hidden;
+}
+
+.pdfWrapper {
+  width: 100%;
+  height: 100%;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Container for iframe */
+.pdfContainer {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: #0b1220;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.pdfIframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  background: #fff;
+}
+
+.cvLoading,
+.cvError,
+.cvNotFound {
+  min-height: calc(100vh - 200px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.loadingContainer,
+.errorContainer,
+.notFoundContainer {
+  text-align: center;
   max-width: 500px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 1rem;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
 }
 
 .retryButton {
   background: linear-gradient(135deg, #3b82f6, #1d4ed8);
   border: none;
-  padding: 1rem 2rem;
-  border-radius: 25px;
   color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
   font-weight: 600;
-  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  transition: all 0.2s ease;
+  margin-top: 1rem;
 }
 
-.retryButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+/* Floating fullscreen button for mobile */
+.mobileControls {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1000;
 }
 
-/* No CV States */
-.noCvContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-  text-align: center;
-  gap: 1.5rem;
-  padding: 2rem;
+.floatingRipple {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
 }
-
 .noCvIcon {
-  color: #94a3b8;
-  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #3b82f6;
+  margin: 10px;
 }
-
-.noCvTitle {
-  font-size: 2.5rem;
-  font-weight: 600;
-  color: #ffffff;
-  margin-bottom: 0.5rem;
-}
-
-.noCvMessage {
-  color: #94a3b8;
-  font-size: 1.1rem;
-  line-height: 1.6;
-  max-width: 500px;
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .container {
-    padding: 0 1.5rem;
+/* Responsive */
+@media (max-width: 768px) {
+  .pdfDisplayArea {
+    height: 70vh;
+    min-height: 360px;
   }
-
-  .controlsBar {
+  .pdfControlsBar {
+    padding: 0.75rem;
     flex-direction: column;
     align-items: stretch;
-    gap: 1rem;
+    gap: 0.5rem;
   }
-
-  .pageControls,
-  .viewControls,
-  .actionControls {
+  .controlsGroup {
     justify-content: center;
   }
+  .downloadButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
 
-  .pdfViewer {
-    padding: 1.5rem;
+/* Responsive adjustments for pdfWrapper */
+@media (max-width: 1200px) {
+  .pdfWrapper {
+    padding: 1rem;
   }
 }
 
 @media (max-width: 768px) {
-  .container {
-    padding: 0 1rem;
-  }
-
-  .title {
-    font-size: 2.5rem;
-  }
-
-  .subtitle {
-    font-size: 1rem;
-  }
-
-  .controlsBar {
-    padding: 1rem;
-  }
-
-  .controlButton {
-    width: 40px;
-    height: 40px;
-  }
-
-  .downloadButton {
-    padding: 0.75rem 1rem;
-    font-size: 0.85rem;
-  }
-
-  .pdfViewer {
-    padding: 1rem;
-  }
-
-  .pageInfo,
-  .zoomInfo {
-    font-size: 0.8rem;
-    min-width: 60px;
+  .pdfWrapper {
+    padding: 0.75rem;
   }
 }
 
 @media (max-width: 480px) {
-  .headerSection {
-    padding: 2rem 0;
-    margin-bottom: 2rem;
-  }
-
-  .title {
-    font-size: 2rem;
-  }
-
-  .controlsBar {
-    padding: 0.75rem;
-    gap: 0.75rem;
-  }
-
-  .pageControls,
-  .viewControls {
-    gap: 0.5rem;
-  }
-
-  .controlButton {
-    width: 36px;
-    height: 36px;
-  }
-
-  .downloadButton {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8rem;
-  }
-
-  .downloadButton span {
-    display: none;
-  }
-
-  .pdfViewer {
-    padding: 0.75rem;
-  }
-
-  .errorTitle,
-  .noCvTitle {
-    font-size: 2rem;
-  }
-
-  .errorMessage,
-  .noCvMessage {
-    font-size: 1rem;
+  .pdfWrapper {
+    padding: 0.5rem;
   }
 }
-
-/* Animation for smooth transitions */
-.pdfContainer {
-  transition: all 0.3s ease;
-}
-
-.controlButton,
-.downloadButton {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Focus states for accessibility */
-.controlButton:focus,
-.downloadButton:focus,
-.retryButton:focus {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-
-/* Hover effects for better UX */
-.cvContainer:hover {
-  border-color: rgba(59, 130, 246, 0.2);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
-}
-
-/* Loading animation for PDF canvas */
-.pdfCanvas {
-  transition: opacity 0.3s ease;
-}
-
-.pdfCanvas.loading {
-  opacity: 0.7;
-}
-
-/* Accessibility improvements */
-@media (prefers-reduced-motion: reduce) {
-  .controlButton:hover,
-  .downloadButton:hover,
-  .retryButton:hover {
-    transform: none;
-  }
-
-  .loader {
-    animation: none;
-  }
-}
-
-/* Print styles */
-@media print {
-  .controlsBar,
-  .headerSection {
-    display: none;
-  }
-
-  .pdfViewer {
-    padding: 0;
-  }
-
-  .pageContainer {
-    background: white;
-    color: black;
-  }
-}
-

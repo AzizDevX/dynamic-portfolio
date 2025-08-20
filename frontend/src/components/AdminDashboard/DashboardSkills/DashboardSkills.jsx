@@ -4,7 +4,7 @@ import { verifyJWTToken } from "../utils/authUtils";
 import { Plus, Edit3, Trash2, Save, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Backend_Root_Url } from "../../../config/AdminUrl.json";
+import { Backend_Root_Url } from "../../../config/AdminUrl.js";
 
 const DashboardSkills = () => {
   //Authentication check

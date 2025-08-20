@@ -159,7 +159,6 @@
   gap: var(--spacing-sm);
 }
 
-/* Enhanced Image Not Available Styling */
 .imageNotAvailable {
   display: flex;
   flex-direction: column;
@@ -241,8 +240,6 @@
   background-color: var(--bg-hover);
   color: var(--text-secondary);
 }
-
-/* Enhanced Status Badge Styles*/
 
 .statusCompleted {
   background: linear-gradient(
@@ -491,13 +488,12 @@
   }
 }
 
-/* Enhanced Tech Stack Styling */
 .techStack {
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-sm);
   margin-bottom: var(--spacing-lg);
-  min-height: 0; /* Allow the container to collapse when empty */
+  min-height: 0;
 }
 
 .techTag {
@@ -544,7 +540,6 @@
   color: var(--accent-primary-hover);
 }
 
-/* Enhanced Live URL Button */
 .liveUrlBtn {
   background: linear-gradient(
     135deg,
@@ -825,7 +820,6 @@
   margin-top: var(--spacing-xs);
 }
 
-/* Enhanced Featured Toggle */
 .featuredToggle {
   margin-top: var(--spacing-sm);
 }
@@ -1287,7 +1281,6 @@
   line-height: 1.5;
 }
 
-/* Enhanced Description Display in Project Cards */
 .description {
   color: var(--text-muted);
   font-size: 0.85rem;
@@ -1362,7 +1355,6 @@
   transform: scale(1.1);
 }
 
-/* Enhanced Image Preview */
 .imagePreview {
   position: relative;
   width: 120px;
@@ -1442,13 +1434,11 @@
   cursor: not-allowed;
 }
 
-/* Enhanced focus states */
 .richTextContainer:focus-within {
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Enhanced template menu animation */
 .templateMenu::before {
   content: "";
   position: absolute;
@@ -1554,7 +1544,6 @@
   line-height: 1.5;
 }
 
-/* Enhanced Description Display in Project Cards */
 .description {
   color: var(--text-muted);
   font-size: 0.85rem;
@@ -1629,7 +1618,6 @@
   transform: scale(1.1);
 }
 
-/* Enhanced Image Preview */
 .imagePreview {
   position: relative;
   width: 120px;
@@ -1675,13 +1663,11 @@
   cursor: not-allowed;
 }
 
-/* Enhanced focus states */
 .richTextContainer:focus-within {
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Enhanced Description Formatting - Consistent with DashboardProjects */
 .projectDescription {
   color: var(--text-primary);
   font-size: 1rem;
@@ -1730,7 +1716,6 @@
   line-height: 1.7;
 }
 
-/* Enhanced Modal Responsiveness */
 @media (max-width: 768px) {
   .modalContainer {
     width: 95vw;

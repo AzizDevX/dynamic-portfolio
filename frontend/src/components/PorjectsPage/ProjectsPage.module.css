@@ -799,8 +799,6 @@
   }
 }
 
-/* Add these new status styles to your existing status badge styles */
-
 /* Empty State Styles */
 .emptyState {
   display: flex;

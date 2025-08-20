@@ -9,7 +9,7 @@ import styles from "./DashboardProjects.module.css";
 import { verifyJWTToken } from "../utils/authUtils";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Backend_Root_Url } from "../../../config/AdminUrl.json";
+import { Backend_Root_Url } from "../../../config/AdminUrl.js";
 
 import {
   Plus,
@@ -56,7 +56,7 @@ const DashboardProjects = () => {
   const [expandedDescriptions, setExpandedDescriptions] = useState({});
   const textareaRef = useRef(null);
 
-  // Project status options - memoized to prevent re-creation
+  // Project status options
   const projectStatusOptions = useMemo(
     () => [
       "completed",
@@ -76,7 +76,6 @@ const DashboardProjects = () => {
     []
   );
 
-  // Helper function to get status class name
   const getStatusClassName = useCallback((status) => {
     if (!status) return styles.statusDefault;
 
@@ -107,7 +106,6 @@ const DashboardProjects = () => {
     );
   }, []);
 
-  // Enhanced helper function to convert markdown-like text to HTML - unified across all components
   const formatDescription = useCallback((text, isFullView = false) => {
     if (!text) return "";
 
@@ -139,7 +137,6 @@ const DashboardProjects = () => {
       .replace(/<\/(ul|h[23])><br\/>/g, "</$1>")
       .replace(/<br\/><(h[23]|ul)>/g, "<$1>");
 
-    // ✅ Truncate but keep HTML structure when not full view
     if (!isFullView) {
       const tempDiv = document.createElement("div");
       tempDiv.innerHTML = formattedText;
@@ -229,7 +226,6 @@ const DashboardProjects = () => {
       setTimeout(() => {
         textarea.focus();
         if (smartMode && !selectedText) {
-          // Select the placeholder text for easy replacement
           const placeholderLength =
             replacement.length - before.length - after.length;
           textarea.setSelectionRange(
@@ -356,7 +352,6 @@ Available for iOS and Android platforms.`,
 
     setTimeout(() => {
       textarea.focus();
-      // Select "Project Name" for easy replacement
       const projectNameStart = start + template_text.indexOf("Project Name");
       const projectNameEnd = projectNameStart + "Project Name".length;
       textarea.setSelectionRange(projectNameStart, projectNameEnd);
@@ -398,11 +393,11 @@ Available for iOS and Android platforms.`,
 
       setProjects(mappedProjects);
       setError(null);
-      setImageErrors({}); // Reset image errors when loading new projects
+      setImageErrors({});
     } catch (err) {
       if (err.response && err.response.status === 404) {
-        setProjects([]); // No projects found, set to empty array
-        setError(null); // Clear any previous error
+        setProjects([]);
+        setError(null);
       } else {
         setError("Failed to load projects");
         console.error("Error loading projects:", err);
@@ -418,6 +413,16 @@ Available for iOS and Android platforms.`,
       ...prev,
       [projectId]: true,
     }));
+  }, []);
+
+  // Helper function to check if image URL is valid and not empty
+  const isValidImageUrl = useCallback((imageUrl) => {
+    return (
+      imageUrl &&
+      imageUrl.trim() !== "" &&
+      imageUrl !== "null" &&
+      imageUrl !== "undefined"
+    );
   }, []);
 
   // Toggle description expansion
@@ -507,12 +512,12 @@ Available for iOS and Android platforms.`,
       });
     } else {
       setFormData({
-        projectStatus: "", // No default status - show placeholder
+        projectStatus: "",
       });
     }
 
     setFormErrors({});
-    setIsPreviewMode(false); // Reset preview mode
+    setIsPreviewMode(false);
   }, []);
 
   const closeSlidePanel = useCallback(() => {
@@ -606,13 +611,43 @@ Available for iOS and Android platforms.`,
     reader.readAsDataURL(file);
   }, []);
 
-  const clearImage = useCallback(() => {
-    setFormData((prev) => ({
-      ...prev,
-      imageUrl: "",
-      imageFile: null,
-    }));
-  }, []);
+  const clearImage = useCallback(
+    async (e) => {
+      e.stopPropagation();
+
+      const projectId = formData.projectId;
+
+      if (projectId) {
+        try {
+          setLoading(true);
+          await axios.put(
+            `${Backend_Root_Url}/api/projects/image/remove/${projectId}`,
+            {},
+            { withCredentials: true }
+          );
+          setFormData((prev) => ({
+            ...prev,
+            imageUrl: "",
+            imageFile: null,
+          }));
+          await loadProjects();
+          setError(null);
+        } catch (err) {
+          setError("Failed to remove project image. Please try again.");
+          console.error("Error removing project image:", err);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          imageUrl: "",
+          imageFile: null,
+        }));
+      }
+    },
+    [formData.projectId, loadProjects]
+  );
 
   // CRUD operations
   const handleSave = useCallback(async () => {
@@ -690,17 +725,14 @@ Available for iOS and Android platforms.`,
     }
   }, [validateForm, slidePanel, formData, loadProjects, closeSlidePanel]);
 
-  // Fixed featured toggle - reload projects after update
   const toggleFeatured = useCallback(
     async (projectId) => {
       const project = projects.find((p) => p.projectId === projectId);
       if (!project || featuredLoading[projectId]) return;
 
       try {
-        // Set loading state for this specific project
         setFeaturedLoading((prev) => ({ ...prev, [projectId]: true }));
 
-        // Send only the Featured field to backend - using JSON instead of FormData
         const updateData = {
           Featured: !project.featured,
         };
@@ -1029,16 +1061,23 @@ Try selecting text and clicking format buttons! ✨`}
                   onDrop={handleDrop}
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  {formData.imageUrl ? (
+                  {isValidImageUrl(formData.imageUrl) ? (
                     <div className={styles.imagePreview}>
-                      <img src={formData.imageUrl} alt="Project preview" />
+                      <img
+                        src={formData.imageUrl}
+                        alt="Project preview"
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                          setFormData((prev) => ({
+                            ...prev,
+                            imageUrl: "",
+                          }));
+                        }}
+                      />
                       <button
                         type="button"
                         className={styles.clearImageBtn}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          clearImage();
-                        }}
+                        onClick={clearImage}
                       >
                         <X size={14} />
                       </button>

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../Navbar/Navbar";
 import Footer from "../Footer/Footer";
+import ProjectDetailModal from "../PorjectsPage/ProjectDetailModal";
 import "../../App.css";
-import { Backend_Root_Url } from "../../config/AdminUrl.json";
+import { Backend_Root_Url } from "../../config/AdminUrl.js";
 import {
   ArrowRight,
   Download,
@@ -12,6 +13,7 @@ import {
   Users,
   Star,
   ExternalLink,
+  ImageOff,
 } from "lucide-react";
 import styles from "./Home.module.css";
 
@@ -20,6 +22,9 @@ const Home = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const [MainHomeData, setMainHomeData] = useState(null);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [cvData, setCvData] = useState(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     const fetchHomeData = async () => {
@@ -33,7 +38,17 @@ const Home = () => {
       }
     };
 
+    const fetchCvData = async () => {
+      try {
+        const response = await axios.get(`${Backend_Root_Url}/api/show/cv/`);
+        setCvData(response.data);
+      } catch (error) {
+        console.error("Error fetching CV data:", error);
+      }
+    };
+
     fetchHomeData();
+    fetchCvData();
   }, []);
 
   const GetRoles = MainHomeData?.MainRoles
@@ -67,6 +82,48 @@ const Home = () => {
 
     return () => clearTimeout(timeout);
   }, [typedText, currentIndex, isDeleting, GetRoles]);
+
+  const handleDownloadCV = async () => {
+    if (cvData?.FindCv?.Cv) {
+      setIsDownloading(true);
+      try {
+        const cvUrl = `${Backend_Root_Url}/uploads/mycv/${cvData.FindCv.Cv}`;
+
+        const link = document.createElement("a");
+        link.download = `${MainHomeData?.DisplayName || "CV"}.pdf`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        const response = await fetch(cvUrl);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        link.href = url;
+        link.download = `${MainHomeData?.DisplayName || "CV"}.pdf`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error("Error downloading CV:", error);
+        window.open(
+          `${Backend_Root_Url}/uploads/mycv/${cvData.FindCv.Cv}`,
+          "_blank"
+        );
+      } finally {
+        setIsDownloading(false);
+      }
+    } else {
+      console.error("CV not available");
+    }
+  };
+
+  const handleProjectView = (project) => {
+    setSelectedProject(project);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedProject(null);
+  };
 
   const statsArray = MainHomeData?.Stats || [
     { StatsNumber: "NoData", StatsLabel: "Backend Issue" },
@@ -108,27 +165,25 @@ const Home = () => {
     {
       _id: 1,
       Title: "E-Commerce Platform",
-      Description:
+      ShortDescription:
         "A full-stack e-commerce solution with React, Node.js, and MongoDB.",
       Image: "/api/placeholder/400/250",
       Project_technologies: ["React", "Node.js", "MongoDB", "Stripe"],
       ProjectLink: "#",
     },
-
     {
       _id: 2,
       Title: "E-Commerce Platform",
-      Description:
+      ShortDescription:
         "A full-stack e-commerce solution with React, Node.js, and MongoDB.",
       Image: "/api/placeholder/400/250",
       Project_technologies: ["React", "Node.js", "MongoDB", "Stripe"],
       ProjectLink: "#",
     },
-
     {
       _id: 3,
       Title: "E-Commerce Platform",
-      Description:
+      ShortDescription:
         "A full-stack e-commerce solution with React, Node.js, and MongoDB.",
       Image: "/api/placeholder/400/250",
       Project_technologies: ["React", "Node.js", "MongoDB", "Stripe"],
@@ -181,10 +236,29 @@ const Home = () => {
                   View My Work
                   <ArrowRight size={20} />
                 </a>
-                <a href="contact" className={styles.secondaryButton}>
-                  <Download size={20} />
-                  Download CV
-                </a>
+
+                {cvData?.FindCv?.Cv ? (
+                  <button
+                    onClick={handleDownloadCV}
+                    className={styles.secondaryButton}
+                    disabled={isDownloading}
+                  >
+                    <Download
+                      size={20}
+                      className={isDownloading ? styles.spinning : ""}
+                    />
+                    {isDownloading ? "Downloading..." : "Download CV"}
+                  </button>
+                ) : (
+                  <button
+                    className={styles.secondaryButton}
+                    disabled
+                    style={{ opacity: 0.6, cursor: "not-allowed" }}
+                  >
+                    <Download size={20} />
+                    Resume Avalible Soon
+                  </button>
+                )}
               </div>
 
               <div className={styles.socialProof}>
@@ -306,25 +380,73 @@ const Home = () => {
             {featuredProjects.map((project) => (
               <div key={project._id} className={styles.projectCard}>
                 <div className={styles.projectImage}>
-                  <div className={styles.projectImagePlaceholder}>
-                    <Code size={48} />
-                  </div>
+                  {project.Image &&
+                  project.Image !== "/api/placeholder/400/250" &&
+                  project.Image !== "Nothing" ? (
+                    <img
+                      src={`${Backend_Root_Url}/uploads/projectsimg/${project.Image}`}
+                      alt={project.Title}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        objectPosition: "center",
+                      }}
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                        e.target.parentNode.classList.add(
+                          styles.imagePlaceholderActive
+                        );
+                      }}
+                    />
+                  ) : (
+                    <div className={styles.imagePlaceholder}>
+                      <div className={styles.placeholderIcon}>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="48"
+                          height="48"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <line x1="2" x2="22" y1="2" y2="22" />
+                          <path d="M10.41 10.41a2 2 0 1 1-2.83-2.83" />
+                          <line x1="13.5" x2="6" y1="13.5" y2="21" />
+                          <line x1="18" x2="21" y1="12" y2="15" />
+                          <path
+                            d="M3.59 3.59A1.99 1.99 0 0 0 3 5v14a2 2 0 0 0 2 2h14c.55 0
+            1.052-.22 1.41-.59"
+                          />
+                          <path d="M21 15V5a2 2 0 0 0-2-2H9" />
+                        </svg>
+                      </div>
+                    </div>
+                  )}
                   <div className={styles.projectOverlay}>
                     <div className={styles.projectActions}>
-                      <a
-                        target="_blank"
-                        href={project.ProjectLink}
+                      <button
+                        onClick={() => handleProjectView(project)}
                         className={styles.projectAction}
+                        title="View Details"
                       >
                         <Eye size={20} />
-                      </a>
-                      <a
-                        target="_blank"
-                        href={project.ProjectLink}
-                        className={styles.projectAction}
-                      >
-                        <ExternalLink size={20} />
-                      </a>
+                      </button>
+                      {project.ProjectLiveUrl &&
+                        project.ProjectLiveUrl.trim() !== "" && (
+                          <a
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            href={project.ProjectLiveUrl}
+                            className={styles.projectAction}
+                            title="Live Demo"
+                          >
+                            <ExternalLink size={20} />
+                          </a>
+                        )}
                     </div>
                   </div>
                 </div>
@@ -332,7 +454,7 @@ const Home = () => {
                 <div className={styles.projectContent}>
                   <h3 className={styles.projectTitle}>{project.Title}</h3>
                   <p className={styles.projectDescription}>
-                    {project.Description}
+                    {project.ShortDescription}
                   </p>
 
                   <div className={styles.projectTech}>
@@ -355,6 +477,30 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Project Detail Modal */}
+      {selectedProject && (
+        <ProjectDetailModal
+          project={{
+            ...selectedProject,
+            title: selectedProject.Title,
+            shortDescription: selectedProject.ShortDescription,
+            description:
+              selectedProject.Description || selectedProject.ShortDescription,
+            image:
+              selectedProject.Image &&
+              selectedProject.Image !== "/api/placeholder/400/250"
+                ? `${Backend_Root_Url}/uploads/projectsimg/${selectedProject.Image}`
+                : null,
+            technologies: selectedProject.Project_technologies || [],
+            status: selectedProject.Status,
+            demoUrl: selectedProject.ProjectLiveUrl,
+            featured: selectedProject.Featured || false,
+          }}
+          onClose={handleCloseModal}
+        />
+      )}
+
       <Footer />
     </div>
   );

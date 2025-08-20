@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { Eye, EyeOff, Lock, User, AlertCircle } from "lucide-react";
 import styles from "./auth.module.css";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { Frontend_Admin_Url } from "../../config/AdminUrl.json";
+import { Frontend_Admin_Url } from "../../config/AdminUrl.js";
 import { verifyJWTToken } from "../AdminDashboard/utils/authUtils";
 import { useEffect } from "react";
+import "../../../src/App.css";
 
 const AdminDashboard = "/" + Frontend_Admin_Url;
 const AuthPage = () => {
@@ -16,17 +16,17 @@ const AuthPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const navigate = useNavigate();
+  const AdminDashboardHref = [{ href: `${AdminDashboard}/dashboard` }];
   //Authentication check
   useEffect(() => {
     const checkAuth = async () => {
       const isValid = await verifyJWTToken();
       if (isValid === true) {
-        navigate(`${AdminDashboard}/dashboard`);
+        window.location.href = AdminDashboardHref[0].href;
       }
     };
     checkAuth();
-  }, [navigate]);
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -34,7 +34,6 @@ const AuthPage = () => {
       ...prev,
       [name]: value,
     }));
-    // Clear error when user starts typing
     if (errorMessage) {
       setErrorMessage("");
     }
@@ -45,7 +44,6 @@ const AuthPage = () => {
     setErrorMessage("");
 
     try {
-      // Your backend API call with axios
       const response = await axios.post(
         "http://localhost:5000/auth/admin",
         {
@@ -53,26 +51,20 @@ const AuthPage = () => {
           password: formData.password,
         },
         {
-          withCredentials: true, // Include credentials for cookie handling
+          withCredentials: true,
         }
       );
 
-      // Handle successful login
       console.log("Login successful");
-      // Redirect or handle success state here
-      navigate(`${AdminDashboard}/dashboard`); // Navigate here directly after success
+      window.location.href = AdminDashboardHref[0].href;
     } catch (error) {
-      // axios error handling - check if it's a response error
       if (error.response) {
-        // Server responded with error status
         const errorMsg =
           error.response.data?.message || "Authentication failed";
         setErrorMessage(errorMsg);
       } else if (error.request) {
-        // Request was made but no response received
         setErrorMessage("Network error. Please check your connection.");
       } else {
-        // Something else happened
         setErrorMessage(
           error.message || "An error occurred during authentication"
         );

@@ -24,7 +24,6 @@ const ProjectDetailModal = ({ project, onClose }) => {
     }
   };
 
-  // Enhanced helper function to convert markdown-like text to HTML - unified with DashboardProjects
   const formatDescription = useCallback((text) => {
     if (!text) return "";
 
@@ -59,7 +58,6 @@ const ProjectDetailModal = ({ project, onClose }) => {
     return formattedText;
   }, []);
 
-  // Helper function to get status class name (consistent with DashboardProjects)
   const getStatusClassName = useCallback((status) => {
     if (!status) return styles.statusDefault;
 
@@ -111,7 +109,6 @@ const ProjectDetailModal = ({ project, onClose }) => {
         </button>
 
         <div className={styles.modalContent}>
-          {/* Image Section - Enhanced with better layout */}
           {project.image ? (
             <div className={styles.projectImageContainer}>
               <img
@@ -123,7 +120,6 @@ const ProjectDetailModal = ({ project, onClose }) => {
                   e.target.parentNode.classList.add(styles.imageError);
                 }}
               />
-              {/* Featured Badge - consistent with main page */}
               {project.featured && (
                 <div className={styles.featuredBadge}>
                   <svg
@@ -142,21 +138,25 @@ const ProjectDetailModal = ({ project, onClose }) => {
             <div className={styles.projectHeaderNoImage}>
               <div className={styles.projectIconPlaceholder}>
                 <svg
-                  width="48"
-                  height="48"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-image-off-icon lucide-image-off"
                 >
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <polyline points="21,15 16,10 5,21" />
+                  <line x1="2" x2="22" y1="2" y2="22" />
+                  <path d="M10.41 10.41a2 2 0 1 1-2.83-2.83" />
+                  <line x1="13.5" x2="6" y1="13.5" y2="21" />
+                  <line x1="18" x2="21" y1="12" y2="15" />
+                  <path d="M3.59 3.59A1.99 1.99 0 0 0 3 5v14a2 2 0 0 0 2 2h14c.55 0 1.052-.22 1.41-.59" />
+                  <path d="M21 15V5a2 2 0 0 0-2-2H9" />
                 </svg>
               </div>
-              {/* Featured Badge for no-image case */}
               {project.featured && (
                 <div className={styles.featuredBadgeNoImage}>
                   <svg
@@ -179,7 +179,6 @@ const ProjectDetailModal = ({ project, onClose }) => {
                 <div className={styles.titleStatusLeft}>
                   <h1 className={styles.projectTitle}>{project.title}</h1>
 
-                  {/* Short Description - consistent with main page */}
                   {project.shortDescription && (
                     <p className={styles.shortDescription}>
                       {project.shortDescription}
@@ -232,7 +231,6 @@ const ProjectDetailModal = ({ project, onClose }) => {
               </div>
             </div>
 
-            {/* Full Description - Enhanced to show all content with consistent formatting */}
             {project.description && (
               <div className={styles.descriptionSection}>
                 <div
@@ -244,7 +242,6 @@ const ProjectDetailModal = ({ project, onClose }) => {
               </div>
             )}
 
-            {/* Technologies Section - Enhanced styling consistent with main page */}
             {project.technologies && project.technologies.length > 0 && (
               <div className={styles.tagsSection}>
                 <h3 className={styles.sectionTitle}>Technologies Used</h3>

@@ -5,7 +5,8 @@ import ProjectDetailModal from "./ProjectDetailModal";
 import styles from "./ProjectsPage.module.css";
 import { Eye, ExternalLink, ImageOff } from "lucide-react";
 import axios from "axios";
-import { Backend_Root_Url } from "../../config/AdminUrl.json";
+import { Backend_Root_Url } from "../../config/AdminUrl.js";
+import "../../App.css";
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState([]);
@@ -38,12 +39,6 @@ const ProjectsPage = () => {
           category: "Project", // Default category since not provided by API
           status: project.Porject_Status,
           demoUrl: project.ProjectLiveUrl || "",
-          githubUrl: "", // Not provided by API
-          features: [], // Not provided by API
-          challenges: "", // Not provided by API
-          solution: "", // Not provided by API
-          duration: "", // Not provided by API
-          teamSize: "", // Not provided by API
           featured: project.Featured,
         }));
 

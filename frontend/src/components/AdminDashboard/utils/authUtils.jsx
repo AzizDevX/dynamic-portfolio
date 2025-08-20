@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Backend_Root_Url } from "../../../config/AdminUrl.json";
+import { Backend_Root_Url } from "../../../config/AdminUrl.js";
 
 export async function verifyJWTToken() {
   try {
@@ -24,4 +24,32 @@ export async function verifyJWTToken() {
     }
   }
 }
-export function logout() {}
+export async function logout() {
+  try {
+    const response = await axios.post(
+      `${Backend_Root_Url}/auth/logout`,
+      {},
+      {
+        withCredentials: true,
+      }
+    );
+
+    if (response.status === 200) {
+      console.log("Logout successful");
+      window.location.href = "/";
+      return true;
+    } else {
+      console.log("Logout failed");
+      return false;
+    }
+  } catch (err) {
+    if (err.response?.status === 401) {
+      console.log("Already logged out or unauthorized");
+      window.location.href = "/";
+      return false;
+    } else {
+      console.log("err - network or server error during logout");
+      return false;
+    }
+  }
+}

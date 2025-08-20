@@ -10,6 +10,10 @@ import DashboardCV from "../DashboardCV/DashboardCV";
 import DashboardFooter from "../DashboardFooter/DashboardFooter";
 import { Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Backend_Root_Url } from "../../../config/AdminUrl.js";
+import "../../../../src/App.css";
+
+import axios from "axios";
 
 const Dashboard = () => {
   // Authentication state
@@ -18,10 +22,54 @@ const Dashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // User data state
+  const [userData, setUserData] = useState(null);
+
   // Navigation state
   const [activeSection, setActiveSection] = useState("home");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Function to generate initials from display name
+  const generateInitials = (displayName) => {
+    if (!displayName) return "UN"; // Unknown User
+
+    const words = displayName.trim().split(/\s+/);
+
+    if (words.length === 1) {
+      // Single word: take first 2 characters
+      return words[0].substring(0, 2).toUpperCase();
+    } else {
+      // Multiple words: take first letter of first 2 words
+      return words
+        .slice(0, 2)
+        .map((word) => word.charAt(0).toUpperCase())
+        .join("");
+    }
+  };
+
+  // Fetch user data
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get(
+          `${Backend_Root_Url}/api/home/main/data`,
+          {
+            withCredentials: true,
+          }
+        );
+        setUserData(response.data);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        setUserData(null);
+      }
+    };
+
+    if (isAuthenticated) {
+      fetchUserData();
+    }
+  }, [isAuthenticated]);
+
   // Authentication check
   useEffect(() => {
     const checkAuth = async () => {
@@ -85,8 +133,28 @@ const Dashboard = () => {
       </div>
       <div className={styles.topBarRight}>
         <div className={styles.userProfile}>
-          <div className={styles.userAvatar}>JD</div>
-          <span className={styles.userName}>John Doe</span>
+          <div className={styles.userAvatar}>
+            {userData?.HomeLogo ? (
+              <img
+                src={`${Backend_Root_Url}/uploads/logo/${userData.HomeLogo}`}
+                alt="User Avatar"
+                className={styles.avatarImage}
+                onError={(e) => {
+                  e.target.style.display = "none";
+                  e.target.nextSibling.style.display = "flex";
+                }}
+              />
+            ) : null}
+            <div
+              className={styles.avatarInitials}
+              style={{ display: userData?.HomeLogo ? "none" : "flex" }}
+            >
+              {generateInitials(userData?.DisplayName)}
+            </div>
+          </div>
+          <span className={styles.userName}>
+            {userData?.DisplayName || "Unknown User"}
+          </span>
         </div>
       </div>
     </div>

@@ -405,7 +405,6 @@
     height: 40px;
   }
 
-  /* Ensure all content is centered on very small screens */
   .footerContent > * {
     text-align: center;
   }

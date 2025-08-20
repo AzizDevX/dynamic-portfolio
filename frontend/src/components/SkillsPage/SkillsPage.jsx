@@ -3,7 +3,8 @@ import Navbar from "../Navbar/Navbar";
 import Footer from "../Footer/Footer";
 import styles from "./SkillsPage.module.css";
 import axios from "axios";
-import { Backend_Root_Url } from "../../config/AdminUrl.json";
+import { Backend_Root_Url } from "../../config/AdminUrl.js";
+import "../../../src/App.css";
 
 const SkillsPage = () => {
   const [skillsData, setSkillsData] = useState([]);
@@ -88,7 +89,10 @@ const SkillsPage = () => {
   };
 
   const stats = calculateStats();
-
+  const retryFetch = () => {
+    setError(null);
+    window.location.reload();
+  };
   if (loading) {
     return (
       <div className={styles.pageContainer}>
@@ -143,13 +147,40 @@ const SkillsPage = () => {
             <section className={styles.noSkillsSection}>
               <div className={styles.noSkillsContainer}>
                 <div className={styles.noSkillsIcon}>
-                  <span className={styles.iconEmoji}>🚀</span>
+                  <svg
+                    className={styles.calendarIcon}
+                    width="32"
+                    height="32"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  >
+                    <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
+                  </svg>
                 </div>
                 <h3 className={styles.noSkillsTitle}>Skills Coming Soon!</h3>
                 <p className={styles.noSkillsText}>
                   I'm currently building an amazing portfolio of skills and
                   technologies. Check back soon to see my expertise in action!
                 </p>
+                <div className={styles.emptyActions}>
+                  <button className={styles.refreshButton} onClick={retryFetch}>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <polyline points="23,4 23,10 17,10" />
+                      <polyline points="1,20 1,14 7,14" />
+                      <path d="M20.49,9A9,9,0,0,0,5.64,5.64L1,10m22,4L18.36,18.36A9,9,0,0,1,3.51,15" />
+                    </svg>
+                    Refresh
+                  </button>
+                </div>
               </div>
             </section>
           </div>

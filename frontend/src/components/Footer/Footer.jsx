@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import styles from "./Footer.module.css";
 import { Link } from "react-router-dom";
-import { Backend_Root_Url } from "../../config/AdminUrl.json";
+import { Backend_Root_Url } from "../../config/AdminUrl.js";
 
 const Footer = () => {
   const [footerData, setFooterData] = useState(null);
@@ -46,18 +46,18 @@ const Footer = () => {
     Globe,
 
     // Additional social media and platforms
-    Discord: MessageCircle, // Discord icon alternative
-    Telegram: Send, // Telegram icon alternative
-    Pinterest: Palette, // Pinterest icon alternative
-    Fiverr: Briefcase, // Fiverr icon alternative
-    Reddit: Share2, // Reddit icon alternative
-    TikTok: Music, // TikTok icon alternative
-    Snapchat: Camera, // Snapchat icon alternative
-    Vimeo: Video, // Vimeo icon alternative
-    WhatsApp: MessageCircle, // WhatsApp icon alternative
-    Slack: Users, // Slack icon alternative
-    Dribbble: Zap, // Dribbble icon alternative
-    Behance: Palette, // Behance icon alternative
+    Discord: MessageCircle,
+    Telegram: Send,
+    Pinterest: Palette,
+    Fiverr: Briefcase,
+    Reddit: Share2,
+    TikTok: Music,
+    Snapchat: Camera,
+    Vimeo: Video,
+    WhatsApp: MessageCircle,
+    Slack: Users,
+    Dribbble: Zap,
+    Behance: Palette,
 
     // Generic fallbacks
     Website: Globe,
@@ -75,7 +75,6 @@ const Footer = () => {
         setFooterData(data);
       } catch (error) {
         console.error("Error fetching footer data:", error);
-        // Fallback to static data if API fails
         setFooterData(null);
       } finally {
         setLoading(false);
@@ -94,11 +93,11 @@ const Footer = () => {
   ];
 
   const quickLinks = [
-    { name: "Home", href: "#home" },
-    { name: "Projects", href: "#projects" },
-    { name: "Skills", href: "#skills" },
-    { name: "CV", href: "#cv" },
-    { name: "Contact", href: "#contact" },
+    { name: "Home", href: "/" },
+    { name: "Projects", href: "projects" },
+    { name: "Skills", href: "skills" },
+    { name: "CV", href: "cv" },
+    { name: "Contact", href: "contact" },
   ];
 
   const staticContactInfo = [
@@ -123,7 +122,7 @@ const Footer = () => {
 
   const socialLinks =
     footerData?.footersociallinks?.FooterSocialLinks?.map((link) => {
-      const IconComponent = iconMap[link.SocialIcon] || Mail; // Fallback to Mail icon
+      const IconComponent = iconMap[link.SocialIcon] || Mail;
       return {
         icon: IconComponent,
         href: link.SocialLink,
@@ -145,7 +144,7 @@ const Footer = () => {
     {
       icon: MapPin,
       text: footerInfo.OwnerAddress,
-      href: "#",
+      href: `https://www.google.com/maps/search/${footerInfo.OwnerAddress}`,
     },
   ];
 
@@ -218,6 +217,7 @@ const Footer = () => {
                   <a
                     key={index}
                     href={contact.href}
+                    target="_blank"
                     className={styles.contactItem}
                   >
                     <IconComponent size={18} />
@@ -230,23 +230,12 @@ const Footer = () => {
 
           {/* Newsletter */}
           <div className={styles.newsletterSection}>
-            <h3 className={styles.sectionTitle}>Stay Updated</h3>
+            <h3 className={styles.sectionTitle}>Let’s Work Together</h3>
             <p className={styles.newsletterDescription}>
-              Subscribe to get notified about new projects and updates.
+              I’m always excited to explore new opportunities, collaborations,
+              and challenges. Feel free to reach out if you think we could work
+              together.
             </p>
-            <div className={styles.newsletterForm}>
-              <input
-                type="email"
-                placeholder="Email Subscription Coming Soon..."
-                className={styles.emailInput}
-                disabled
-              />
-              <button className={styles.subscribeButton} disabled>
-                {" "}
-                {/* Disabled Because Future Not Ready Yet*/}
-                Subscribe
-              </button>
-            </div>
           </div>
         </div>
 

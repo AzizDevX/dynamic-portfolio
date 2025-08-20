@@ -152,8 +152,15 @@ body {
   color: white;
   font-weight: 600;
   font-size: 0.9rem;
+  overflow: hidden; /* Ensures image respects circular boundary */
 }
 
+.userAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%; /* Double security for circular shape */
+}
 .userName {
   font-weight: 500;
   color: var(--text-primary);
@@ -209,8 +216,12 @@ body {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Mobile Responsive */
@@ -249,4 +260,3 @@ body {
     display: none !important;
   }
 }
-

@@ -3,7 +3,7 @@ import styles from "./DashboardFooter.module.css";
 import { verifyJWTToken } from "../utils/authUtils";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Backend_Root_Url } from "../../../config/AdminUrl.json";
+import { Backend_Root_Url } from "../../../config/AdminUrl.js";
 
 import {
   Edit3,

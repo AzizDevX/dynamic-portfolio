@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../Navbar/Navbar";
 import Footer from "../Footer/Footer";
 import {
@@ -13,14 +13,31 @@ import {
   Github,
   Linkedin,
   Twitter,
+  Heart,
+  Facebook,
+  Instagram,
+  Youtube,
+  Twitch,
   Globe,
+  MessageCircle,
+  Palette,
+  Briefcase,
+  Zap,
+  Music,
+  Camera,
+  Video,
+  Users,
+  Share2,
 } from "lucide-react";
 import styles from "./Contact.module.css";
+import { Backend_Root_Url } from "../../config/AdminUrl.js";
+import axios from "axios";
+import "../../../src/App.css";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
+    fullname: "",
+    address: "",
     subject: "",
     message: "",
   });
@@ -30,6 +47,65 @@ const Contact = () => {
     error: null,
   });
   const [formErrors, setFormErrors] = useState({});
+  const [footerInfo, setFooterInfo] = useState(null);
+  const [socialLinks, setSocialLinks] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Icon mapping for social links
+  const iconMap = {
+    Github,
+    Linkedin,
+    Twitter,
+    Mail,
+    Phone,
+    MapPin,
+    Heart,
+    Facebook,
+    Instagram,
+    Youtube,
+    Twitch,
+    Globe,
+    MessageCircle,
+    Send,
+    Palette,
+    Briefcase,
+    Zap,
+    Music,
+    Camera,
+    Video,
+    Users,
+    Share2,
+  };
+
+  // Fetch footer data on component mount
+  useEffect(() => {
+    const fetchFooterData = async () => {
+      try {
+        const response = await axios.get(
+          `${Backend_Root_Url}/api/home/main/data`
+        );
+        const data = response.data;
+
+        if (data.FooterInfo) {
+          setFooterInfo(data.FooterInfo);
+        }
+
+        if (
+          data.footersociallinks &&
+          data.footersociallinks.FooterSocialLinks
+        ) {
+          setSocialLinks(data.footersociallinks.FooterSocialLinks);
+        }
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching footer data:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchFooterData();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -50,14 +126,14 @@ const Contact = () => {
   const validateForm = () => {
     const errors = {};
 
-    if (!formData.name.trim()) {
-      errors.name = "Name is required";
+    if (!formData.fullname.trim()) {
+      errors.fullname = "Full name is required";
     }
 
-    if (!formData.email.trim()) {
-      errors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = "Please enter a valid email address";
+    if (!formData.address.trim()) {
+      errors.address = "Email address is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.address)) {
+      errors.address = "Please enter a valid email address";
     }
 
     if (!formData.subject.trim()) {
@@ -84,29 +160,42 @@ const Contact = () => {
     setFormStatus({ loading: true, success: false, error: null });
 
     try {
-      // TODO: Replace with actual API call to backend
-      // const response = await axios.post(`${Backend_Root_Url}/api/contact`, formData);
-
-      // Simulate API call for now
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const response = await axios.post(
+        `${Backend_Root_Url}/api/contact`,
+        formData
+      );
 
       setFormStatus({ loading: false, success: true, error: null });
-      setFormData({ name: "", email: "", subject: "", message: "" });
+      setFormData({ fullname: "", address: "", subject: "", message: "" });
 
       // Auto-hide success message after 5 seconds
       setTimeout(() => {
         setFormStatus({ loading: false, success: false, error: null });
       }, 5000);
     } catch (error) {
+      let errorMessage = "Failed to send message. Please try again later.";
+
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        errorMessage = error.response.data.message;
+      } else if (error.response && error.response.status === 429) {
+        errorMessage =
+          "You are sending messages too frequently. Please try again later.";
+      }
+
       setFormStatus({
         loading: false,
         success: false,
-        error: "Failed to send message. Please try again later.",
+        error: errorMessage,
       });
     }
   };
 
-  const contactInfo = [
+  // Default contact info (fallback if API fails)
+  const defaultContactInfo = [
     {
       icon: Mail,
       title: "Email",
@@ -127,12 +216,84 @@ const Contact = () => {
     },
   ];
 
-  const socialLinks = [
+  // Generate contact info from API data or use defaults
+  const contactInfo = footerInfo
+    ? [
+        {
+          icon: Mail,
+          title: "Email",
+          value: footerInfo.OwnerEmail,
+          href: `mailto:${footerInfo.OwnerEmail}`,
+        },
+        {
+          icon: Phone,
+          title: "Phone",
+          value: footerInfo.OwnerPhone,
+          href: `tel:${footerInfo.OwnerPhone.replace(/\s/g, "")}`,
+        },
+        {
+          icon: MapPin,
+          title: "Location",
+          value: footerInfo.OwnerAddress,
+          href: `https://www.google.com/maps/search/${encodeURIComponent(
+            footerInfo.OwnerAddress
+          )}`,
+        },
+      ]
+    : defaultContactInfo;
+
+  // Default social links (fallback if API fails)
+  const defaultSocialLinks = [
     { icon: Github, href: "#", label: "GitHub", color: "#333" },
     { icon: Linkedin, href: "#", label: "LinkedIn", color: "#0077b5" },
     { icon: Twitter, href: "#", label: "Twitter", color: "#1da1f2" },
     { icon: Globe, href: "#", label: "Website", color: "#3b82f6" },
   ];
+
+  // Generate social links from API data or use defaults
+  const socialLinksData =
+    socialLinks.length > 0
+      ? socialLinks.map((link) => {
+          const IconComponent = iconMap[link.SocialIcon] || Globe;
+          return {
+            icon: IconComponent,
+            href: link.SocialLink,
+            label: link.SocialIcon,
+            color: getSocialColor(link.SocialIcon),
+          };
+        })
+      : defaultSocialLinks;
+
+  function getSocialColor(iconName) {
+    const colorMap = {
+      Github: "#333",
+      Linkedin: "#0077b5",
+      Twitter: "#1da1f2",
+      Facebook: "#1877f2",
+      Instagram: "#e4405f",
+      Youtube: "#ff0000",
+      Twitch: "#9146ff",
+      Globe: "#3b82f6",
+    };
+    return colorMap[iconName] || "#3b82f6";
+  }
+
+  if (loading) {
+    return (
+      <div className={styles.pageContainer}>
+        <Navbar />
+        <main className={styles.mainContent}>
+          <div className={styles.container}>
+            <div className={styles.loadingContainer}>
+              <div className={styles.spinner}></div>
+              <p>Loading contact information...</p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.pageContainer}>
@@ -185,49 +346,49 @@ const Contact = () => {
                 <form onSubmit={handleSubmit} className={styles.contactForm}>
                   <div className={styles.formRow}>
                     <div className={styles.inputGroup}>
-                      <label htmlFor="name" className={styles.label}>
+                      <label htmlFor="fullname" className={styles.label}>
                         <User size={18} />
                         Full Name
                       </label>
                       <input
                         type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
+                        id="fullname"
+                        name="fullname"
+                        value={formData.fullname}
                         onChange={handleInputChange}
                         className={`${styles.input} ${
-                          formErrors.name ? styles.inputError : ""
+                          formErrors.fullname ? styles.inputError : ""
                         }`}
                         placeholder="Enter your full name"
                         disabled={formStatus.loading}
                       />
-                      {formErrors.name && (
+                      {formErrors.fullname && (
                         <span className={styles.errorText}>
-                          {formErrors.name}
+                          {formErrors.fullname}
                         </span>
                       )}
                     </div>
 
                     <div className={styles.inputGroup}>
-                      <label htmlFor="email" className={styles.label}>
+                      <label htmlFor="address" className={styles.label}>
                         <Mail size={18} />
                         Email Address
                       </label>
                       <input
                         type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
+                        id="address"
+                        name="address"
+                        value={formData.address}
                         onChange={handleInputChange}
                         className={`${styles.input} ${
-                          formErrors.email ? styles.inputError : ""
+                          formErrors.address ? styles.inputError : ""
                         }`}
                         placeholder="Enter your email address"
                         disabled={formStatus.loading}
                       />
-                      {formErrors.email && (
+                      {formErrors.address && (
                         <span className={styles.errorText}>
-                          {formErrors.email}
+                          {formErrors.address}
                         </span>
                       )}
                     </div>
@@ -320,6 +481,8 @@ const Contact = () => {
                       <a
                         key={index}
                         href={info.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className={styles.contactInfoItem}
                       >
                         <div className={styles.contactIcon}>
@@ -337,7 +500,7 @@ const Contact = () => {
                 <div className={styles.socialSection}>
                   <h3 className={styles.socialTitle}>Follow Me</h3>
                   <div className={styles.socialLinks}>
-                    {socialLinks.map((social, index) => {
+                    {socialLinksData.map((social, index) => {
                       const IconComponent = social.icon;
                       return (
                         <a
