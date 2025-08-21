@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Full-stack portfolio application",
   "scripts": {
-    "start": "npm install && concurrently \"cd backend && npm install && npm run start\" \"cd frontend && npm run production\""
+    "install-pack": "npm install && concurrently \"cd backend && npm install\" \"cd frontend && npm install\"",
+    "build": "cd frontend && npx vite build",
+    "start": "concurrently \"cd backend && npm run start\" \"cd frontend && npx vite preview --port 3000 --host localhost\""
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

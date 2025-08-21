@@ -5,10 +5,7 @@
   "type": "module",
   "homepage": "/",
   "scripts": {
-    "dev": "vite",
-    "build": "npm install && vite build",
-    "preview": "vite preview",
-    "production": "vite preview --host 0.0.0.0 --port 3000"
+    "dev": "vite dev"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -45,6 +42,7 @@
     "cmdk": "^1.1.1",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.15.0",
+    "http-server": "^14.1.1",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.510.0",
     "next-themes": "^0.4.6",

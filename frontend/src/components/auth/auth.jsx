@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { Eye, EyeOff, Lock, User, AlertCircle } from "lucide-react";
 import styles from "./auth.module.css";
 import axios from "axios";
-import { Frontend_Admin_Url } from "../../config/AdminUrl.js";
+import { Frontend_Admin_Url, Backend_Root_Url } from "../../config/AdminUrl.js";
 import { verifyJWTToken } from "../AdminDashboard/utils/authUtils";
 import { useEffect } from "react";
+
 import "../../../src/App.css";
 
 const AdminDashboard = "/" + Frontend_Admin_Url;
@@ -45,7 +46,7 @@ const AuthPage = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/auth/admin",
+        `${Backend_Root_Url}/auth/admin`,
         {
           userName: formData.username,
           password: formData.password,

@@ -15,9 +15,11 @@ import Contact from "./routers/Contact.js";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
+
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 const BACKEND_PORT = process.env.BACKEND_PORT || 5000;
 const FRONTEND_PORT = process.env.FRONTEND_PORT || 3000;
 
@@ -55,6 +57,6 @@ app.use("/api/", EdirCv);
 app.use("/api/", EditFooter);
 app.use("/api/", Contact);
 
-app.listen(BACKEND_PORT, () => {
+app.listen(BACKEND_PORT, "127.0.0.1", () => {
   console.log(`Server Alive At port ${BACKEND_PORT}`);
 });
