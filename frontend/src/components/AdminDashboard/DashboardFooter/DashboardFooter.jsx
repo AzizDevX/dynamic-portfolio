@@ -90,16 +90,16 @@ const getUrlValidationMessage = (url) => {
 
 const DashboardFooter = () => {
   //Authentication check
-  const navigate = useNavigate();
   useEffect(() => {
     const checkAuth = async () => {
       const isValid = await verifyJWTToken();
       if (isValid === false) {
-        navigate("/denied");
+        window.location.href = "/denied";
+        return;
       }
     };
     checkAuth();
-  }, [navigate]);
+  }, []);
 
   // Available social icons (updated with all platforms)
   const availableIcons = [

@@ -33,16 +33,16 @@ import {
 
 const DashboardProjects = () => {
   //Authentication check
-  const navigate = useNavigate();
   useEffect(() => {
     const checkAuth = async () => {
       const isValid = await verifyJWTToken();
       if (isValid === false) {
-        navigate("/denied");
+        window.location.href = "/denied";
+        return;
       }
     };
     checkAuth();
-  }, [navigate]);
+  }, []);
 
   // Projects state
   const [projects, setProjects] = useState([]);

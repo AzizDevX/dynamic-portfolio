@@ -8,16 +8,16 @@ import { Backend_Root_Url } from "../../../config/AdminUrl.js";
 
 const DashboardAbout = () => {
   //Authentication check
-  const navigate = useNavigate();
   useEffect(() => {
     const checkAuth = async () => {
       const isValid = await verifyJWTToken();
       if (isValid === false) {
-        navigate("/denied");
+        window.location.href = "/denied";
+        return;
       }
     };
     checkAuth();
-  }, [navigate]);
+  }, []);
 
   // About section state
   const [aboutData, setAboutData] = useState(null);

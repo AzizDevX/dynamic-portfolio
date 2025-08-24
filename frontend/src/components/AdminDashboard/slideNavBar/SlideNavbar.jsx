@@ -43,7 +43,7 @@ const SlideNavbar = ({
       const isValid = await verifyJWTToken();
 
       if (isValid === false) {
-        navigate("/denied");
+        window.location.href = "/denied";
         return;
       }
 

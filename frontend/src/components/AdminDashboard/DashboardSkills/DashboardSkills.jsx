@@ -13,7 +13,8 @@ const DashboardSkills = () => {
     const checkAuth = async () => {
       const isValid = await verifyJWTToken();
       if (isValid === false) {
-        navigate("/denied");
+        window.location.href = "/denied";
+        return;
       } else {
         fetchSkills();
       }

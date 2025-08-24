@@ -76,13 +76,14 @@ const Dashboard = () => {
       const isValid = await verifyJWTToken();
       setIsAuthenticated(isValid);
       if (isValid === false) {
-        navigate("/denied");
+        window.location.href = "/denied";
+        return;
       }
       setIsLoading(false);
     };
 
     checkAuth();
-  }, [navigate]);
+  }, []);
 
   // Close mobile menu when clicking outside
   useEffect(() => {

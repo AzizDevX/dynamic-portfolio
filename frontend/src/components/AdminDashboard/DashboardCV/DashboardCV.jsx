@@ -8,16 +8,16 @@ import { Backend_Root_Url } from "../../../config/AdminUrl.js";
 
 const DashboardCV = () => {
   //Authentication check
-  const navigate = useNavigate();
   useEffect(() => {
     const checkAuth = async () => {
       const isValid = await verifyJWTToken();
       if (isValid === false) {
-        navigate("/denied");
+        window.location.href = "/denied";
+        return;
       }
     };
     checkAuth();
-  }, [navigate]);
+  }, []);
 
   // CV state
   const [cvData, setCvData] = useState({
