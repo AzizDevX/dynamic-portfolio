@@ -288,12 +288,12 @@
 .statusOnHold {
   background: linear-gradient(
     135deg,
-    rgba(251, 191, 36, 0.15),
-    rgba(245, 158, 11, 0.25)
+    rgba(251, 113, 133, 0.15),
+    rgba(244, 63, 94, 0.25)
   );
-  color: #f59e0b;
-  border: 1px solid rgba(251, 191, 36, 0.4);
-  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.2);
+  color: #f43f5e;
+  border: 1px solid rgba(251, 113, 133, 0.4);
+  box-shadow: 0 2px 8px rgba(251, 113, 133, 0.2);
 }
 
 .statusCanceled {
@@ -322,85 +322,92 @@
 .statusPrototype {
   background: linear-gradient(
     135deg,
-    rgba(139, 92, 246, 0.15),
-    rgba(124, 58, 237, 0.25),
-    rgba(168, 85, 247, 0.15)
+    rgba(129, 140, 248, 0.15),
+    rgba(99, 102, 241, 0.25),
+    rgba(165, 180, 252, 0.15)
   );
-  color: #7c3aed;
-  border: 1px solid rgba(139, 92, 246, 0.4);
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
+  color: #6366f1;
+  border: 1px solid rgba(129, 140, 248, 0.4);
+  box-shadow: 0 2px 8px rgba(129, 140, 248, 0.2);
 }
 
 .statusLaunched {
   background: linear-gradient(
     135deg,
-    rgba(16, 185, 129, 0.15),
-    rgba(5, 150, 105, 0.25),
-    rgba(34, 197, 94, 0.15)
+    rgba(192, 31, 192, 0.15),
+    rgba(192, 31, 192, 0.25),
+    rgba(192, 31, 192, 0.15)
   );
-  color: #059669;
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  color: #c01fc0;
+  border: 1px solid rgba(192, 31, 192, 0.4);
+  box-shadow: 0 2px 8px rgba(192, 31, 192, 0.3);
 }
 
 .statusMetrics {
   background: linear-gradient(
     135deg,
-    rgba(245, 158, 11, 0.15),
-    rgba(217, 119, 6, 0.25),
-    rgba(251, 191, 36, 0.15)
+    rgba(96, 165, 250, 0.15),
+    rgba(59, 130, 246, 0.25),
+    rgba(147, 197, 253, 0.15)
   );
-  color: #d97706;
-  border: 1px solid rgba(245, 158, 11, 0.4);
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+  color: #3b82f6;
+  border: 1px solid rgba(96, 165, 250, 0.4);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
 }
 
 .statusAwarded {
   background: linear-gradient(
     135deg,
-    rgba(251, 146, 60, 0.15),
-    rgba(234, 88, 12, 0.25),
-    rgba(251, 191, 36, 0.15)
+    rgba(255, 154, 0, 0.15),
+    rgba(255, 109, 0, 0.25),
+    rgba(230, 81, 0, 0.15)
   );
-  color: #ea580c;
-  border: 1px solid rgba(251, 146, 60, 0.4);
-  box-shadow: 0 2px 8px rgba(251, 146, 60, 0.3);
+  color: #ca5801;
+  border: 1px solid rgba(255, 154, 0, 0.4);
+  box-shadow: 0 2px 8px rgba(255, 109, 0, 0.3);
 }
 
 .statusPassed {
   background: linear-gradient(
     135deg,
-    rgba(52, 211, 153, 0.15),
-    rgba(20, 184, 166, 0.25),
-    rgba(45, 212, 191, 0.15)
+    rgba(144, 238, 144, 0.25),
+    rgba(101, 185, 9, 0.35),
+    rgba(173, 255, 47, 0.25)
   );
-  color: #14b8a6;
-  border: 1px solid rgba(52, 211, 153, 0.4);
-  box-shadow: 0 2px 8px rgba(52, 211, 153, 0.2);
+  color: #b4ff04;
+  border: 1px solid rgba(180, 255, 4, 0.8);
+  box-shadow: 0 2px 6px rgba(180, 255, 4, 0.4);
 }
 
 .statusAchievement {
   background: linear-gradient(
     135deg,
-    rgba(236, 72, 153, 0.15),
-    rgba(219, 39, 119, 0.25),
-    rgba(251, 113, 133, 0.15)
+    rgba(218, 165, 32, 0.18),
+    rgba(184, 134, 11, 0.28),
+    rgba(218, 165, 32, 0.18)
   );
-  color: #db2777;
-  border: 1px solid rgba(236, 72, 153, 0.4);
-  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
+  color: #daa520;
+  font-weight: 600;
+  border: 1px solid rgba(218, 165, 32, 0.75);
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(184, 134, 11, 0.35),
+    0 0 6px rgba(218, 165, 32, 0.25);
+  transition: all 0.3s ease;
 }
 
 .statusArchived {
   background: linear-gradient(
     135deg,
-    rgba(107, 114, 128, 0.15),
-    rgba(75, 85, 99, 0.25)
+    rgba(156, 163, 175, 0.18),
+    rgba(120, 85, 60, 0.25),
+    rgba(75, 85, 99, 0.18)
   );
-  color: #4b5563;
-  border: 1px solid rgba(107, 114, 128, 0.4);
-  box-shadow: 0 2px 8px rgba(107, 114, 128, 0.1);
-  opacity: 0.8;
+  color: #6b4f3f; /* muted brown-gray text */
+  border: 1px solid rgba(120, 85, 60, 0.5);
+  box-shadow: 0 2px 6px rgba(107, 114, 128, 0.2);
+  border-radius: 8px;
+  opacity: 0.92;
+  font-weight: 500;
 }
 
 .statusDefault {
