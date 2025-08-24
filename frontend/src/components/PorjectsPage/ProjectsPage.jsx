@@ -107,32 +107,62 @@ const ProjectsPage = () => {
     window.location.reload();
   };
 
-  // Calculate statistics
+  // Calculate statistics with improved logic
   const calculateStats = () => {
-    const totalProjects = projects.length;
-    const completedProjects = projects.filter(
-      (p) => p.status.toLowerCase() === "completed"
+    const totalWorks = projects.length;
+
+    const successfulStatuses = [
+      "completed",
+      "archived",
+      "launched",
+      "passed",
+      "awarded",
+      "achievement",
+    ];
+
+    const activeStatuses = ["in progress", "prototype", "on hold"];
+
+    const pausedStatuses = ["planning", "planned"];
+
+    const failedStatuses = ["canceled"];
+
+    const workableStatuses = [
+      ...successfulStatuses,
+      ...activeStatuses,
+      ...failedStatuses,
+    ];
+
+    const workableProjects = projects.filter((p) =>
+      workableStatuses.includes(p.status.toLowerCase())
+    );
+
+    const successfulProjects = projects.filter((p) =>
+      successfulStatuses.includes(p.status.toLowerCase())
     ).length;
+
     const projectsWithLiveUrl = projects.filter(
       (p) => p.demoUrl && p.demoUrl.trim() !== ""
     ).length;
 
-    // Get unique technologies
+    // Get unique technologies across all projects
     const allTechnologies = projects.flatMap((p) => p.technologies);
     const uniqueTechnologies = [...new Set(allTechnologies)].length;
 
-    // Calculate completion percentage
-    const completionPercentage =
-      totalProjects > 0
-        ? Math.round((completedProjects / totalProjects) * 100)
+    const successRate =
+      workableProjects.length > 0
+        ? Math.round((successfulProjects / workableProjects.length) * 100)
         : 0;
 
     return {
-      totalProjects,
-      completedProjects,
+      totalWorks,
+      successfulProjects,
       uniqueTechnologies,
       projectsWithLiveUrl,
-      completionPercentage,
+      successRate,
+      workableProjectsCount: workableProjects.length,
+      activeProjectsCount: projects.filter((p) =>
+        activeStatuses.includes(p.status.toLowerCase())
+      ).length,
     };
   };
 
@@ -317,14 +347,14 @@ const ProjectsPage = () => {
               </div>
               <div className={styles.statsGrid}>
                 <div className={styles.statCard}>
-                  <div className={styles.statNumber}>{stats.totalProjects}</div>
-                  <div className={styles.statLabel}>Total Projects</div>
+                  <div className={styles.statNumber}>{stats.totalWorks}</div>
+                  <div className={styles.statLabel}>Total Works</div>
                 </div>
                 <div className={styles.statCard}>
                   <div className={styles.statNumber}>
-                    {stats.completedProjects}
+                    {stats.successfulProjects}
                   </div>
-                  <div className={styles.statLabel}>Projects Completed</div>
+                  <div className={styles.statLabel}>Successful Works</div>
                 </div>
                 <div className={styles.statCard}>
                   <div className={styles.statNumber}>
@@ -333,10 +363,8 @@ const ProjectsPage = () => {
                   <div className={styles.statLabel}>Technologies Used</div>
                 </div>
                 <div className={styles.statCard}>
-                  <div className={styles.statNumber}>
-                    {stats.completionPercentage}%
-                  </div>
-                  <div className={styles.statLabel}>Completion Rate</div>
+                  <div className={styles.statNumber}>{stats.successRate}%</div>
+                  <div className={styles.statLabel}>Success Rate</div>
                 </div>
               </div>
             </section>
