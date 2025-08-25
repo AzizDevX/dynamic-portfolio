@@ -72,9 +72,12 @@ Router.post("/contact", contactLimiter, async (req, res) => {
       message,
     });
 
+    const resendDomain =
+      process.env.RESEND_MAIL_DOMAIN || "onboarding@resend.dev";
+
     const { data, error } = await resend.emails.send({
-      from: `Contact Form <${AdminMail}>`,
-      to: AdminMail,
+      from: `!! New Message From My Portfolio Website <${resendDomain}>`,
+      to: `${AdminMail}`,
       subject: subject,
       reply_to: address,
       html: htmlContent,
