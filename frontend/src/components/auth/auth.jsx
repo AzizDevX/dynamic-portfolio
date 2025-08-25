@@ -46,7 +46,7 @@ const AuthPage = () => {
 
     try {
       const response = await axios.post(
-        `${Backend_Root_Url}/auth/admin`,
+        `${Backend_Root_Url}/auth/${Frontend_Admin_Url}`,
         {
           userName: formData.username,
           password: formData.password,
