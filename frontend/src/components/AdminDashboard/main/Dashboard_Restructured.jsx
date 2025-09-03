@@ -3,6 +3,7 @@ import styles from "./Dashboard_Restructured.module.css";
 import { verifyJWTToken, logout } from "../utils/authUtils";
 import SlideNavbar from "../slideNavBar/SlideNavbar";
 import DashboardHome from "../Dashboardhome/DashboardHome";
+import DashboardSEO from "../DashboardSEO/DashboardSEO";
 import DashboardAbout from "../DashboardAbout/DashboardAbout";
 import DashboardProjects from "../DashboardProjects/DashboardProjects";
 import DashboardSkills from "../DashboardSkills/DashboardSkills";
@@ -26,7 +27,7 @@ const Dashboard = () => {
   const [userData, setUserData] = useState(null);
 
   // Navigation state
-  const [activeSection, setActiveSection] = useState("home");
+  const [activeSection, setActiveSection] = useState("seo");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -164,6 +165,7 @@ const Dashboard = () => {
   // Get section title
   const getSectionTitle = (sectionId) => {
     const sections = {
+      seo: "SEO Section",
       home: "Home",
       about: "About",
       projects: "Projects",
@@ -177,6 +179,8 @@ const Dashboard = () => {
   // Render active section content
   const renderActiveSection = () => {
     switch (activeSection) {
+      case "seo":
+        return <DashboardSEO />;
       case "home":
         return <DashboardHome />;
       case "about":

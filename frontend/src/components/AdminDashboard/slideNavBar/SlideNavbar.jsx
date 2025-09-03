@@ -13,6 +13,7 @@ import {
   LogOut,
   Menu,
   X,
+  Search,
 } from "lucide-react";
 
 const SlideNavbar = ({
@@ -63,6 +64,7 @@ const SlideNavbar = ({
 
   // Navigation sections
   const sections = [
+    { id: "seo", label: "SEO Section", icon: Search },
     { id: "home", label: "Home", icon: Home },
     { id: "about", label: "About", icon: User },
     { id: "projects", label: "Projects", icon: Briefcase },
