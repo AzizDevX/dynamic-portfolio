@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 const staticSeo = mongoose.Schema(
   {
+    WebLogo: {
+      type: String,
+      trim: true,
+    },
     Author: {
       type: String,
       trim: true,

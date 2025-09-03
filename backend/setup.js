@@ -215,8 +215,10 @@ async function setupStaticSeo_DefaultValues() {
       );
     }
     const Static = new StaticSeo({
-      Author: "Aziz Kammoun",
-      WebsiteName: "",
+      WebLogo:
+        "https://raw.githubusercontent.com/AzizDevX/dynamic-portfolio/main/frontend/public/SeoDefultlogo.png",
+      Author: "Your Name Here",
+      WebsiteName: "Your Website Name",
       LangCode: "en",
       Lang: "English",
       CountryCode: "Tn",
@@ -241,7 +243,7 @@ async function setupSeo_DefaultValues() {
     const AddSeo = await Seo.insertMany([
       {
         Page: "home",
-        Title: `Welcome to my profile`,
+        Title: `My Portfolio | Home`,
         Description: `Hello! Welcome to my personal profile. Explore my background, experiences, and achievements.`,
         Keywords: [
           "personal profile",
@@ -252,7 +254,7 @@ async function setupSeo_DefaultValues() {
         ],
         SocialTitle: `Welcome to my profile`,
         SocialDescription: `Discover more about my background, experiences, and accomplishments.`,
-        PageUrl: `https://www...yourdomain.com`,
+        PageUrl: `https://www.YourDomainHere.com`,
         SocialImage: "",
         TwitterTitle: `Welcome to my profile`,
         TwitterDescription: `Explore my profile including experiences, skills, and achievements.`,
@@ -260,7 +262,7 @@ async function setupSeo_DefaultValues() {
       },
       {
         Page: "projects",
-        Title: `My Projects`,
+        Title: `My Portfolio | Projects`,
         Description: `Take a look at the projects and initiatives I have worked on.`,
         Keywords: [
           "projects",
@@ -271,7 +273,7 @@ async function setupSeo_DefaultValues() {
         ],
         SocialTitle: `My Projects`,
         SocialDescription: `Explore the projects I have completed and the work I am proud of.`,
-        PageUrl: `https://www...yourdomain.com/projects`,
+        PageUrl: `https://www.YourDomainHere.com/projects`,
         SocialImage: "",
         TwitterTitle: `My Projects`,
         TwitterDescription: `Check out the projects and work I have completed.`,
@@ -279,12 +281,12 @@ async function setupSeo_DefaultValues() {
       },
       {
         Page: "skills",
-        Title: `My Skills`,
+        Title: `My Portfolio | Skills`,
         Description: `Learn about the skills and strengths I have developed over time.`,
         Keywords: ["skills", "abilities", "talents", "strengths", "expertise"],
         SocialTitle: `My Skills`,
         SocialDescription: `Discover the abilities and talents I have honed through experience.`,
-        PageUrl: `https://www...yourdomain.com/skills`,
+        PageUrl: `https://www.YourDomainHere.com/skills`,
 
         SocialImage: "",
         TwitterTitle: `My Skills`,
@@ -293,12 +295,12 @@ async function setupSeo_DefaultValues() {
       },
       {
         Page: "cv",
-        Title: `My CV`,
+        Title: `My Portfolio | Full CV`,
         Description: `View my curriculum vitae, including experiences, education, and achievements.`,
         Keywords: ["cv", "resume", "experience", "education", "achievements"],
         SocialTitle: `My CV`,
         SocialDescription: `Check my CV to learn about my experiences, education, and accomplishments.`,
-        PageUrl: `https://www...yourdomain.com/cv`,
+        PageUrl: `https://www.YourDomainHere.com/cv`,
         SocialImage: "",
         TwitterTitle: `My CV`,
         TwitterDescription: `Review my professional CV with details on experience and education.`,
@@ -306,7 +308,7 @@ async function setupSeo_DefaultValues() {
       },
       {
         Page: "contact",
-        Title: `Contact Me`,
+        Title: `My Portfolio | Contact`,
         Description: `Get in touch with me for questions, collaborations, or networking.`,
         Keywords: [
           "contact",
@@ -317,7 +319,7 @@ async function setupSeo_DefaultValues() {
         ],
         SocialTitle: `Contact Me`,
         SocialDescription: `Reach out for inquiries, collaborations, or opportunities.`,
-        PageUrl: `https://www...yourdomain.com/contact`,
+        PageUrl: `https://www.YourDomainHere.com/contact`,
         SocialImage: "",
         TwitterTitle: `Contact Me`,
         TwitterDescription: `Connect with me for questions, networking, or collaboration opportunities.`,
