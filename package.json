@@ -5,7 +5,10 @@
   "scripts": {
     "install-pack": "npm install && concurrently \"cd backend && npm install\" \"cd frontend && npm install\"",
     "build": "cd frontend && npx vite build",
-    "start": "concurrently \"cd backend && npm run start\" \"cd frontend && npx vite preview --port 3000 --host localhost\""
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "npm run wait && cd frontend && npm start",
+    "wait": "node -e \"setTimeout(() => process.exit(0), 3500)\""
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
