@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite --host localhost --port 3000",
     "build": "vite build",
-    "start": "cross-env NODE_ENV=production node src/simple-server.js"
+    "start-frontend": "cross-env NODE_ENV=production node src/simple-server.js"
   },
   "dependencies": {
     "@dr.pogodin/react-helmet": "^3.0.2",

@@ -6,8 +6,8 @@
     "install-pack": "npm install && concurrently \"cd backend && npm install\" \"cd frontend && npm install\"",
     "build": "cd frontend && npx vite build",
     "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
-    "start:backend": "cd backend && npm start",
-    "start:frontend": "npm run wait && cd frontend && npm start",
+    "start:backend": "cd backend && npm run start-backend",
+    "start:frontend": "npm run wait && cd frontend && npm run start-frontend",
     "wait": "node -e \"setTimeout(() => process.exit(0), 3500)\""
   },
   "devDependencies": {
