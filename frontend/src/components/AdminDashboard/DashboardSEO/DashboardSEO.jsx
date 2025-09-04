@@ -33,6 +33,7 @@ const DashboardSEO = () => {
     static: {
       Author: "",
       WebsiteName: "",
+      WebLogo: "",
       LangCode: "en",
       Lang: "English",
       CountryCode: "TN",
@@ -176,6 +177,7 @@ const DashboardSEO = () => {
           static: {
             Author: staticResponse.data.Author || "",
             WebsiteName: staticResponse.data.WebsiteName || "",
+            WebLogo: staticResponse.data.WebLogo || "",
             LangCode: staticResponse.data.LangCode || "en",
             Lang: staticResponse.data.Lang || "English",
             CountryCode: staticResponse.data.CountryCode || "TN",
@@ -249,8 +251,14 @@ const DashboardSEO = () => {
 
   const validateKeywords = (keywords) => {
     if (!keywords || keywords.trim() === "") return true; // Allow empty
-    // Check if it's a comma-separated string
-    return typeof keywords === "string";
+    // Check if it contains commas (correct format)
+    if (typeof keywords === "string") {
+      // Split by comma and check that each keyword is valid (no periods)
+      const keywordArray = keywords.split(",").map((k) => k.trim());
+      // Check if any keyword contains periods (invalid)
+      return !keywordArray.some((keyword) => keyword.includes("."));
+    }
+    return false;
   };
 
   // Handle input changes with validation
@@ -276,20 +284,22 @@ const DashboardSEO = () => {
   const handlePageInputChange = (page, field, value) => {
     // Special handling for Keywords field
     if (field === "Keywords") {
-      // Convert comma-separated string to array for storage
-      const keywordsArray = value
-        ? value
-            .split(",")
-            .map((k) => k.trim())
-            .filter((k) => k)
-        : [];
+      // Store the raw string value temporarily for display
       setFormData((prev) => ({
         ...prev,
         pages: {
           ...prev.pages,
           [page]: {
             ...prev.pages[page],
-            [field]: keywordsArray,
+            // Store as string for input display
+            KeywordsString: value,
+            // Also update the array for API
+            [field]: value
+              ? value
+                  .split(",")
+                  .map((k) => k.trim())
+                  .filter((k) => k.length > 0)
+              : [],
           },
         },
       }));
@@ -342,6 +352,11 @@ const DashboardSEO = () => {
         "ICBM must be in format: latitude, longitude (e.g., 40.7128, -74.0060)";
     }
 
+    // Validate WebLogo URL
+    if (formData.static.WebLogo && !validateUrl(formData.static.WebLogo)) {
+      errors["static.WebLogo"] = "Please enter a valid image URL";
+    }
+
     // Validate page-specific data
     Object.keys(formData.pages).forEach((page) => {
       const pageData = formData.pages[page];
@@ -349,6 +364,15 @@ const DashboardSEO = () => {
       // Title is required
       if (!pageData.Title || pageData.Title.trim() === "") {
         errors[`pages.${page}.Title`] = "Page Title is required";
+      }
+
+      // Validate Keywords format
+      if (pageData.Keywords && pageData.Keywords.length > 0) {
+        const keywordsString = pageData.Keywords.join(", ");
+        if (!validateKeywords(keywordsString)) {
+          errors[`pages.${page}.Keywords`] =
+            "Keywords must be separated by commas, not periods. Example: web design, portfolio, developer";
+        }
       }
 
       if (pageData.PageUrl && !validateUrl(pageData.PageUrl)) {
@@ -394,6 +418,7 @@ const DashboardSEO = () => {
         {
           Author: formData.static.Author,
           WebsiteName: formData.static.WebsiteName,
+          WebLogo: formData.static.WebLogo,
           LangCode: formData.static.LangCode,
           Lang: formData.static.Lang,
           CountryCode: formData.static.CountryCode,
@@ -541,6 +566,28 @@ const DashboardSEO = () => {
           </div>
 
           <div className={styles.formGroup}>
+            <label>Website Logo (Tab Icon)</label>
+            <input
+              type="url"
+              value={formData.static.WebLogo}
+              onChange={(e) =>
+                handleInputChange("static", "WebLogo", e.target.value)
+              }
+              placeholder="https://yourwebsite.com/logo.png"
+              className={validationErrors["static.WebLogo"] ? styles.error : ""}
+            />
+            {validationErrors["static.WebLogo"] && (
+              <span className={styles.errorText}>
+                {validationErrors["static.WebLogo"]}
+              </span>
+            )}
+            <small>
+              Direct image URL for your website's tab icon/favicon. Must be a
+              direct link to an image file (.png, .jpg, .ico recommended).
+            </small>
+          </div>
+
+          <div className={styles.formGroup}>
             <label>Language Code</label>
             <input
               type="text"
@@ -650,9 +697,12 @@ const DashboardSEO = () => {
   // Render page-specific SEO form
   const renderPageForm = (page) => {
     const pageData = formData.pages[page];
-    const keywordsString = Array.isArray(pageData.Keywords)
-      ? pageData.Keywords.join(", ")
-      : "";
+    const keywordsString =
+      pageData.KeywordsString !== undefined
+        ? pageData.KeywordsString
+        : Array.isArray(pageData.Keywords)
+        ? pageData.Keywords.join(", ")
+        : "";
 
     return (
       <div className={styles.form}>
@@ -696,11 +746,23 @@ const DashboardSEO = () => {
                   handlePageInputChange(page, "Keywords", e.target.value)
                 }
                 placeholder="keyword1, keyword2, keyword3"
+                className={
+                  validationErrors[`pages.${page}.Keywords`] ? styles.error : ""
+                }
               />
+              {validationErrors[`pages.${page}.Keywords`] && (
+                <span className={styles.errorText}>
+                  {validationErrors[`pages.${page}.Keywords`]}
+                </span>
+              )}
               <small>
-                Separate keywords with commas. Example: web design, portfolio,
-                developer.
+                Type keywords separated by commas. Example: web design,
+                portfolio, developer
               </small>
+
+              <div className={styles.keywordsPreview}>
+                <small>Keywords: {pageData.Keywords.length} items</small>
+              </div>
             </div>
 
             <div className={styles.formGroup}>
