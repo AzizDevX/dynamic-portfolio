@@ -14,7 +14,7 @@ const vitePort = 3001;
 const Backend_Root_Url =
   process.env.VITE_BACKEND_ROOT_URL || "http://localhost:5000";
 
-const VITE_FRONTEND_ADMIN_URL = process.env.VITE_FRONTEND_ADMIN_URL || "/admin";
+const VITE_FRONTEND_ADMIN_URL = process.env.VITE_FRONTEND_ADMIN_URL || "";
 
 console.log(`🔧 Environment: ${isProduction ? "Production" : "Development"}`);
 console.log(`🔧 PORT from env: ${process.env.PORT}`);
