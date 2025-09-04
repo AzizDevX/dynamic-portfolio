@@ -4,6 +4,7 @@ function EditStaticSeoValidation(req, res, next) {
     return res.status(400).json({ message: "No data provided for validation" });
   }
   const SeoSchema = Joi.object({
+    WebLogo: Joi.string().uri().allow("", null),
     Author: Joi.string().allow("", null),
     WebsiteName: Joi.string().allow("", null),
     LangCode: Joi.string().max(2).allow("", null),
