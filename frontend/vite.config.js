@@ -12,11 +12,40 @@ export default defineConfig({
     },
   },
   server: {
-    historyApiFallback: true,
     host: "localhost",
-    port: 3000,
+    port: 3001,
+    cors: true,
+    strictPort: true,
+    hmr: {
+      port: 3002,
+    },
+    open: false,
   },
   preview: {
     historyApiFallback: true,
+    port: process.env.PORT || 3000,
+  },
+  build: {
+    outDir: "dist/client",
+    sourcemap: false, // Disable sourcemap to avoid tailwind warnings
+    target: "esnext",
+    rollupOptions: {
+      input: "./index.html",
+    },
+    assetsDir: "assets",
+  },
+  define: {
+    "process.env.NODE_ENV": JSON.stringify(
+      process.env.NODE_ENV || "development"
+    ),
+    "process.env.VITE_BACKEND_ROOT_URL": JSON.stringify(
+      process.env.VITE_BACKEND_ROOT_URL
+    ),
+    "process.env.VITE_FRONTEND_ADMIN_URL": JSON.stringify(
+      process.env.VITE_FRONTEND_ADMIN_URL
+    ),
+  },
+  optimizeDeps: {
+    include: ["react", "react-dom", "react-dom/client", "react-router-dom"],
   },
 });
