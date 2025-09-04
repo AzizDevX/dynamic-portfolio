@@ -25,30 +25,116 @@ const Home = () => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [cvData, setCvData] = useState(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchHomeData = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `${Backend_Root_Url}/api/home/main/data`
-        );
-        setMainHomeData(response.data);
+        setLoading(true);
+        setError(null);
+
+        // Fetch both home data and CV data
+        const [homeResponse, cvResponse] = await Promise.all([
+          axios.get(`${Backend_Root_Url}/api/home/main/data`),
+          axios.get(`${Backend_Root_Url}/api/show/cv/`),
+        ]);
+
+        setMainHomeData(homeResponse.data);
+        setCvData(cvResponse.data);
+        setLoading(false);
       } catch (error) {
-        console.error("Error fetching home data:", error);
+        console.error("Error fetching data:", error);
+        setError("Failed to load data. Showing fallback content.");
+        setLoading(false);
+        // Set fallback data when API fails
+        setMainHomeData({
+          DisplayName: "You Need To Complete Setup",
+          description:
+            "You Need To Complete Setup The Backend Or Your DataBase Not Connected",
+          MainRoles: {
+            role1: "Frontend Developer",
+            role2: "Backend Developer",
+            role3: "Full Stack Developer",
+          },
+          Clients_Counting: "NoData",
+          Rateing: "NoData",
+          Stats: [{ StatsNumber: "NoData", StatsLabel: "Backend Issue" }],
+          AboutUs: {
+            AboutUsTitle: "Backend Not Running Or Invalid Database Connection",
+            AboutUsDescription:
+              "No data available. Please follow the installation guide in the GitHub repo or open an issue if you need help. https://github.com/AzizDevX/dynamic-portfolio",
+            AboutSkills: [
+              "Not Found",
+              "Follow Github Guide",
+              "Ask For Help",
+              "Invalid DataBase Connection Url Or Down ??",
+              "AzizKammoun",
+              "AzizDevX",
+            ],
+          },
+          AboutUsSlides: {
+            AboutUsSlides: [
+              {
+                slideTitle: "Backend Not Running",
+                slideDescription:
+                  "No data available. Please follow the installation guide in the GitHub repo or open an issue if you need help.",
+                slideImage: "default-icon.png",
+              },
+              {
+                slideTitle: "Setup Required",
+                slideDescription:
+                  "Your backend is not connected. Check the The Guide On Github for setup instructions.",
+                slideImage: "default-icon.png",
+              },
+              {
+                slideTitle: "Need Assistance?",
+                slideDescription:
+                  "Visit our GitHub issues page to report problems : https://github.com/AzizDevX/dynamic-portfolio/issues or ask for AzizDevX The Owner Of Project For Help.",
+                slideImage: "default-icon.png",
+              },
+            ],
+          },
+          HomeLogo: "default-logo.png",
+          FeaturedProjects: [
+            {
+              _id: 1,
+              Title: "E-Commerce Platform",
+              ShortDescription:
+                "A full-stack e-commerce solution with React, Node.js, and MongoDB.",
+              Image: "/api/placeholder/400/250",
+              Project_technologies: ["React", "Node.js", "MongoDB", "Stripe"],
+              ProjectLink: "#",
+            },
+            {
+              _id: 2,
+              Title: "Task Management App",
+              ShortDescription:
+                "A collaborative task management application with real-time updates.",
+              Image: "/api/placeholder/400/250",
+              Project_technologies: [
+                "React",
+                "Socket.io",
+                "Express",
+                "PostgreSQL",
+              ],
+              ProjectLink: "#",
+            },
+            {
+              _id: 3,
+              Title: "Weather Dashboard",
+              ShortDescription:
+                "A modern weather dashboard with location-based forecasts.",
+              Image: "/api/placeholder/400/250",
+              Project_technologies: ["Vue.js", "OpenWeather API", "Chart.js"],
+              ProjectLink: "#",
+            },
+          ],
+        });
       }
     };
 
-    const fetchCvData = async () => {
-      try {
-        const response = await axios.get(`${Backend_Root_Url}/api/show/cv/`);
-        setCvData(response.data);
-      } catch (error) {
-        console.error("Error fetching CV data:", error);
-      }
-    };
-
-    fetchHomeData();
-    fetchCvData();
+    fetchData();
   }, []);
 
   const GetRoles = MainHomeData?.MainRoles
@@ -56,7 +142,7 @@ const Home = () => {
     : [];
 
   useEffect(() => {
-    if (!GetRoles || GetRoles.length === 0) return;
+    if (!GetRoles || GetRoles.length === 0 || loading) return;
 
     const currentRole = GetRoles[currentIndex];
     if (!currentRole || typeof currentRole !== "string") return;
@@ -81,7 +167,7 @@ const Home = () => {
     }, typeSpeed);
 
     return () => clearTimeout(timeout);
-  }, [typedText, currentIndex, isDeleting, GetRoles]);
+  }, [typedText, currentIndex, isDeleting, GetRoles, loading]);
 
   const handleDownloadCV = async () => {
     if (cvData?.FindCv?.Cv) {
@@ -125,6 +211,29 @@ const Home = () => {
     setSelectedProject(null);
   };
 
+  const retryFetch = () => {
+    setError(null);
+    window.location.reload();
+  };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className={styles.home}>
+        <Navbar />
+        <div className="loading-overlay">
+          <div className="loading-container">
+            <div className="loading-spinner">
+              <div className="spinner-ring"></div>
+            </div>
+            <p className="loading-text">Loading portfolio...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   const statsArray = MainHomeData?.Stats || [
     { StatsNumber: "NoData", StatsLabel: "Backend Issue" },
   ];
@@ -137,7 +246,7 @@ const Home = () => {
     "Not Found",
     "Follow Github Guide",
     "Ask For Help",
-    "Invalide DataBase Connection Url Or Down ?? ",
+    "Invalid DataBase Connection Url Or Down ??",
     "AzizKammoun",
     "AzizDevX",
   ];
@@ -146,16 +255,19 @@ const Home = () => {
       slideTitle: "Backend Not Running",
       slideDescription:
         "No data available. Please follow the installation guide in the GitHub repo or open an issue if you need help.",
+      slideImage: "default-icon.png",
     },
     {
       slideTitle: "Setup Required",
       slideDescription:
         "Your backend is not connected. Check the The Guide On Github for setup instructions.",
+      slideImage: "default-icon.png",
     },
     {
       slideTitle: "Need Assistance?",
       slideDescription:
-        "Visit our GitHub issues page to report problems : https://github.com/AzizDevX/dynamic-portfolio/issues or ask for AzizDevX The Owner Of Project For Help. ",
+        "Visit our GitHub issues page to report problems : https://github.com/AzizDevX/dynamic-portfolio/issues or ask for AzizDevX The Owner Of Project For Help.",
+      slideImage: "default-icon.png",
     },
   ];
   const SlidesIconsDir = `${Backend_Root_Url}/uploads/aboutimg/`;
@@ -173,20 +285,20 @@ const Home = () => {
     },
     {
       _id: 2,
-      Title: "E-Commerce Platform",
+      Title: "Task Management App",
       ShortDescription:
-        "A full-stack e-commerce solution with React, Node.js, and MongoDB.",
+        "A collaborative task management application with real-time updates.",
       Image: "/api/placeholder/400/250",
-      Project_technologies: ["React", "Node.js", "MongoDB", "Stripe"],
+      Project_technologies: ["React", "Socket.io", "Express", "PostgreSQL"],
       ProjectLink: "#",
     },
     {
       _id: 3,
-      Title: "E-Commerce Platform",
+      Title: "Weather Dashboard",
       ShortDescription:
-        "A full-stack e-commerce solution with React, Node.js, and MongoDB.",
+        "A modern weather dashboard with location-based forecasts.",
       Image: "/api/placeholder/400/250",
-      Project_technologies: ["React", "Node.js", "MongoDB", "Stripe"],
+      Project_technologies: ["Vue.js", "OpenWeather API", "Chart.js"],
       ProjectLink: "#",
     },
   ];
@@ -213,9 +325,7 @@ const Home = () => {
 
               <h1 className={styles.heroTitle}>
                 <span className={styles.name}>
-                  {MainHomeData
-                    ? MainHomeData.DisplayName
-                    : "You Need To Complete Setup"}
+                  {MainHomeData?.DisplayName || "Developer"}
                 </span>
                 <span className={styles.role}>
                   {typedText}
@@ -225,9 +335,8 @@ const Home = () => {
 
               <p className={styles.heroDescription}>
                 <span>
-                  {MainHomeData
-                    ? MainHomeData.description
-                    : "You Need To Complete Setup The Backend Or Your DataBase Not Connected"}
+                  {MainHomeData?.description ||
+                    "Building amazing web experiences"}
                 </span>
               </p>
 
@@ -256,7 +365,7 @@ const Home = () => {
                     style={{ opacity: 0.6, cursor: "not-allowed" }}
                   >
                     <Download size={20} />
-                    Resume Avalible Soon
+                    Resume Available Soon
                   </button>
                 )}
               </div>
@@ -265,18 +374,12 @@ const Home = () => {
                 <div className={styles.socialProofItem}>
                   <Users size={20} />
                   <span>
-                    {" "}
-                    {MainHomeData
-                      ? MainHomeData.Clients_Counting
-                      : "NoData"}{" "}
-                    Happy Clients
+                    {MainHomeData?.Clients_Counting || "0"} Happy Clients
                   </span>
                 </div>
                 <div className={styles.socialProofItem}>
                   <Star size={20} />
-                  <span>
-                    {MainHomeData ? MainHomeData.Rateing : "NoData"} Rating
-                  </span>
+                  <span>{MainHomeData?.Rateing || "5.0"} Rating</span>
                 </div>
               </div>
             </div>
@@ -284,9 +387,12 @@ const Home = () => {
             <div className={styles.heroImage}>
               <div className={styles.imageContainer}>
                 <img
-                  src={MainHomeData ? HomeLogo : "NotFound"}
-                  alt="Home image "
+                  src={HomeLogo}
+                  alt="Home image"
                   className={styles.profileImage}
+                  onError={(e) => {
+                    e.target.src = "/api/placeholder/400/400";
+                  }}
                 />
                 <div className={styles.imageGlow}></div>
               </div>
@@ -301,14 +407,8 @@ const Home = () => {
           <div className={styles.statsGrid}>
             {statsArray.map((stat, index) => (
               <div key={index} className={styles.statItem}>
-                <div className={styles.statNumber}>
-                  {MainHomeData ? stat.StatsNumber : "NoData"}
-                </div>
-                <div className={styles.statLabel}>
-                  {MainHomeData
-                    ? stat.StatsLabel
-                    : "NoData So BackEnd Not Running Or incomplete Setup Of Backend"}
-                </div>
+                <div className={styles.statNumber}>{stat.StatsNumber}</div>
+                <div className={styles.statLabel}>{stat.StatsLabel}</div>
               </div>
             ))}
           </div>
@@ -337,7 +437,13 @@ const Home = () => {
                   return (
                     <div key={index} className={styles.serviceItem}>
                       <div className={styles.serviceIcon}>
-                        <img src={SlideIcon}></img>
+                        <img
+                          src={SlideIcon}
+                          alt={AboutUsSlide.slideTitle}
+                          onError={(e) => {
+                            e.target.src = "/api/placeholder/48/48";
+                          }}
+                        />
                       </div>
                       <div className={styles.serviceContent}>
                         <h3 className={styles.serviceTitle}>
@@ -477,6 +583,42 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Show error message if API failed but we have fallback content */}
+      {error && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "20px",
+            right: "20px",
+            background: "rgba(239, 68, 68, 0.9)",
+            color: "white",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            fontSize: "14px",
+            maxWidth: "300px",
+            zIndex: 1000,
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+          }}
+        >
+          {error}
+          <button
+            onClick={retryFetch}
+            style={{
+              marginLeft: "12px",
+              background: "white",
+              color: "#ef4444",
+              border: "none",
+              padding: "4px 8px",
+              borderRadius: "4px",
+              fontSize: "12px",
+              cursor: "pointer",
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* Project Detail Modal */}
       {selectedProject && (
