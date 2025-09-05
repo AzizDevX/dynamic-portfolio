@@ -23,6 +23,24 @@ console.log(`🔧 Admin URL: ${VITE_FRONTEND_ADMIN_URL}`);
 
 const app = express();
 
+// Global no-cache middleware - applies to ALL responses
+app.use((req, res, next) => {
+  // Comprehensive no-cache headers
+  res.setHeader(
+    "Cache-Control",
+    "no-cache, no-store, must-revalidate, max-age=0, s-maxage=0"
+  );
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.setHeader("Surrogate-Control", "no-store");
+
+  // Additional headers to prevent caching
+  res.setHeader("Last-Modified", new Date().toUTCString());
+  res.setHeader("ETag", `"${Date.now()}"`);
+
+  next();
+});
+
 // Read LazyLoading CSS content
 let lazyLoadingCSS = "";
 try {
@@ -115,7 +133,20 @@ const builtAssets = findBuiltAssets();
 if (!isProduction) {
   const publicPath = resolve(__dirname, "../public");
   if (existsSync(publicPath)) {
-    app.use(express.static(publicPath));
+    app.use(
+      express.static(publicPath, {
+        // Override the global no-cache for static assets in development only
+        setHeaders: (res, path) => {
+          // Even in dev, we'll apply no-cache to be consistent
+          res.setHeader(
+            "Cache-Control",
+            "no-cache, no-store, must-revalidate, max-age=0"
+          );
+          res.setHeader("Pragma", "no-cache");
+          res.setHeader("Expires", "0");
+        },
+      })
+    );
     console.log("📦 Serving public assets from:", publicPath);
   }
 } else {
@@ -129,14 +160,14 @@ if (!isProduction) {
       express.static(distPath, {
         index: false, // Don't serve index.html automatically
         setHeaders: (res, path) => {
-          // Cache assets but not HTML files
-          if (
-            path.endsWith(".js") ||
-            path.endsWith(".css") ||
-            path.endsWith(".ico")
-          ) {
-            res.setHeader("Cache-Control", "public, max-age=31536000"); // 1 year
-          }
+          // Apply no-cache to all static files as well
+          res.setHeader(
+            "Cache-Control",
+            "no-cache, no-store, must-revalidate, max-age=0"
+          );
+          res.setHeader("Pragma", "no-cache");
+          res.setHeader("Expires", "0");
+          res.setHeader("Last-Modified", new Date().toUTCString());
         },
       })
     );
@@ -317,6 +348,9 @@ function generate404Page(webLogo) {
     <meta name="description" content="The page you are looking for could not be found." />
     <meta name="robots" content="noindex, nofollow" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     ${
       webLogo ? `<link rel="icon" type="image/x-icon" href="${webLogo}" />` : ""
     }
@@ -373,6 +407,9 @@ function generateDeniedPage(webLogo) {
     <meta name="description" content="Access to this resource is denied." />
     <meta name="robots" content="noindex, nofollow" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     ${
       webLogo ? `<link rel="icon" type="image/x-icon" href="${webLogo}" />` : ""
     }
@@ -429,6 +466,9 @@ function generateAdminLoginPage(webLogo) {
     <meta name="description" content="Admin authentication portal." />
     <meta name="robots" content="noindex, nofollow" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     ${
       webLogo ? `<link rel="icon" type="image/x-icon" href="${webLogo}" />` : ""
     }
@@ -485,6 +525,9 @@ function generateAdminDashboardPage(webLogo) {
     <meta name="description" content="Administrative dashboard and control panel." />
     <meta name="robots" content="noindex, nofollow" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     ${
       webLogo ? `<link rel="icon" type="image/x-icon" href="${webLogo}" />` : ""
     }
@@ -600,6 +643,11 @@ function generateHTML(seoData, pathname) {
       `<meta name="keywords" content="${keywords.join(", ")}" />`,
     author && `<meta name="author" content="${author}" />`,
     language && `<meta name="language" content="${language}" />`,
+
+    // Cache control meta tags
+    `<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">`,
+    `<meta http-equiv="Pragma" content="no-cache">`,
+    `<meta http-equiv="Expires" content="0">`,
 
     // Geographic meta tags
     countryCode && `<meta name="geo.region" content="${countryCode}" />`,
@@ -735,7 +783,7 @@ app.use(async (req, res, next) => {
     if (pathname === "/denied") {
       const html = generateDeniedPage(webLogo);
       res.setHeader("Content-Type", "text/html; charset=utf-8");
-      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      // No need to set cache headers here as global middleware already handles it
       return res.send(html);
     }
 
@@ -743,7 +791,6 @@ app.use(async (req, res, next) => {
     if (pathname === normalizedAdminUrl) {
       const html = generateAdminLoginPage(webLogo);
       res.setHeader("Content-Type", "text/html; charset=utf-8");
-      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
       return res.send(html);
     }
 
@@ -751,7 +798,6 @@ app.use(async (req, res, next) => {
     if (pathname === normalizedAdminDashboard) {
       const html = generateAdminDashboardPage(webLogo);
       res.setHeader("Content-Type", "text/html; charset=utf-8");
-      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
       return res.send(html);
     }
 
@@ -767,7 +813,6 @@ app.use(async (req, res, next) => {
       const html = generateHTML(seoData, pathname);
 
       res.setHeader("Content-Type", "text/html; charset=utf-8");
-      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
       return res.send(html);
     }
 
@@ -775,7 +820,6 @@ app.use(async (req, res, next) => {
     const html = generate404Page(webLogo);
     res.status(404);
     res.setHeader("Content-Type", "text/html; charset=utf-8");
-    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     return res.send(html);
   } catch (error) {
     console.error("💥 SSR Error:", error);
@@ -789,6 +833,9 @@ app.use(async (req, res, next) => {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Portfolio - Loading Error</title>
   </head>
   <body>
@@ -823,27 +870,28 @@ app.listen(port, () => {
 
   console.log(`\n🚀 SSR Server running on http://localhost:${port}`);
   console.log(`🔗 Backend API: ${Backend_Root_Url}`);
-  console.log(`🔒 Admin URL: ${normalizedAdminUrl}`);
-  console.log(`🔒 Admin Dashboard: ${normalizedAdminDashboard}`);
+  console.log(`🔐 Admin URL: ${normalizedAdminUrl}`);
+  console.log(`🔐 Admin Dashboard: ${normalizedAdminDashboard}`);
   console.log(`🚫 Denied Access: /denied`);
   if (!isProduction) {
     console.log(`🎯 Vite Dev Server: http://localhost:${vitePort}`);
   } else {
-    console.log(`🔍 Built JS: ${builtAssets.jsFile || "NOT FOUND"}`);
-    console.log(`🔍 Built CSS: ${builtAssets.cssFile || "NOT FOUND"}`);
+    console.log(`📁 Built JS: ${builtAssets.jsFile || "NOT FOUND"}`);
+    console.log(`📁 Built CSS: ${builtAssets.cssFile || "NOT FOUND"}`);
   }
-  console.log(`🔍 Environment: ${isProduction ? "Production" : "Development"}`);
+  console.log(`🔧 Environment: ${isProduction ? "Production" : "Development"}`);
   console.log(
-    `🔍 Serving from: ${
+    `📁 Serving from: ${
       isProduction ? "dist/client" : "public + Vite dev server"
     }`
   );
   console.log(`✅ LazyLoading CSS: ${lazyLoadingCSS ? "Loaded" : "Not Found"}`);
+  console.log(`🚫 Cache Policy: NO-CACHE enforced for ALL responses`);
   console.log(
     `📋 Note: ${
       isProduction
-        ? "Static assets from dist/client"
-        : "All JS modules handled by Vite dev server"
+        ? "Static assets from dist/client (no cache)"
+        : "All JS modules handled by Vite dev server (no cache)"
     }\n`
   );
   console.log(`📄 Route Mapping:`);
