@@ -34,20 +34,30 @@ const Home = () => {
         setLoading(true);
         setError(null);
 
-        // Fetch both home data and CV data
-        const [homeResponse, cvResponse] = await Promise.all([
-          axios.get(`${Backend_Root_Url}/api/home/main/data`),
-          axios.get(`${Backend_Root_Url}/api/show/cv/`),
-        ]);
-
+        const homeResponse = await axios.get(
+          `${Backend_Root_Url}/api/home/main/data`
+        );
         setMainHomeData(homeResponse.data);
-        setCvData(cvResponse.data);
+
+        try {
+          const cvResponse = await axios.get(
+            `${Backend_Root_Url}/api/show/cv/`
+          );
+          setCvData(cvResponse.data);
+        } catch (cvError) {
+          console.log(
+            "CV not found (this is normal if no CV is uploaded):",
+            cvError.message
+          );
+          setCvData(null);
+        }
+
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching home data:", error);
         setError("Failed to load data. Showing fallback content.");
         setLoading(false);
-        // Set fallback data when API fails
+
         setMainHomeData({
           DisplayName: "You Need To Complete Setup",
           description:
@@ -131,6 +141,8 @@ const Home = () => {
             },
           ],
         });
+
+        setCvData(null);
       }
     };
 
