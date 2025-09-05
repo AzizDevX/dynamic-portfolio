@@ -35,13 +35,24 @@ Router.post(
           expiresIn: "6h",
         }
       );
-      res.cookie("token", token, {
-        httpOnly: true,
-        // secure: true, // only in HTTPS
-        // sameSite: "Strict",
-        maxAge: 21600000, // 6h
-      });
 
+      if (
+        process.env.CUSTOM_DOMAIN &&
+        process.env.CUSTOM_DOMAIN.trim() !== ""
+      ) {
+        res.cookie("token", token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: "none",
+          maxAge: 21600000, // 6 hours
+          path: "/",
+        });
+      } else {
+        res.cookie("token", token, {
+          httpOnly: true,
+          maxAge: 21600000, // 6h
+        });
+      }
       const realIp =
         req.headers["cf-connecting-ip"] ||
         (req.headers["x-forwarded-for"]
@@ -78,7 +89,22 @@ Router.post(`/logout`, async (req, res) => {
       return res.status(400).json({ message: "Invalid Jwt" });
     }
     await AdminJti.deleteOne({ AdminObjectId: decoded.id, Jti: decoded.jti });
-    res.clearCookie("token");
+
+    if (process.env.CUSTOM_DOMAIN && process.env.CUSTOM_DOMAIN.trim() !== "") {
+      res.clearCookie("token", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: "/",
+        maxAge: 0,
+      });
+    } else {
+      res.clearCookie("token", {
+        httpOnly: true,
+        maxAge: 0,
+      });
+    }
+
     return res.status(200).json({ message: "Logged out successfully" });
   } catch (err) {
     return res.status(401).json({ message: "Invalid or expired token" });
