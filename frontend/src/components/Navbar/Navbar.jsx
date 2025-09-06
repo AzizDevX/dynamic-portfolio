@@ -82,7 +82,7 @@ const Navbar = () => {
             </a>
           ))}
           <a
-            href="#contact"
+            href="contact"
             className={styles.mobileCtaButton}
             onClick={() => setIsMenuOpen(false)}
           >

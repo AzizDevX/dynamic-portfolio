@@ -142,11 +142,27 @@ const SlideNavbar = ({
       <div className={styles.sidebarFooter}>
         <div
           className={styles.logoutBtn}
-          onClick={onLogout}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onLogout();
+          }}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            onLogout();
+          }}
+          onTouchStart={(e) => {
+            e.preventDefault();
+            onLogout();
+          }}
           style={{
             cursor: "pointer",
             userSelect: "none",
             WebkitUserSelect: "none",
+            WebkitTapHighlightColor: "rgba(59, 130, 246, 0.2)",
+            touchAction: "manipulation",
+            position: "relative",
+            zIndex: 10,
           }}
         >
           <LogOut size={20} />
