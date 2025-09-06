@@ -1,7 +1,7 @@
 {
   "name": "dynamic-portfolio",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.1.0",
   "type": "module",
   "homepage": "/",
   "scripts": {
@@ -9,6 +9,7 @@
     "build": "vite build",
     "start-frontend": "cross-env NODE_ENV=production node src/simple-server.js"
   },
+  "author": "Aziz Kammoun",
   "dependencies": {
     "@dr.pogodin/react-helmet": "^3.0.2",
     "@hookform/resolvers": "^5.0.1",
