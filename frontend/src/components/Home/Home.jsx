@@ -112,7 +112,8 @@ const Home = () => {
               Title: "E-Commerce Platform",
               ShortDescription:
                 "A full-stack e-commerce solution with React, Node.js, and MongoDB.",
-              Image: "/api/placeholder/400/250",
+              Image:
+                "https://raw.githubusercontent.com/AzizDevX/dynamic-portfolio/main/public/notfound/ProjectNotFound.png",
               Project_technologies: ["React", "Node.js", "MongoDB", "Stripe"],
               ProjectLink: "#",
             },
@@ -121,7 +122,8 @@ const Home = () => {
               Title: "Task Management App",
               ShortDescription:
                 "A collaborative task management application with real-time updates.",
-              Image: "/api/placeholder/400/250",
+              Image:
+                "https://raw.githubusercontent.com/AzizDevX/dynamic-portfolio/main/public/notfound/ProjectNotFound.png",
               Project_technologies: [
                 "React",
                 "Socket.io",
@@ -135,7 +137,8 @@ const Home = () => {
               Title: "Weather Dashboard",
               ShortDescription:
                 "A modern weather dashboard with location-based forecasts.",
-              Image: "/api/placeholder/400/250",
+              Image:
+                "https://raw.githubusercontent.com/AzizDevX/dynamic-portfolio/main/public/notfound/ProjectNotFound.png",
               Project_technologies: ["Vue.js", "OpenWeather API", "Chart.js"],
               ProjectLink: "#",
             },
@@ -291,7 +294,8 @@ const Home = () => {
       Title: "E-Commerce Platform",
       ShortDescription:
         "A full-stack e-commerce solution with React, Node.js, and MongoDB.",
-      Image: "/api/placeholder/400/250",
+      Image:
+        "https://raw.githubusercontent.com/AzizDevX/dynamic-portfolio/main/public/notfound/ProjectNotFound.png",
       Project_technologies: ["React", "Node.js", "MongoDB", "Stripe"],
       ProjectLink: "#",
     },
@@ -300,7 +304,8 @@ const Home = () => {
       Title: "Task Management App",
       ShortDescription:
         "A collaborative task management application with real-time updates.",
-      Image: "/api/placeholder/400/250",
+      Image:
+        "https://raw.githubusercontent.com/AzizDevX/dynamic-portfolio/main/public/notfound/ProjectNotFound.png",
       Project_technologies: ["React", "Socket.io", "Express", "PostgreSQL"],
       ProjectLink: "#",
     },
@@ -309,7 +314,8 @@ const Home = () => {
       Title: "Weather Dashboard",
       ShortDescription:
         "A modern weather dashboard with location-based forecasts.",
-      Image: "/api/placeholder/400/250",
+      Image:
+        "https://raw.githubusercontent.com/AzizDevX/dynamic-portfolio/main/public/notfound/ProjectNotFound.png",
       Project_technologies: ["Vue.js", "OpenWeather API", "Chart.js"],
       ProjectLink: "#",
     },
@@ -403,7 +409,8 @@ const Home = () => {
                   alt="Home image"
                   className={styles.profileImage}
                   onError={(e) => {
-                    e.target.src = "/api/placeholder/400/400";
+                    e.target.src =
+                      "https://raw.githubusercontent.com/AzizDevX/dynamic-portfolio/main/public/notfound/LogoNotFound.png";
                   }}
                 />
                 <div className={styles.imageGlow}></div>
@@ -453,7 +460,8 @@ const Home = () => {
                           src={SlideIcon}
                           alt={AboutUsSlide.slideTitle}
                           onError={(e) => {
-                            e.target.src = "/api/placeholder/48/48";
+                            e.target.src =
+                              "https://raw.githubusercontent.com/AzizDevX/dynamic-portfolio/main/public/notfound/LogoNotFound.png";
                           }}
                         />
                       </div>
@@ -499,7 +507,8 @@ const Home = () => {
               <div key={project._id} className={styles.projectCard}>
                 <div className={styles.projectImage}>
                   {project.Image &&
-                  project.Image !== "/api/placeholder/400/250" &&
+                  project.Image !==
+                    "https://raw.githubusercontent.com/AzizDevX/dynamic-portfolio/main/public/notfound/ProjectNotFound.png" &&
                   project.Image !== "Nothing" ? (
                     <img
                       src={`${Backend_Root_Url}/uploads/projectsimg/${project.Image}`}
@@ -643,7 +652,8 @@ const Home = () => {
               selectedProject.Description || selectedProject.ShortDescription,
             image:
               selectedProject.Image &&
-              selectedProject.Image !== "/api/placeholder/400/250"
+              selectedProject.Image !==
+                "https://raw.githubusercontent.com/AzizDevX/dynamic-portfolio/main/public/notfound/ProjectNotFound.png"
                 ? `${Backend_Root_Url}/uploads/projectsimg/${selectedProject.Image}`
                 : null,
             technologies: selectedProject.Project_technologies || [],
