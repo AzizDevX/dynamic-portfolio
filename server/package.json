@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start-backend": "node index.js",
+    "start-server": "node index.js",
     "dev": "nodemon index.js"
   },
   "keywords": [],

@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite --host localhost --port 3000",
     "build": "vite build",
-    "start-frontend": "cross-env NODE_ENV=production node src/simple-server.js"
+    "start-client": "cross-env NODE_ENV=production node src/simple-server.js"
   },
   "author": "Aziz Kammoun",
   "dependencies": {
