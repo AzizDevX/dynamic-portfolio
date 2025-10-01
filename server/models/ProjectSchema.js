@@ -53,6 +53,14 @@ const ProjectSchema = new mongoose.Schema(
       ],
       default: [],
     },
+    DisplayOrder: {
+      type: Number,
+      // uinque: true,
+    },
+    FeaturedDisplayOrder: {
+      type: Number,
+      // uinque: true,
+    },
     Featured: {
       type: Boolean,
       default: false,

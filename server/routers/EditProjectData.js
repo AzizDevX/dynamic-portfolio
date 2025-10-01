@@ -26,7 +26,9 @@ Router.post(
         ProjectLink: req.body.ProjectLink,
         Project_technologies: req.body.Project_technologies,
         Porject_Status: req.body.Porject_Status,
+        DisplayOrder: req.body.DisplayOrder,
         Featured: req.body.Featured,
+        FeaturedDisplayOrder: req.body.FeaturedDisplayOrder,
       });
       const savedProject = await NewProject.save();
       return res.status(201).json(savedProject);
@@ -147,7 +149,9 @@ Router.get("/show/projects", async (req, res) => {
       ProjectLiveUrl: doc.ProjectLiveUrl,
       Project_technologies: doc.Project_technologies,
       Porject_Status: doc.Porject_Status,
+      DisplayOrder: doc.DisplayOrder,
       Featured: doc.Featured,
+      FeaturedDisplayOrder: doc.FeaturedDisplayOrder,
     }));
     return res.status(200).json(FilteredData);
   } catch (err) {

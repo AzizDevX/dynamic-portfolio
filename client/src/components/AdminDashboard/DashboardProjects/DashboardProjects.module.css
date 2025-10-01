@@ -239,6 +239,7 @@
   text-transform: capitalize;
   background-color: var(--bg-hover);
   color: var(--text-secondary);
+  margin-right: 5px;
 }
 
 .statusCompleted {
@@ -1806,4 +1807,102 @@
   content: "• "; /* real bullet */
   color: var(--accent-primary);
   font-weight: bold;
+}
+
+.helpText {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  display: block;
+}
+
+.infoBox {
+  background: #e3f2fd;
+  border-left: 3px solid #2196f3;
+  padding: 12px;
+  border-radius: 4px;
+  margin-top: 16px;
+}
+
+.infoBox p {
+  margin: 0;
+  font-size: 14px;
+  color: #1976d2;
+}
+
+.positionSelect {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.positionSelect:focus {
+  outline: none;
+  border-color: #2196f3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+}
+
+.positionBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 10px;
+
+  background: linear-gradient(
+    135deg,
+    rgba(125, 211, 252, 0.15),
+    /* light cyan-blue */ rgba(56, 189, 248, 0.25) /* sky teal */
+  );
+  color: #0ea5e9; /* cyan-500 */
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.2);
+  transition: var(--transition-fast);
+}
+
+.positionBadge:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(125, 211, 252, 0.25),
+    rgba(56, 189, 248, 0.35)
+  );
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+  transform: translateY(-1px);
+}
+
+.FeaturedpositionBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: linear-gradient(
+    135deg,
+    rgba(251, 146, 60, 0.15),
+    rgba(249, 115, 22, 0.25)
+  );
+  margin-top: 10px;
+  color: #fb923c;
+  border: 1px solid rgba(251, 146, 60, 0.4);
+  box-shadow: 0 2px 8px rgba(251, 146, 60, 0.2);
+  transition: var(--transition-fast);
+}
+
+.FeaturedpositionBadge:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(251, 146, 60, 0.25),
+    rgba(249, 115, 22, 0.35)
+  );
+  box-shadow: 0 4px 12px rgba(251, 146, 60, 0.3);
+  transform: translateY(-1px);
 }

@@ -15,6 +15,23 @@ const ProjectsPage = () => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Smart sorting function that handles all edge cases
+  const sortProjectsSmartly = (projectsList) => {
+    return [...projectsList].sort((a, b) => {
+      // Handle null/undefined DisplayOrder - put them at the end
+      const orderA = a.DisplayOrder ?? 999999;
+      const orderB = b.DisplayOrder ?? 999999;
+
+      // Primary sort by DisplayOrder
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+
+      // Tiebreaker for duplicates or both null - sort by ID to maintain consistency
+      return a.id.localeCompare(b.id);
+    });
+  };
+
   useEffect(() => {
     const fetchProjects = async () => {
       try {
@@ -36,13 +53,16 @@ const ProjectsPage = () => {
               ? null
               : `${Backend_Root_Url}/uploads/projectsimg/${project.Image}`,
           technologies: project.Project_technologies || [],
-          category: "Project", // Default category since not provided by API
+          category: "Project",
           status: project.Porject_Status,
           demoUrl: project.ProjectLiveUrl || "",
           featured: project.Featured,
+          DisplayOrder: project.DisplayOrder ?? null, // Preserve DisplayOrder
         }));
 
-        setProjects(transformedProjects);
+        // Apply smart sorting
+        const sortedProjects = sortProjectsSmartly(transformedProjects);
+        setProjects(sortedProjects);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching projects:", err);

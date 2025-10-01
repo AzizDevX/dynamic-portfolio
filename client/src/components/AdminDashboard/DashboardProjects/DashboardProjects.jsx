@@ -76,6 +76,326 @@ const DashboardProjects = () => {
     []
   );
 
+  const sortProjectsSmartly = useCallback((projectsList) => {
+    return [...projectsList].sort((a, b) => {
+      const orderA = a.DisplayOrder ?? 999999;
+      const orderB = b.DisplayOrder ?? 999999;
+
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+
+      return a.projectId.localeCompare(b.projectId);
+    });
+  }, []);
+
+  // Get next available position for new project (DisplayOrder)
+  const getNextDisplayOrder = useCallback(() => {
+    const projectsWithOrder = projects.filter((p) => p.DisplayOrder !== null);
+
+    if (projectsWithOrder.length === 0) {
+      return 0;
+    }
+
+    const maxOrder = Math.max(...projectsWithOrder.map((p) => p.DisplayOrder));
+    return maxOrder + 1;
+  }, [projects]);
+
+  const getNextFeaturedDisplayOrder = useCallback(() => {
+    const featuredProjects = projects.filter(
+      (p) => p.featured === true && p.FeaturedDisplayOrder !== null
+    );
+
+    if (featuredProjects.length === 0) {
+      return 0;
+    }
+
+    const maxOrder = Math.max(
+      ...featuredProjects.map((p) => p.FeaturedDisplayOrder)
+    );
+    return maxOrder + 1;
+  }, [projects]);
+
+  const getValidPositionRange = useCallback(
+    (currentProjectId = null) => {
+      const projectsWithPositions = projects.filter(
+        (p) => p.DisplayOrder !== null
+      );
+
+      if (projectsWithPositions.length === 0) {
+        return { min: 1, max: 1, available: [1] };
+      }
+
+      const totalProjects = projectsWithPositions.length;
+
+      const currentProject = projects.find(
+        (p) => p.projectId === currentProjectId
+      );
+      const currentPositionDB = currentProject?.DisplayOrder;
+      const currentPositionUser =
+        currentPositionDB !== null && currentPositionDB !== undefined
+          ? currentPositionDB + 1
+          : null;
+
+      const available = [];
+      for (let i = 1; i <= totalProjects; i++) {
+        if (i !== currentPositionUser) {
+          available.push(i);
+        }
+      }
+
+      return {
+        min: 1,
+        max: totalProjects,
+        available: available,
+        currentPosition: currentPositionUser,
+      };
+    },
+    [projects]
+  );
+
+  const getValidFeaturedPositionRange = useCallback(
+    (currentProjectId = null) => {
+      const featuredProjects = projects.filter(
+        (p) => p.featured === true && p.FeaturedDisplayOrder !== null
+      );
+
+      if (featuredProjects.length === 0) {
+        return { min: 1, max: 1, available: [1] };
+      }
+
+      const totalFeatured = featuredProjects.length;
+
+      const currentProject = projects.find(
+        (p) => p.projectId === currentProjectId
+      );
+      const currentFeaturedPositionDB = currentProject?.FeaturedDisplayOrder;
+      const currentFeaturedPositionUser =
+        currentFeaturedPositionDB !== null &&
+        currentFeaturedPositionDB !== undefined
+          ? currentFeaturedPositionDB + 1
+          : null;
+
+      const available = [];
+      for (let i = 1; i <= totalFeatured; i++) {
+        if (i !== currentFeaturedPositionUser) {
+          available.push(i);
+        }
+      }
+
+      return {
+        min: 1,
+        max: totalFeatured,
+        available: available,
+        currentPosition: currentFeaturedPositionUser,
+      };
+    },
+    [projects]
+  );
+
+  const validatePosition = useCallback(
+    (userPosition, currentProjectId = null) => {
+      if (
+        userPosition === null ||
+        userPosition === undefined ||
+        userPosition === ""
+      ) {
+        return { valid: true, message: "" };
+      }
+
+      const posNum = parseInt(userPosition);
+
+      if (isNaN(posNum) || posNum < 1) {
+        return { valid: false, message: "Position must be 1 or higher" };
+      }
+
+      const { max, available, currentPosition } =
+        getValidPositionRange(currentProjectId);
+
+      if (posNum === currentPosition) {
+        return { valid: true, message: "" };
+      }
+
+      if (posNum > max) {
+        return {
+          valid: false,
+          message: `Position ${posNum} doesn't exist. You have ${max} project${
+            max > 1 ? "s" : ""
+          }`,
+        };
+      }
+
+      if (!available.includes(posNum)) {
+        return {
+          valid: false,
+          message: `Position ${posNum} is not available`,
+        };
+      }
+
+      return { valid: true, message: "" };
+    },
+    [getValidPositionRange]
+  );
+
+  const validateFeaturedPosition = useCallback(
+    (userPosition, currentProjectId = null) => {
+      if (
+        userPosition === null ||
+        userPosition === undefined ||
+        userPosition === ""
+      ) {
+        return { valid: true, message: "" };
+      }
+
+      const posNum = parseInt(userPosition);
+
+      if (isNaN(posNum) || posNum < 1) {
+        return {
+          valid: false,
+          message: "Featured position must be 1 or higher",
+        };
+      }
+
+      const { max, available, currentPosition } =
+        getValidFeaturedPositionRange(currentProjectId);
+
+      if (posNum === currentPosition) {
+        return { valid: true, message: "" };
+      }
+
+      if (posNum > max) {
+        return {
+          valid: false,
+          message: `Featured position ${posNum} doesn't exist. You have ${max} featured project${
+            max > 1 ? "s" : ""
+          }`,
+        };
+      }
+
+      if (!available.includes(posNum)) {
+        return {
+          valid: false,
+          message: `Featured position ${posNum} is not available`,
+        };
+      }
+
+      return { valid: true, message: "" };
+    },
+    [getValidFeaturedPositionRange]
+  );
+
+  const forceReorganizeDisplayOrders = useCallback(async () => {
+    try {
+      const response = await axios.get(
+        `${Backend_Root_Url}/api/show/projects`,
+        { withCredentials: true }
+      );
+
+      const currentProjects = response.data.map((project) => ({
+        projectId: project._id,
+        title: project.Title,
+        DisplayOrder: project.DisplayOrder ?? null,
+      }));
+
+      const projectsWithOrder = currentProjects
+        .filter((p) => p.DisplayOrder !== null && p.DisplayOrder !== undefined)
+        .sort((a, b) => a.DisplayOrder - b.DisplayOrder);
+
+      if (projectsWithOrder.length === 0) {
+        console.log("No projects with DisplayOrder to reorganize");
+        return;
+      }
+
+      console.log(
+        "FORCE reorganizing ALL DisplayOrder sequentially (0,1,2,3...)"
+      );
+
+      for (let index = 0; index < projectsWithOrder.length; index++) {
+        const project = projectsWithOrder[index];
+
+        if (project.DisplayOrder !== index) {
+          console.log(
+            `Updating ${project.title}: DisplayOrder ${project.DisplayOrder} -> ${index}`
+          );
+
+          await axios.put(
+            `${Backend_Root_Url}/api/projects/edit/${project.projectId}?folder=projectsimg`,
+            { DisplayOrder: index },
+            {
+              withCredentials: true,
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+        }
+      }
+
+      console.log("✅ All DisplayOrder reorganized successfully (0,1,2,3...)");
+    } catch (err) {
+      console.error("❌ Error reorganizing DisplayOrder:", err);
+      throw err;
+    }
+  }, []);
+
+  const forceReorganizeFeaturedDisplayOrders = useCallback(async () => {
+    try {
+      const response = await axios.get(
+        `${Backend_Root_Url}/api/show/projects`,
+        { withCredentials: true }
+      );
+
+      const currentProjects = response.data.map((project) => ({
+        projectId: project._id,
+        title: project.Title,
+        featured: project.Featured,
+        FeaturedDisplayOrder: project.FeaturedDisplayOrder ?? null,
+      }));
+
+      const featuredProjects = currentProjects
+        .filter(
+          (p) =>
+            p.featured === true &&
+            p.FeaturedDisplayOrder !== null &&
+            p.FeaturedDisplayOrder !== undefined
+        )
+        .sort((a, b) => a.FeaturedDisplayOrder - b.FeaturedDisplayOrder);
+
+      if (featuredProjects.length === 0) {
+        console.log("No featured projects to reorganize");
+        return;
+      }
+
+      console.log(
+        "FORCE reorganizing ALL FeaturedDisplayOrder sequentially (0,1,2,3...)"
+      );
+
+      for (let index = 0; index < featuredProjects.length; index++) {
+        const project = featuredProjects[index];
+
+        if (project.FeaturedDisplayOrder !== index) {
+          console.log(
+            `Updating ${project.title}: FeaturedDisplayOrder ${project.FeaturedDisplayOrder} -> ${index}`
+          );
+
+          await axios.put(
+            `${Backend_Root_Url}/api/projects/edit/${project.projectId}?folder=projectsimg`,
+            { FeaturedDisplayOrder: index },
+            {
+              withCredentials: true,
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+        }
+      }
+
+      console.log(
+        "✅ All FeaturedDisplayOrder reorganized successfully (0,1,2,3...)"
+      );
+    } catch (err) {
+      console.error("❌ Error reorganizing FeaturedDisplayOrder:", err);
+      throw err;
+    }
+  }, []);
+
   const getStatusClassName = useCallback((status) => {
     if (!status) return styles.statusDefault;
 
@@ -110,20 +430,13 @@ const DashboardProjects = () => {
     if (!text) return "";
 
     let formattedText = text
-      // Convert **text** to bold
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-      // Convert *text* to italic
       .replace(/\*(.*?)\*/g, "<em>$1</em>")
-      // Convert ## Heading to h3
       .replace(/^## (.*$)/gm, "<h3>$1</h3>")
-      // Convert # Heading to h2
       .replace(/^# (.*$)/gm, "<h2>$1</h2>")
-      // Convert * List items to li (but not ** bold)
       .replace(/^(?!\*\*)\* (.*$)/gm, "<li>$1</li>")
-      // Convert line breaks to br tags
       .replace(/\n/g, "<br/>");
 
-    // Wrap consecutive li elements in ul
     formattedText = formattedText.replace(
       /(<li>.*?<\/li>)(<br\/>)*(<li>.*?<\/li>)*/gs,
       (match) => {
@@ -132,7 +445,6 @@ const DashboardProjects = () => {
       }
     );
 
-    // Clean up extra br tags after lists and headings
     formattedText = formattedText
       .replace(/<\/(ul|h[23])><br\/>/g, "</$1>")
       .replace(/<br\/><(h[23]|ul)>/g, "<$1>");
@@ -175,7 +487,6 @@ const DashboardProjects = () => {
     return formattedText;
   }, []);
 
-  // Rich text formatting functions with smart assistance
   const insertFormatting = useCallback(
     (before, after = "", smartMode = false) => {
       const textarea = textareaRef.current;
@@ -189,12 +500,10 @@ const DashboardProjects = () => {
       let newCursorPos;
 
       if (smartMode && selectedText) {
-        // Smart mode: just wrap selected text
         replacement = before + selectedText + after;
         newCursorPos =
           start + before.length + selectedText.length + after.length;
       } else if (smartMode && !selectedText) {
-        // Smart mode: insert placeholder text
         const placeholders = {
           "**": "Bold text",
           "*": "Italic text",
@@ -205,7 +514,6 @@ const DashboardProjects = () => {
         replacement = before + placeholder + after;
         newCursorPos = start + before.length;
       } else {
-        // Normal mode
         replacement = before + selectedText + after;
         newCursorPos = selectedText
           ? start + before.length + selectedText.length + after.length
@@ -222,7 +530,6 @@ const DashboardProjects = () => {
         description: newValue,
       }));
 
-      // Set cursor position after formatting
       setTimeout(() => {
         textarea.focus();
         if (smartMode && !selectedText) {
@@ -240,13 +547,11 @@ const DashboardProjects = () => {
     []
   );
 
-  // Smart formatting functions
   const handleBold = () => insertFormatting("**", "**", true);
   const handleItalic = () => insertFormatting("*", "*", true);
   const handleHeading = () => insertFormatting("## ", "", true);
   const handleList = () => insertFormatting("* ", "", true);
 
-  // Auto-format on Enter key for lists
   const handleKeyDown = useCallback((e) => {
     if (e.key === "Enter") {
       const textarea = textareaRef.current;
@@ -255,12 +560,10 @@ const DashboardProjects = () => {
       const start = textarea.selectionStart;
       const value = textarea.value;
 
-      // Find the current line
       const beforeCursor = value.substring(0, start);
       const lines = beforeCursor.split("\n");
       const currentLine = lines[lines.length - 1];
 
-      // Check if current line is a list item
       const listMatch = currentLine.match(/^(\s*\* )(.*)/);
       if (listMatch) {
         e.preventDefault();
@@ -268,7 +571,6 @@ const DashboardProjects = () => {
         const content = listMatch[2];
 
         if (content.trim() === "") {
-          // Empty list item, remove it and exit list mode
           const newValue =
             value.substring(0, start - currentLine.length) +
             value.substring(start);
@@ -285,7 +587,6 @@ const DashboardProjects = () => {
             );
           }, 0);
         } else {
-          // Add new list item
           const newValue =
             value.substring(0, start) + "\n" + indent + value.substring(start);
           setFormData((prev) => ({
@@ -305,34 +606,33 @@ const DashboardProjects = () => {
     }
   }, []);
 
-  // Insert quick templates
   const insertTemplate = useCallback((template) => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
     const templates = {
-      dashboard: `## 📊 Project Name
+      dashboard: `## Project Name
 A comprehensive dashboard built for [purpose], featuring:
-* 📈 **Feature 1** – Description here
-* 📦 **Feature 2** – Description here
-* 👥 **Feature 3** – Description here
+* Feature 1 - Description here
+* Feature 2 - Description here
+* Feature 3 - Description here
 
-✨ Includes **modern design** and **responsive layout**.`,
+Includes **modern design** and **responsive layout**.`,
 
-      designer: `## 🎨 BMW Poster Project
+      designer: `## BMW Poster Project
 A high-end design project that includes:
-* 🎯 **Striking Visuals** – Sleek automotive photography and dynamic composition
-* ✏️ **Creative Typography** – Bold fonts and brand-aligned style
-* 🖌️ **Color & Mood** – Premium color palette reflecting BMW elegance
-* 🗂️ **Organized Layers** – Easy to modify and adapt for different formats
+* **Striking Visuals** - Sleek automotive photography and dynamic composition
+* **Creative Typography** - Bold fonts and brand-aligned style
+* **Color & Mood** - Premium color palette reflecting BMW elegance
+* **Organized Layers** - Easy to modify and adapt for different formats
 
 Crafted with precision, creativity, and attention to detail for a stunning brand showcase.`,
 
-      mobile: `## 📱 Mobile Application
+      mobile: `## Mobile Application
 Cross-platform mobile app featuring:
-* 🎨 **Modern UI/UX** – Intuitive user interface
-* ⚡ **Performance** – Fast and responsive
-* 🔄 **Sync** – Real-time data synchronization
+* **Modern UI/UX** - Intuitive user interface
+* **Performance** - Fast and responsive
+* **Sync** - Real-time data synchronization
 
 Available for iOS and Android platforms.`,
     };
@@ -358,7 +658,6 @@ Available for iOS and Android platforms.`,
     }, 0);
   }, []);
 
-  // Load projects on component mount
   useEffect(() => {
     loadProjects();
   }, []);
@@ -373,15 +672,15 @@ Available for iOS and Android platforms.`,
         }
       );
 
-      // Map backend data to frontend structure
       const mappedProjects = response.data.map((project, index) => ({
-        projectId: project._id || index + 1, // Use MongoDB _id if available
+        projectId: project._id || index + 1,
         title: project.Title,
         shortDescription: project.ShortDescription,
         description: project.Description,
-        imageUrl: project.Image
-          ? `${Backend_Root_Url}/uploads/projectsimg/${project.Image}`
-          : "",
+        imageUrl:
+          project.Image && project.Image !== "Nothing"
+            ? `${Backend_Root_Url}/uploads/projectsimg/${project.Image}`
+            : "",
         imageFile: null,
         technoligue: Array.isArray(project.Project_technologies)
           ? project.Project_technologies
@@ -389,9 +688,12 @@ Available for iOS and Android platforms.`,
         projectStatus: project.Porject_Status,
         featured: project.Featured,
         liveUrl: project.ProjectLiveUrl || "",
+        DisplayOrder: project.DisplayOrder ?? null,
+        FeaturedDisplayOrder: project.FeaturedDisplayOrder ?? null,
       }));
 
-      setProjects(mappedProjects);
+      const sortedProjects = sortProjectsSmartly(mappedProjects);
+      setProjects(sortedProjects);
       setError(null);
       setImageErrors({});
     } catch (err) {
@@ -405,9 +707,8 @@ Available for iOS and Android platforms.`,
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [sortProjectsSmartly]);
 
-  // Handle image load errors
   const handleImageError = useCallback((projectId) => {
     setImageErrors((prev) => ({
       ...prev,
@@ -415,7 +716,6 @@ Available for iOS and Android platforms.`,
     }));
   }, []);
 
-  // Helper function to check if image URL is valid and not empty
   const isValidImageUrl = useCallback((imageUrl) => {
     return (
       imageUrl &&
@@ -425,7 +725,6 @@ Available for iOS and Android platforms.`,
     );
   }, []);
 
-  // Toggle description expansion
   const toggleDescription = useCallback((projectId) => {
     setExpandedDescriptions((prev) => ({
       ...prev,
@@ -433,7 +732,6 @@ Available for iOS and Android platforms.`,
     }));
   }, []);
 
-  // Slide panel state
   const [slidePanel, setSlidePanel] = useState({
     isOpen: false,
     type: "",
@@ -441,7 +739,6 @@ Available for iOS and Android platforms.`,
     title: "",
   });
 
-  // Delete confirmation state
   const [deleteConfirmation, setDeleteConfirmation] = useState({
     isOpen: false,
     type: "",
@@ -449,15 +746,12 @@ Available for iOS and Android platforms.`,
     itemName: "",
   });
 
-  // Form states for slide panel
   const [formData, setFormData] = useState({});
   const [dragActive, setDragActive] = useState(false);
   const [formErrors, setFormErrors] = useState({});
 
-  // File input refs
   const fileInputRef = useRef(null);
 
-  // Form validation
   const validateForm = useCallback(() => {
     const errors = {};
 
@@ -486,11 +780,40 @@ Available for iOS and Android platforms.`,
       errors.liveUrl = "Please enter a valid URL or IP address";
     }
 
+    if (
+      formData.DisplayOrderUser !== null &&
+      formData.DisplayOrderUser !== undefined &&
+      formData.DisplayOrderUser !== ""
+    ) {
+      const validation = validatePosition(
+        formData.DisplayOrderUser,
+        formData.projectId
+      );
+      if (!validation.valid) {
+        errors.DisplayOrder = validation.message;
+      }
+    }
+
+    if (formData.featured === true) {
+      if (
+        formData.FeaturedDisplayOrderUser !== null &&
+        formData.FeaturedDisplayOrderUser !== undefined &&
+        formData.FeaturedDisplayOrderUser !== ""
+      ) {
+        const validation = validateFeaturedPosition(
+          formData.FeaturedDisplayOrderUser,
+          formData.projectId
+        );
+        if (!validation.valid) {
+          errors.FeaturedDisplayOrder = validation.message;
+        }
+      }
+    }
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
-  }, [formData]);
+  }, [formData, validatePosition, validateFeaturedPosition]);
 
-  // Slide panel functions
   const openSlidePanel = useCallback((type, data = null, title = "") => {
     setSlidePanel({
       isOpen: true,
@@ -499,7 +822,6 @@ Available for iOS and Android platforms.`,
       title,
     });
 
-    // Initialize form data properly
     if (data) {
       setFormData({
         ...data,
@@ -509,10 +831,22 @@ Available for iOS and Android platforms.`,
           data.technoligue.length > 0
             ? data.technoligue.join(", ")
             : "",
+        originalDisplayOrder: data.DisplayOrder,
+        originalFeaturedDisplayOrder: data.FeaturedDisplayOrder,
+        DisplayOrderUser:
+          data.DisplayOrder !== null && data.DisplayOrder !== undefined
+            ? data.DisplayOrder + 1
+            : null,
+        FeaturedDisplayOrderUser:
+          data.FeaturedDisplayOrder !== null &&
+          data.FeaturedDisplayOrder !== undefined
+            ? data.FeaturedDisplayOrder + 1
+            : null,
       });
     } else {
       setFormData({
         projectStatus: "",
+        featured: false,
       });
     }
 
@@ -532,7 +866,6 @@ Available for iOS and Android platforms.`,
     setIsPreviewMode(false);
   }, []);
 
-  // Delete confirmation functions
   const openDeleteConfirmation = useCallback((type, id, itemName) => {
     setDeleteConfirmation({
       isOpen: true,
@@ -555,25 +888,48 @@ Available for iOS and Android platforms.`,
     const { type, id } = deleteConfirmation;
 
     if (type === "project") {
+      const deletedProject = projects.find((p) => p.projectId === id);
+      const wasFeatured = deletedProject?.featured;
+
       try {
         setLoading(true);
+
         await axios.delete(`${Backend_Root_Url}/api/projects/delete/${id}`, {
           withCredentials: true,
         });
-        await loadProjects(); // Reload projects after deletion
+
+        console.log("Project deleted successfully");
+
+        await forceReorganizeDisplayOrders();
+
+        if (wasFeatured) {
+          console.log(
+            "Deleted project was featured - reorganizing featured projects"
+          );
+          await forceReorganizeFeaturedDisplayOrders();
+        }
+
+        await loadProjects();
         setError(null);
       } catch (err) {
         setError("Failed to delete project");
         console.error("Error deleting project:", err);
+        await loadProjects();
       } finally {
         setLoading(false);
       }
     }
 
     closeDeleteConfirmation();
-  }, [deleteConfirmation, loadProjects, closeDeleteConfirmation]);
+  }, [
+    deleteConfirmation,
+    projects,
+    loadProjects,
+    closeDeleteConfirmation,
+    forceReorganizeDisplayOrders,
+    forceReorganizeFeaturedDisplayOrders,
+  ]);
 
-  // File upload handlers
   const handleDrag = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -649,7 +1005,6 @@ Available for iOS and Android platforms.`,
     [formData.projectId, loadProjects]
   );
 
-  // CRUD operations
   const handleSave = useCallback(async () => {
     if (!validateForm()) {
       return;
@@ -662,18 +1017,16 @@ Available for iOS and Android platforms.`,
 
       const formDataToSend = new FormData();
 
-      // Append all project data to FormData
       formDataToSend.append("Title", formData.title);
       formDataToSend.append("ShortDescription", formData.shortDescription);
       formDataToSend.append("Description", formData.description);
       formDataToSend.append("ProjectLiveUrl", formData.liveUrl || "");
 
-      // Process technologies - split by comma and trim whitespace
       const technologies = formData.technoligue
         ? formData.technoligue
             .split(",")
-            .map((tech) => tech.trim()) // Just trim whitespace
-            .filter((tech) => tech) // Remove empty strings
+            .map((tech) => tech.trim())
+            .filter((tech) => tech)
         : [];
 
       technologies.forEach((tech) =>
@@ -682,7 +1035,48 @@ Available for iOS and Android platforms.`,
       formDataToSend.append("Porject_Status", formData.projectStatus);
       formDataToSend.append("Featured", formData.featured || false);
 
-      // Append image file if exists
+      if (type === "addProject") {
+        const nextOrder = getNextDisplayOrder();
+        formDataToSend.append("DisplayOrder", nextOrder);
+      } else if (type === "editProject") {
+        if (
+          formData.DisplayOrderUser !== null &&
+          formData.DisplayOrderUser !== undefined &&
+          formData.DisplayOrderUser !== ""
+        ) {
+          const dbPosition = parseInt(formData.DisplayOrderUser) - 1;
+          formDataToSend.append("DisplayOrder", dbPosition);
+        } else {
+          formDataToSend.append("DisplayOrder", "");
+        }
+      }
+
+      if (type === "addProject") {
+        if (formData.featured === true) {
+          const nextFeaturedOrder = getNextFeaturedDisplayOrder();
+          formDataToSend.append("FeaturedDisplayOrder", nextFeaturedOrder);
+        } else {
+          formDataToSend.append("FeaturedDisplayOrder", "");
+        }
+      } else if (type === "editProject") {
+        if (formData.featured === true) {
+          if (
+            formData.FeaturedDisplayOrderUser !== null &&
+            formData.FeaturedDisplayOrderUser !== undefined &&
+            formData.FeaturedDisplayOrderUser !== ""
+          ) {
+            const dbFeaturedPosition =
+              parseInt(formData.FeaturedDisplayOrderUser) - 1;
+            formDataToSend.append("FeaturedDisplayOrder", dbFeaturedPosition);
+          } else {
+            const nextFeaturedOrder = getNextFeaturedDisplayOrder();
+            formDataToSend.append("FeaturedDisplayOrder", nextFeaturedOrder);
+          }
+        } else {
+          formDataToSend.append("FeaturedDisplayOrder", "");
+        }
+      }
+
       if (formData.imageFile) {
         formDataToSend.append("image", formData.imageFile);
       }
@@ -699,19 +1093,206 @@ Available for iOS and Android platforms.`,
           }
         );
       } else if (type === "editProject") {
-        await axios.put(
-          `${Backend_Root_Url}/api/projects/edit/${data.projectId}?folder=projectsimg`,
-          formDataToSend,
-          {
-            withCredentials: true,
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
+        const currentPositionDB = formData.originalDisplayOrder;
+        const newPositionUser = formData.DisplayOrderUser;
+
+        const currentFeaturedPositionDB = formData.originalFeaturedDisplayOrder;
+        const newFeaturedPositionUser = formData.FeaturedDisplayOrderUser;
+        const wasFeatured = data.featured;
+        const isFeaturedNow = formData.featured;
+
+        const needsDisplayOrderSwap =
+          newPositionUser !== null &&
+          newPositionUser !== undefined &&
+          newPositionUser !== "" &&
+          currentPositionDB !== null &&
+          currentPositionDB !== undefined &&
+          currentPositionDB !== parseInt(newPositionUser) - 1;
+
+        const needsFeaturedSwap =
+          isFeaturedNow &&
+          wasFeatured &&
+          newFeaturedPositionUser !== null &&
+          newFeaturedPositionUser !== undefined &&
+          newFeaturedPositionUser !== "" &&
+          currentFeaturedPositionDB !== null &&
+          currentFeaturedPositionDB !== undefined &&
+          currentFeaturedPositionDB !== parseInt(newFeaturedPositionUser) - 1;
+
+        if (needsDisplayOrderSwap) {
+          const newPositionDB = parseInt(newPositionUser) - 1;
+          const targetProject = projects.find(
+            (p) => p.DisplayOrder === newPositionDB
+          );
+
+          if (targetProject && targetProject.projectId !== formData.projectId) {
+            try {
+              console.log(`DisplayOrder Swap: Step 1 - Move target to temp`);
+              await axios.put(
+                `${Backend_Root_Url}/api/projects/edit/${targetProject.projectId}?folder=projectsimg`,
+                { DisplayOrder: -999 },
+                {
+                  withCredentials: true,
+                  headers: { "Content-Type": "application/json" },
+                }
+              );
+            } catch (tempError) {
+              console.error("Error moving to temp position:", tempError);
+              throw new Error("Failed to prepare DisplayOrder swap");
+            }
+
+            console.log(`DisplayOrder Swap: Step 2 - Update current project`);
+            await axios.put(
+              `${Backend_Root_Url}/api/projects/edit/${data.projectId}?folder=projectsimg`,
+              formDataToSend,
+              {
+                withCredentials: true,
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                },
+              }
+            );
+
+            try {
+              console.log(
+                `DisplayOrder Swap: Step 3 - Move target to old position`
+              );
+              await axios.put(
+                `${Backend_Root_Url}/api/projects/edit/${targetProject.projectId}?folder=projectsimg`,
+                { DisplayOrder: currentPositionDB },
+                {
+                  withCredentials: true,
+                  headers: { "Content-Type": "application/json" },
+                }
+              );
+            } catch (swapError) {
+              console.error("Error completing DisplayOrder swap:", swapError);
+              await loadProjects();
+              throw new Error(
+                "DisplayOrder swap partially completed - please refresh"
+              );
+            }
+          } else {
+            await axios.put(
+              `${Backend_Root_Url}/api/projects/edit/${data.projectId}?folder=projectsimg`,
+              formDataToSend,
+              {
+                withCredentials: true,
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                },
+              }
+            );
           }
-        );
+        } else {
+          await axios.put(
+            `${Backend_Root_Url}/api/projects/edit/${data.projectId}?folder=projectsimg`,
+            formDataToSend,
+            {
+              withCredentials: true,
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          );
+        }
+
+        if (needsFeaturedSwap) {
+          const newFeaturedPositionDB = parseInt(newFeaturedPositionUser) - 1;
+          const targetFeaturedProject = projects.find(
+            (p) =>
+              p.featured === true &&
+              p.FeaturedDisplayOrder === newFeaturedPositionDB
+          );
+
+          console.log("Featured Swap Debug:", {
+            currentProjectId: formData.projectId,
+            currentFeaturedPositionDB: currentFeaturedPositionDB,
+            newFeaturedPositionDB: newFeaturedPositionDB,
+            targetFeaturedProject: targetFeaturedProject
+              ? targetFeaturedProject.projectId
+              : "None",
+          });
+
+          if (
+            targetFeaturedProject &&
+            targetFeaturedProject.projectId !== formData.projectId
+          ) {
+            try {
+              console.log(`Featured Swap: Step 1 - Move target to temp (-999)`);
+              await axios.put(
+                `${Backend_Root_Url}/api/projects/edit/${targetFeaturedProject.projectId}?folder=projectsimg`,
+                { FeaturedDisplayOrder: -999 },
+                {
+                  withCredentials: true,
+                  headers: { "Content-Type": "application/json" },
+                }
+              );
+            } catch (tempError) {
+              console.error(
+                "Error moving featured to temp position:",
+                tempError
+              );
+              await loadProjects();
+              throw new Error("Failed to prepare FeaturedDisplayOrder swap");
+            }
+
+            try {
+              console.log(
+                `Featured Swap: Step 2 - Move current project to new position (${newFeaturedPositionDB})`
+              );
+              await axios.put(
+                `${Backend_Root_Url}/api/projects/edit/${data.projectId}?folder=projectsimg`,
+                { FeaturedDisplayOrder: newFeaturedPositionDB },
+                {
+                  withCredentials: true,
+                  headers: { "Content-Type": "application/json" },
+                }
+              );
+            } catch (updateError) {
+              console.error(
+                "Error updating current project featured position:",
+                updateError
+              );
+              await loadProjects();
+              throw new Error("Failed to update FeaturedDisplayOrder");
+            }
+
+            try {
+              console.log(
+                `Featured Swap: Step 3 - Move target to old position (${currentFeaturedPositionDB})`
+              );
+              await axios.put(
+                `${Backend_Root_Url}/api/projects/edit/${targetFeaturedProject.projectId}?folder=projectsimg`,
+                { FeaturedDisplayOrder: currentFeaturedPositionDB },
+                {
+                  withCredentials: true,
+                  headers: { "Content-Type": "application/json" },
+                }
+              );
+              console.log("Featured swap completed successfully!");
+            } catch (swapError) {
+              console.error(
+                "Error completing FeaturedDisplayOrder swap:",
+                swapError
+              );
+              await loadProjects();
+              throw new Error(
+                "FeaturedDisplayOrder swap partially completed - please refresh"
+              );
+            }
+          }
+        } else if (isFeaturedNow && !wasFeatured) {
+          console.log("Newly featured project - no swap needed");
+        } else if (!isFeaturedNow && wasFeatured) {
+          console.log(
+            "Project changed from featured to non-featured - reorganizing all featured projects"
+          );
+          await forceReorganizeFeaturedDisplayOrders();
+        }
       }
 
-      await loadProjects(); // Reload projects after save
+      await loadProjects();
       closeSlidePanel();
       setError(null);
     } catch (err) {
@@ -723,7 +1304,17 @@ Available for iOS and Android platforms.`,
     } finally {
       setLoading(false);
     }
-  }, [validateForm, slidePanel, formData, loadProjects, closeSlidePanel]);
+  }, [
+    validateForm,
+    slidePanel,
+    formData,
+    loadProjects,
+    closeSlidePanel,
+    getNextDisplayOrder,
+    getNextFeaturedDisplayOrder,
+    forceReorganizeFeaturedDisplayOrders,
+    projects,
+  ]);
 
   const toggleFeatured = useCallback(
     async (projectId) => {
@@ -733,13 +1324,27 @@ Available for iOS and Android platforms.`,
       try {
         setFeaturedLoading((prev) => ({ ...prev, [projectId]: true }));
 
-        const updateData = {
-          Featured: !project.featured,
-        };
+        const willBeFeatured = !project.featured;
+        let featuredOrder;
+
+        if (willBeFeatured) {
+          featuredOrder = getNextFeaturedDisplayOrder();
+          console.log(
+            `Making project featured with FeaturedDisplayOrder: ${featuredOrder}`
+          );
+        } else {
+          featuredOrder = null;
+          console.log(
+            "Unfeaturing project - setting FeaturedDisplayOrder to null"
+          );
+        }
 
         await axios.put(
           `${Backend_Root_Url}/api/projects/edit/${projectId}?folder=projectsimg`,
-          updateData,
+          {
+            Featured: willBeFeatured,
+            FeaturedDisplayOrder: featuredOrder,
+          },
           {
             withCredentials: true,
             headers: {
@@ -748,21 +1353,28 @@ Available for iOS and Android platforms.`,
           }
         );
 
-        // Reload projects to get fresh data from backend
+        console.log("Project featured status updated successfully");
+        await forceReorganizeFeaturedDisplayOrders();
         await loadProjects();
         setError(null);
       } catch (err) {
         setError("Failed to update featured status");
         console.error("Error updating featured status:", err);
+        console.error("Error details:", err.response?.data);
+        await loadProjects();
       } finally {
-        // Clear loading state for this specific project
         setFeaturedLoading((prev) => ({ ...prev, [projectId]: false }));
       }
     },
-    [projects, loadProjects]
+    [
+      projects,
+      loadProjects,
+      featuredLoading,
+      getNextFeaturedDisplayOrder,
+      forceReorganizeFeaturedDisplayOrders,
+    ]
   );
 
-  // Render functions
   const renderDeleteConfirmation = useCallback(() => {
     if (!deleteConfirmation.isOpen) return null;
 
@@ -790,10 +1402,22 @@ Available for iOS and Android platforms.`,
     );
   }, [deleteConfirmation, closeDeleteConfirmation, confirmDelete]);
 
+  const getPositionSuggestions = useCallback(() => {
+    const { available } = getValidPositionRange(formData.projectId);
+    return available;
+  }, [getValidPositionRange, formData.projectId]);
+
+  const getFeaturedPositionSuggestions = useCallback(() => {
+    const { available } = getValidFeaturedPositionRange(formData.projectId);
+    return available;
+  }, [getValidFeaturedPositionRange, formData.projectId]);
+
   const renderSlidePanel = useCallback(() => {
     if (!slidePanel.isOpen) return null;
 
     const { type, title } = slidePanel;
+    const positionSuggestions = getPositionSuggestions();
+    const featuredPositionSuggestions = getFeaturedPositionSuggestions();
 
     return (
       <div className={styles.slidePanel}>
@@ -857,7 +1481,7 @@ Available for iOS and Android platforms.`,
                       type="button"
                       className={styles.toolbarBtn}
                       onClick={handleBold}
-                      title="Bold - Wraps selected text or adds placeholder"
+                      title="Bold"
                     >
                       <Bold size={16} />
                     </button>
@@ -865,7 +1489,7 @@ Available for iOS and Android platforms.`,
                       type="button"
                       className={styles.toolbarBtn}
                       onClick={handleItalic}
-                      title="Italic - Wraps selected text or adds placeholder"
+                      title="Italic"
                     >
                       <Italic size={16} />
                     </button>
@@ -873,7 +1497,7 @@ Available for iOS and Android platforms.`,
                       type="button"
                       className={styles.toolbarBtn}
                       onClick={handleHeading}
-                      title="Heading - Adds heading format"
+                      title="Heading"
                     >
                       <Hash size={16} />
                     </button>
@@ -881,20 +1505,19 @@ Available for iOS and Android platforms.`,
                       type="button"
                       className={styles.toolbarBtn}
                       onClick={handleList}
-                      title="List - Creates list item (Enter for new item)"
+                      title="List"
                     >
                       <List size={16} />
                     </button>
                     <div className={styles.toolbarDivider}></div>
 
-                    {/* Quick Templates */}
                     <div className={styles.templateDropdown}>
                       <button
                         type="button"
                         className={styles.templateBtn}
                         title="Quick Templates"
                       >
-                        📝 Templates
+                        Templates
                       </button>
                       <div className={styles.templateMenu}>
                         <button
@@ -902,22 +1525,21 @@ Available for iOS and Android platforms.`,
                           onClick={() => insertTemplate("dashboard")}
                           className={styles.templateOption}
                         >
-                          📊 Dashboard Project
+                          Dashboard Project
                         </button>
                         <button
                           type="button"
                           onClick={() => insertTemplate("designer")}
                           className={styles.templateOption}
                         >
-                          🚀 Designer project
+                          Designer project
                         </button>
-
                         <button
                           type="button"
                           onClick={() => insertTemplate("mobile")}
                           className={styles.templateOption}
                         >
-                          📱 Mobile App
+                          Mobile App
                         </button>
                       </div>
                     </div>
@@ -956,17 +1578,7 @@ Available for iOS and Android platforms.`,
                         }))
                       }
                       onKeyDown={handleKeyDown}
-                      placeholder={`Project description with smart formatting:
-
-🎯 Click buttons above for easy formatting!
-📝 Use templates for quick start!
-
-Manual formatting:
-## Main Heading
-**Bold text** or *Italic text*
-* List item (press Enter for new item)
-
-Try selecting text and clicking format buttons! ✨`}
+                      placeholder="Project description with smart formatting..."
                       rows={12}
                       className={`${styles.richTextarea} ${
                         formErrors.description ? styles.errorInput : ""
@@ -979,14 +1591,6 @@ Try selecting text and clicking format buttons! ✨`}
                     {formErrors.description}
                   </span>
                 )}
-                <div className={styles.formattingHelp}>
-                  <small>
-                    💡 <strong>Smart Tips:</strong> • Select text and click
-                    format buttons for instant formatting • Use templates for
-                    quick project setup • Press Enter in lists to create new
-                    items automatically • Click preview to see how it looks! ✨
-                  </small>
-                </div>
               </div>
 
               <div className={styles.formGroup}>
@@ -1048,6 +1652,122 @@ Try selecting text and clicking format buttons! ✨`}
                   <span className={styles.errorText}>{formErrors.liveUrl}</span>
                 )}
               </div>
+
+              {type === "editProject" &&
+                formData.originalDisplayOrder !== null &&
+                formData.originalDisplayOrder !== undefined && (
+                  <div className={styles.formGroup}>
+                    <label>
+                      Display Position (Swap with Another Project) For Main
+                      Project Page
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={formData.DisplayOrderUser ?? ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+
+                        if (value === "") {
+                          setFormData((prev) => ({
+                            ...prev,
+                            DisplayOrderUser: "",
+                          }));
+                          setFormErrors((prev) => ({
+                            ...prev,
+                            DisplayOrder: "Position is required",
+                          }));
+                          return;
+                        }
+
+                        const newPosition = parseInt(value);
+
+                        if (isNaN(newPosition) || newPosition < 1) {
+                          setFormErrors((prev) => ({
+                            ...prev,
+                            DisplayOrder:
+                              "Position must be a number 1 or higher",
+                          }));
+                          return;
+                        }
+
+                        setFormData((prev) => ({
+                          ...prev,
+                          DisplayOrderUser: newPosition,
+                        }));
+
+                        const validation = validatePosition(
+                          newPosition,
+                          formData.projectId
+                        );
+                        if (!validation.valid) {
+                          setFormErrors((prev) => ({
+                            ...prev,
+                            DisplayOrder: validation.message,
+                          }));
+                        } else {
+                          setFormErrors((prev) => {
+                            const newErrors = { ...prev };
+                            delete newErrors.DisplayOrder;
+                            return newErrors;
+                          });
+                        }
+                      }}
+                      onBlur={(e) => {
+                        if (e.target.value === "") {
+                          setFormData((prev) => ({
+                            ...prev,
+                            DisplayOrderUser: prev.originalDisplayOrder + 1,
+                          }));
+                          setFormErrors((prev) => {
+                            const newErrors = { ...prev };
+                            delete newErrors.DisplayOrder;
+                            return newErrors;
+                          });
+                        }
+                      }}
+                      placeholder="Enter position number (1 = first)"
+                      className={`${styles.positionInput} ${
+                        formErrors.DisplayOrder ? styles.errorInput : ""
+                      }`}
+                    />
+                    {formErrors.DisplayOrder && (
+                      <span className={styles.errorText}>
+                        {formErrors.DisplayOrder}
+                      </span>
+                    )}
+                    <small className={styles.helpText}>
+                      Current position:{" "}
+                      {formData.DisplayOrderUser !== null &&
+                      formData.DisplayOrderUser !== undefined
+                        ? `${formData.DisplayOrderUser}`
+                        : "Not positioned (shows at end)"}
+                    </small>
+                    {positionSuggestions.length > 0 && (
+                      <small
+                        className={styles.helpText}
+                        style={{
+                          display: "block",
+                          marginTop: "4px",
+                          color: "#10b981",
+                        }}
+                      >
+                        Available positions: {positionSuggestions.join(", ")}
+                      </small>
+                    )}
+                    <small
+                      className={styles.helpText}
+                      style={{
+                        display: "block",
+                        marginTop: "4px",
+                        color: "#fbbf24",
+                      }}
+                    >
+                      Note: Changing position will automatically swap with the
+                      project at your target position.
+                    </small>
+                  </div>
+                )}
 
               <div className={styles.formGroup}>
                 <label>Project Image</label>
@@ -1118,6 +1838,146 @@ Try selecting text and clicking format buttons! ✨`}
                   </label>
                 </div>
               </div>
+
+              {/* Featured Display Order - Only show if project is featured AND editing */}
+              {type === "editProject" &&
+                formData.featured === true &&
+                formData.originalFeaturedDisplayOrder !== null &&
+                formData.originalFeaturedDisplayOrder !== undefined && (
+                  <div className={styles.formGroup}>
+                    <label>
+                      Featured Display Position (Swap with Another Featured
+                      Project)
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={formData.FeaturedDisplayOrderUser ?? ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+
+                        if (value === "") {
+                          setFormData((prev) => ({
+                            ...prev,
+                            FeaturedDisplayOrderUser: "",
+                          }));
+                          setFormErrors((prev) => ({
+                            ...prev,
+                            FeaturedDisplayOrder:
+                              "Featured position is required",
+                          }));
+                          return;
+                        }
+
+                        const newPosition = parseInt(value);
+
+                        if (isNaN(newPosition) || newPosition < 1) {
+                          setFormErrors((prev) => ({
+                            ...prev,
+                            FeaturedDisplayOrder:
+                              "Featured position must be a number 1 or higher",
+                          }));
+                          return;
+                        }
+
+                        setFormData((prev) => ({
+                          ...prev,
+                          FeaturedDisplayOrderUser: newPosition,
+                        }));
+
+                        const validation = validateFeaturedPosition(
+                          newPosition,
+                          formData.projectId
+                        );
+                        if (!validation.valid) {
+                          setFormErrors((prev) => ({
+                            ...prev,
+                            FeaturedDisplayOrder: validation.message,
+                          }));
+                        } else {
+                          setFormErrors((prev) => {
+                            const newErrors = { ...prev };
+                            delete newErrors.FeaturedDisplayOrder;
+                            return newErrors;
+                          });
+                        }
+                      }}
+                      onBlur={(e) => {
+                        if (e.target.value === "") {
+                          setFormData((prev) => ({
+                            ...prev,
+                            FeaturedDisplayOrderUser:
+                              prev.originalFeaturedDisplayOrder + 1,
+                          }));
+                          setFormErrors((prev) => {
+                            const newErrors = { ...prev };
+                            delete newErrors.FeaturedDisplayOrder;
+                            return newErrors;
+                          });
+                        }
+                      }}
+                      placeholder="Enter featured position number (1 = first featured)"
+                      className={`${styles.positionInput} ${
+                        formErrors.FeaturedDisplayOrder ? styles.errorInput : ""
+                      }`}
+                    />
+                    {formErrors.FeaturedDisplayOrder && (
+                      <span className={styles.errorText}>
+                        {formErrors.FeaturedDisplayOrder}
+                      </span>
+                    )}
+                    <small className={styles.helpText}>
+                      Current featured position:{" "}
+                      {formData.FeaturedDisplayOrderUser !== null &&
+                      formData.FeaturedDisplayOrderUser !== undefined
+                        ? `${formData.FeaturedDisplayOrderUser}`
+                        : "Not positioned"}
+                    </small>
+                    {featuredPositionSuggestions.length > 0 && (
+                      <small
+                        className={styles.helpText}
+                        style={{
+                          display: "block",
+                          marginTop: "4px",
+                          color: "#10b981",
+                        }}
+                      >
+                        Available featured positions:{" "}
+                        {featuredPositionSuggestions.join(", ")}
+                      </small>
+                    )}
+                    <small
+                      className={styles.helpText}
+                      style={{
+                        display: "block",
+                        marginTop: "4px",
+                        color: "#fbbf24",
+                      }}
+                    >
+                      Note: Changing featured position will automatically swap
+                      with the featured project at your target position.
+                    </small>
+                    <small
+                      className={styles.helpText}
+                      style={{ display: "block", marginTop: "2px" }}
+                    >
+                      Position 1 = first featured project, 2 = second featured,
+                      etc.
+                    </small>
+                  </div>
+                )}
+
+              {type === "addProject" && (
+                <div className={styles.infoBox}>
+                  <p>
+                    This project will be automatically added at the end of your
+                    project list.{" "}
+                    {formData.featured === true &&
+                      "As a featured project, it will also be added at the end of your featured projects list. "}
+                    You can change its position later by editing the project.
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -1158,6 +2018,11 @@ Try selecting text and clicking format buttons! ✨`}
     handleList,
     insertTemplate,
     handleKeyDown,
+    isValidImageUrl,
+    getPositionSuggestions,
+    getFeaturedPositionSuggestions,
+    validatePosition,
+    validateFeaturedPosition,
   ]);
 
   if (loading && projects.length === 0) {
@@ -1295,16 +2160,22 @@ Try selecting text and clicking format buttons! ✨`}
                   >
                     {project.projectStatus}
                   </span>
-                </div>
-                {project.technoligue && project.technoligue.length > 0 && (
-                  <div className={styles.techStack}>
-                    {project.technoligue.map((tech, techIndex) => (
-                      <span key={techIndex} className={styles.techTag}>
-                        {tech}
+                  {project.DisplayOrder !== null &&
+                    project.DisplayOrder !== undefined && (
+                      <span className={styles.positionBadge}>
+                        Projects Page | Project Position:{" "}
+                        {project.DisplayOrder + 1}
                       </span>
-                    ))}
-                  </div>
-                )}
+                    )}
+                  {project.featured &&
+                    project.FeaturedDisplayOrder !== null &&
+                    project.FeaturedDisplayOrder !== undefined && (
+                      <span className={styles.FeaturedpositionBadge}>
+                        Home Page | Featured Project Position:{" "}
+                        {project.FeaturedDisplayOrder + 1}
+                      </span>
+                    )}
+                </div>
                 <div className={styles.projectLinks}>
                   {project.liveUrl && (
                     <a

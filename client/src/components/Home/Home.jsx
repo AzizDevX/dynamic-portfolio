@@ -106,43 +106,7 @@ const Home = () => {
             ],
           },
           HomeLogo: "default-logo.png",
-          FeaturedProjects: [
-            {
-              _id: 1,
-              Title: "E-Commerce Platform",
-              ShortDescription:
-                "A full-stack e-commerce solution with React, Node.js, and MongoDB.",
-              Image:
-                "https://raw.githubusercontent.com/AzizDevX/dynamic-portfolio/main/public/notfound/ProjectNotFound.png",
-              Project_technologies: ["React", "Node.js", "MongoDB", "Stripe"],
-              ProjectLink: "#",
-            },
-            {
-              _id: 2,
-              Title: "Task Management App",
-              ShortDescription:
-                "A collaborative task management application with real-time updates.",
-              Image:
-                "https://raw.githubusercontent.com/AzizDevX/dynamic-portfolio/main/public/notfound/ProjectNotFound.png",
-              Project_technologies: [
-                "React",
-                "Socket.io",
-                "Express",
-                "PostgreSQL",
-              ],
-              ProjectLink: "#",
-            },
-            {
-              _id: 3,
-              Title: "Weather Dashboard",
-              ShortDescription:
-                "A modern weather dashboard with location-based forecasts.",
-              Image:
-                "https://raw.githubusercontent.com/AzizDevX/dynamic-portfolio/main/public/notfound/ProjectNotFound.png",
-              Project_technologies: ["Vue.js", "OpenWeather API", "Chart.js"],
-              ProjectLink: "#",
-            },
-          ],
+          FeaturedProjects: [],
         });
 
         setCvData(null);
@@ -288,38 +252,91 @@ const Home = () => {
   const SlidesIconsDir = `${Backend_Root_Url}/uploads/aboutimg/`;
   const HomeLogo = `${Backend_Root_Url}/uploads/logo/` + MainHomeData?.HomeLogo;
 
-  const featuredProjects = MainHomeData?.FeaturedProjects || [
-    {
-      _id: 1,
-      Title: "E-Commerce Platform",
-      ShortDescription:
-        "A full-stack e-commerce solution with React, Node.js, and MongoDB.",
-      Image:
-        "https://raw.githubusercontent.com/AzizDevX/dynamic-portfolio/main/public/notfound/ProjectNotFound.png",
-      Project_technologies: ["React", "Node.js", "MongoDB", "Stripe"],
-      ProjectLink: "#",
-    },
-    {
-      _id: 2,
-      Title: "Task Management App",
-      ShortDescription:
-        "A collaborative task management application with real-time updates.",
-      Image:
-        "https://raw.githubusercontent.com/AzizDevX/dynamic-portfolio/main/public/notfound/ProjectNotFound.png",
-      Project_technologies: ["React", "Socket.io", "Express", "PostgreSQL"],
-      ProjectLink: "#",
-    },
-    {
-      _id: 3,
-      Title: "Weather Dashboard",
-      ShortDescription:
-        "A modern weather dashboard with location-based forecasts.",
-      Image:
-        "https://raw.githubusercontent.com/AzizDevX/dynamic-portfolio/main/public/notfound/ProjectNotFound.png",
-      Project_technologies: ["Vue.js", "OpenWeather API", "Chart.js"],
-      ProjectLink: "#",
-    },
-  ];
+  const featuredProjects = (() => {
+    const projects = MainHomeData?.FeaturedProjects || [];
+
+    const validFeaturedProjects = projects.filter(
+      (project) =>
+        project.Featured === true &&
+        project.FeaturedDisplayOrder !== null &&
+        project.FeaturedDisplayOrder !== undefined
+    );
+
+    // Separate valid and invalid projects
+    const projectsWithValidOrder = [];
+    const projectsWithInvalidOrder = [];
+    const usedPositions = new Set();
+
+    validFeaturedProjects.forEach((project) => {
+      const order = project.FeaturedDisplayOrder;
+
+      // Check if order is a valid number and not duplicated
+      if (
+        typeof order === "number" &&
+        order >= 0 &&
+        !usedPositions.has(order)
+      ) {
+        projectsWithValidOrder.push(project);
+        usedPositions.add(order);
+      } else {
+        // Invalid or duplicate order - goes to end
+        console.warn(
+          `Project "${project.Title}" has invalid/duplicate FeaturedDisplayOrder: ${order}`
+        );
+        projectsWithInvalidOrder.push(project);
+      }
+    });
+
+    // Sort valid projects by FeaturedDisplayOrder
+    projectsWithValidOrder.sort(
+      (a, b) => a.FeaturedDisplayOrder - b.FeaturedDisplayOrder
+    );
+
+    // Append invalid projects at the end
+    return [...projectsWithValidOrder, ...projectsWithInvalidOrder];
+  })();
+
+  // Fallback if no featured projects available
+  const displayProjects =
+    featuredProjects.length > 0
+      ? featuredProjects
+      : [
+          {
+            _id: 1,
+            Title: "E-Commerce Platform",
+            ShortDescription:
+              "A full-stack e-commerce solution with React, Node.js, and MongoDB.",
+            Image:
+              "https://raw.githubusercontent.com/AzizDevX/dynamic-portfolio/main/public/notfound/ProjectNotFound.png",
+            Project_technologies: ["React", "Node.js", "MongoDB", "Stripe"],
+            ProjectLink: "#",
+          },
+          {
+            _id: 2,
+            Title: "Task Management App",
+            ShortDescription:
+              "A collaborative task management application with real-time updates.",
+            Image:
+              "https://raw.githubusercontent.com/AzizDevX/dynamic-portfolio/main/public/notfound/ProjectNotFound.png",
+            Project_technologies: [
+              "React",
+              "Socket.io",
+              "Express",
+              "PostgreSQL",
+            ],
+            ProjectLink: "#",
+          },
+          {
+            _id: 3,
+            Title: "Weather Dashboard",
+            ShortDescription:
+              "A modern weather dashboard with location-based forecasts.",
+            Image:
+              "https://raw.githubusercontent.com/AzizDevX/dynamic-portfolio/main/public/notfound/ProjectNotFound.png",
+            Project_technologies: ["Vue.js", "OpenWeather API", "Chart.js"],
+            ProjectLink: "#",
+          },
+        ];
 
   return (
     <div className={styles.home} id="home">
@@ -503,7 +520,7 @@ const Home = () => {
           </div>
 
           <div className={styles.projectsGrid}>
-            {featuredProjects.map((project) => (
+            {displayProjects.map((project) => (
               <div key={project._id} className={styles.projectCard}>
                 <div className={styles.projectImage}>
                   {project.Image &&
