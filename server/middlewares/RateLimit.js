@@ -3,7 +3,7 @@ import BlockHistory from "../models/BlockHistorySchema.js";
 import crypto from "crypto";
 
 const RATE_LIMIT = {
-  POINTS: 3, // Reduced to 3 for better security
+  POINTS: 3,
   DURATION: 3600, // per 1 hour (in seconds)
 };
 
@@ -17,6 +17,23 @@ const BLOCK_DURATIONS = [
 
 const memoryStore = new Map();
 const suspiciousPatterns = new Map();
+
+// Known VPN/Proxy IP ranges (add more as needed)
+const VPN_INDICATORS = [
+  // Common VPN providers
+  "vpn",
+  "proxy",
+  "tor",
+  "anonymizer",
+  // Data center hosting
+  "amazonaws",
+  "digitalocean",
+  "linode",
+  "vultr",
+  // Known VPN ASNs patterns
+  "ovh",
+  "hetzner",
+];
 
 setInterval(() => {
   const now = Date.now();
@@ -41,6 +58,7 @@ setInterval(() => {
   }
 }, 10 * 60 * 1000);
 
+// Enhanced fingerprint with more browser characteristics
 function generateFingerprint(req) {
   const components = [
     req.ip || "unknown",
@@ -48,7 +66,10 @@ function generateFingerprint(req) {
     req.headers?.["accept-language"] || "unknown",
     req.headers?.["accept-encoding"] || "unknown",
     req.headers?.["accept"] || "unknown",
-    req.connection?.remotePort || "unknown",
+    // Additional fingerprinting data
+    req.headers?.["sec-ch-ua"] || "unknown", // Browser hints
+    req.headers?.["sec-ch-ua-mobile"] || "unknown",
+    req.headers?.["sec-ch-ua-platform"] || "unknown",
   ];
 
   return crypto
@@ -58,18 +79,85 @@ function generateFingerprint(req) {
     .substring(0, 16);
 }
 
+// NEW: Detect if request is coming from VPN/Proxy
+function detectVPNProxy(req) {
+  const ip = req.ip;
+  const headers = req.headers;
+
+  let vpnScore = 0;
+
+  // Check for proxy headers
+  const proxyHeaders = [
+    "x-forwarded-for",
+    "x-real-ip",
+    "via",
+    "forwarded",
+    "x-proxy-id",
+    "x-proxyuser-ip",
+  ];
+
+  for (const header of proxyHeaders) {
+    if (headers[header]) {
+      vpnScore += 1;
+    }
+  }
+
+  // Check hostname for VPN indicators (requires reverse DNS lookup in production)
+  // For now, check if IP is in common VPN ranges
+  // You could integrate with VPN detection APIs like:
+  // - IPHub.info
+  // - GetIPIntel.net
+  // - IP2Proxy
+
+  // Check for missing browser headers (VPNs/proxies sometimes strip these)
+  if (!headers["accept-language"]) vpnScore += 1;
+  if (!headers["sec-ch-ua"]) vpnScore += 1;
+
+  return vpnScore;
+}
+
+// NEW: Enhanced email validation
+function validateEmail(email) {
+  if (!email) return { valid: false, suspicious: 0 };
+
+  let suspiciousScore = 0;
+
+  // Check for disposable email domains
+  const disposableDomains = [
+    "tempmail",
+    "throwaway",
+    "10minutemail",
+    "guerrillamail",
+    "mailinator",
+    "maildrop",
+    "trashmail",
+    "yopmail",
+  ];
+
+  const domain = email.split("@")[1]?.toLowerCase();
+  if (domain && disposableDomains.some((d) => domain.includes(d))) {
+    suspiciousScore += 3;
+  }
+
+  // Check for suspicious patterns
+  if (/\d{5,}/.test(email)) suspiciousScore += 1; // Many numbers
+  if (email.length > 50) suspiciousScore += 1; // Very long email
+  if ((email.match(/\./g) || []).length > 3) suspiciousScore += 1; // Too many dots
+
+  return { valid: true, suspicious: suspiciousScore };
+}
+
 function getTrackingKeys(req) {
   const ip = req.ip;
   const email = req.body?.address || req.body?.email;
   const fingerprint = generateFingerprint(req);
-  const subnet = ip ? ip.split(".").slice(0, 3).join(".") : null; // /24 subnet
+  const subnet = ip ? ip.split(".").slice(0, 3).join(".") : null;
 
   const keys = [];
 
   if (ip) keys.push(`ip_${ip}`);
   if (email) keys.push(`email_${email}`);
   keys.push(`fp_${fingerprint}`);
-
   if (subnet) keys.push(`subnet_${subnet}`);
 
   return keys;
@@ -83,6 +171,17 @@ function detectSuspiciousBehavior(req, keys) {
 
   let suspiciousScore = 0;
 
+  // NEW: Check for VPN/Proxy
+  const vpnScore = detectVPNProxy(req);
+  suspiciousScore += vpnScore;
+
+  // NEW: Validate email
+  if (email) {
+    const emailValidation = validateEmail(email);
+    suspiciousScore += emailValidation.suspicious;
+  }
+
+  // Track email across multiple IPs (VPN hopping detection)
   if (email) {
     const emailPattern = `email_pattern_${email}`;
     if (!suspiciousPatterns.has(emailPattern)) {
@@ -92,25 +191,42 @@ function detectSuspiciousBehavior(req, keys) {
     const emailData = suspiciousPatterns.get(emailPattern);
     emailData.ips.add(ip);
 
+    // If same email from 3+ different IPs in 1 hour = VPN hopping
     if (emailData.ips.size >= 3 && now - emailData.firstSeen < 3600000) {
-      suspiciousScore += 3;
+      suspiciousScore += 4; // Higher penalty for VPN hopping
+      console.warn(
+        `🚨 VPN hopping detected: ${email} from ${emailData.ips.size} IPs`
+      );
     }
   }
 
+  // Track IP pattern
   if (ip) {
     const ipPattern = `ip_pattern_${ip}`;
     if (!suspiciousPatterns.has(ipPattern)) {
-      suspiciousPatterns.set(ipPattern, { agents: new Set(), firstSeen: now });
+      suspiciousPatterns.set(ipPattern, {
+        agents: new Set(),
+        emails: new Set(),
+        firstSeen: now,
+      });
     }
 
     const ipData = suspiciousPatterns.get(ipPattern);
     ipData.agents.add(userAgent);
+    if (email) ipData.emails.add(email);
 
+    // Multiple user agents from same IP (device spoofing)
     if (ipData.agents.size >= 3 && now - ipData.firstSeen < 3600000) {
       suspiciousScore += 2;
     }
+
+    // Multiple emails from same IP
+    if (ipData.emails.size >= 3 && now - ipData.firstSeen < 3600000) {
+      suspiciousScore += 3;
+    }
   }
 
+  // Check for bot user agents
   if (userAgent) {
     const suspicious = [
       "curl",
@@ -121,6 +237,7 @@ function detectSuspiciousBehavior(req, keys) {
       "scraper",
       "insomnia",
       "httpie",
+      "postman",
     ];
 
     if (suspicious.some((s) => userAgent.toLowerCase().includes(s))) {
@@ -128,7 +245,7 @@ function detectSuspiciousBehavior(req, keys) {
     }
   }
 
-  // Check for missing common headers
+  // Missing common headers
   if (!req.headers?.["accept-language"]) suspiciousScore += 1;
   if (!req.headers?.["accept-encoding"]) suspiciousScore += 1;
 
@@ -136,26 +253,47 @@ function detectSuspiciousBehavior(req, keys) {
 }
 
 function checkMemoryRateLimit(keys, suspiciousScore) {
-  const keyString = keys.join("|");
   const now = Date.now();
   const windowStart = now - RATE_LIMIT.DURATION * 1000;
 
-  if (!memoryStore.has(keyString)) {
-    memoryStore.set(keyString, []);
+  let maxCount = 0;
+  let limitExceeded = false;
+
+  // Stricter limits for suspicious requests
+  const effectiveLimit =
+    suspiciousScore >= 5 ? 1 : suspiciousScore >= 3 ? 2 : RATE_LIMIT.POINTS;
+
+  for (const key of keys) {
+    if (!memoryStore.has(key)) {
+      memoryStore.set(key, []);
+    }
+
+    const requests = memoryStore.get(key);
+    const validRequests = requests.filter(
+      (timestamp) => timestamp > windowStart
+    );
+
+    if (validRequests.length >= effectiveLimit) {
+      limitExceeded = true;
+      maxCount = Math.max(maxCount, validRequests.length);
+    }
   }
 
-  const requests = memoryStore.get(keyString);
-  const validRequests = requests.filter((timestamp) => timestamp > windowStart);
-
-  const effectiveLimit = suspiciousScore >= 3 ? 1 : RATE_LIMIT.POINTS;
-
-  if (validRequests.length >= effectiveLimit) {
-    return { exceeded: true, count: validRequests.length, suspiciousScore };
+  if (limitExceeded) {
+    return { exceeded: true, count: maxCount, suspiciousScore };
   }
 
-  validRequests.push(now);
-  memoryStore.set(keyString, validRequests);
-  return { exceeded: false, count: validRequests.length, suspiciousScore };
+  for (const key of keys) {
+    const requests = memoryStore.get(key);
+    const validRequests = requests.filter(
+      (timestamp) => timestamp > windowStart
+    );
+    validRequests.push(now);
+    memoryStore.set(key, validRequests);
+    maxCount = Math.max(maxCount, validRequests.length);
+  }
+
+  return { exceeded: false, count: maxCount, suspiciousScore };
 }
 
 async function checkDatabaseBlocks(keys) {
@@ -228,10 +366,11 @@ async function applyStrikes(keys, suspiciousScore) {
       ...existingBlocks.map((b) => b.strikes || 0)
     );
 
-    const strikeMultiplier = suspiciousScore >= 5 ? 2 : 1;
+    // Harsher penalties for high suspicious scores
+    const strikeMultiplier =
+      suspiciousScore >= 7 ? 3 : suspiciousScore >= 5 ? 2 : 1;
     const newStrikes = Math.min(5, maxStrikes + strikeMultiplier);
 
-    // Update all keys with new strikes
     const updatePromises = keys.map((key) =>
       BlockHistory.findOneAndUpdate(
         { key },
@@ -288,14 +427,14 @@ export async function contactLimiter(req, res, next) {
     const keys = getTrackingKeys(req);
     const suspiciousScore = detectSuspiciousBehavior(req, keys);
 
-    if (suspiciousScore >= 7) {
+    // Block immediately if extremely suspicious
+    if (suspiciousScore >= 8) {
       await applyStrikes(keys, suspiciousScore);
       return res.status(429).json({
         message: "Request blocked due to suspicious activity.",
       });
     }
 
-    // Check database for existing blocks
     const blockStatus = await checkDatabaseBlocks(keys);
 
     if (blockStatus?.blocked) {
