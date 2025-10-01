@@ -366,15 +366,6 @@ const DashboardSEO = () => {
         errors[`pages.${page}.Title`] = "Page Title is required";
       }
 
-      // Validate Keywords format
-      if (pageData.Keywords && pageData.Keywords.length > 0) {
-        const keywordsString = pageData.Keywords.join(", ");
-        if (!validateKeywords(keywordsString)) {
-          errors[`pages.${page}.Keywords`] =
-            "Keywords must be separated by commas, not periods. Example: web design, portfolio, developer";
-        }
-      }
-
       if (pageData.PageUrl && !validateUrl(pageData.PageUrl)) {
         errors[`pages.${page}.PageUrl`] = "Please enter a valid URL";
       }

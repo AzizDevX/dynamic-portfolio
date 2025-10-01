@@ -306,18 +306,10 @@ const DashboardProjects = () => {
         return;
       }
 
-      console.log(
-        "FORCE reorganizing ALL DisplayOrder sequentially (0,1,2,3...)"
-      );
-
       for (let index = 0; index < projectsWithOrder.length; index++) {
         const project = projectsWithOrder[index];
 
         if (project.DisplayOrder !== index) {
-          console.log(
-            `Updating ${project.title}: DisplayOrder ${project.DisplayOrder} -> ${index}`
-          );
-
           await axios.put(
             `${Backend_Root_Url}/api/projects/edit/${project.projectId}?folder=projectsimg`,
             { DisplayOrder: index },
@@ -329,7 +321,7 @@ const DashboardProjects = () => {
         }
       }
 
-      console.log("✅ All DisplayOrder reorganized successfully (0,1,2,3...)");
+      console.log("All DisplayOrder reorganized successfully");
     } catch (err) {
       console.error("❌ Error reorganizing DisplayOrder:", err);
       throw err;
@@ -364,18 +356,10 @@ const DashboardProjects = () => {
         return;
       }
 
-      console.log(
-        "FORCE reorganizing ALL FeaturedDisplayOrder sequentially (0,1,2,3...)"
-      );
-
       for (let index = 0; index < featuredProjects.length; index++) {
         const project = featuredProjects[index];
 
         if (project.FeaturedDisplayOrder !== index) {
-          console.log(
-            `Updating ${project.title}: FeaturedDisplayOrder ${project.FeaturedDisplayOrder} -> ${index}`
-          );
-
           await axios.put(
             `${Backend_Root_Url}/api/projects/edit/${project.projectId}?folder=projectsimg`,
             { FeaturedDisplayOrder: index },
@@ -386,10 +370,6 @@ const DashboardProjects = () => {
           );
         }
       }
-
-      console.log(
-        "✅ All FeaturedDisplayOrder reorganized successfully (0,1,2,3...)"
-      );
     } catch (err) {
       console.error("❌ Error reorganizing FeaturedDisplayOrder:", err);
       throw err;
@@ -903,9 +883,6 @@ Available for iOS and Android platforms.`,
         await forceReorganizeDisplayOrders();
 
         if (wasFeatured) {
-          console.log(
-            "Deleted project was featured - reorganizing featured projects"
-          );
           await forceReorganizeFeaturedDisplayOrders();
         }
 
@@ -1127,7 +1104,6 @@ Available for iOS and Android platforms.`,
 
           if (targetProject && targetProject.projectId !== formData.projectId) {
             try {
-              console.log(`DisplayOrder Swap: Step 1 - Move target to temp`);
               await axios.put(
                 `${Backend_Root_Url}/api/projects/edit/${targetProject.projectId}?folder=projectsimg`,
                 { DisplayOrder: -999 },
@@ -1141,7 +1117,6 @@ Available for iOS and Android platforms.`,
               throw new Error("Failed to prepare DisplayOrder swap");
             }
 
-            console.log(`DisplayOrder Swap: Step 2 - Update current project`);
             await axios.put(
               `${Backend_Root_Url}/api/projects/edit/${data.projectId}?folder=projectsimg`,
               formDataToSend,
@@ -1154,9 +1129,6 @@ Available for iOS and Android platforms.`,
             );
 
             try {
-              console.log(
-                `DisplayOrder Swap: Step 3 - Move target to old position`
-              );
               await axios.put(
                 `${Backend_Root_Url}/api/projects/edit/${targetProject.projectId}?folder=projectsimg`,
                 { DisplayOrder: currentPositionDB },
@@ -1205,21 +1177,11 @@ Available for iOS and Android platforms.`,
               p.FeaturedDisplayOrder === newFeaturedPositionDB
           );
 
-          console.log("Featured Swap Debug:", {
-            currentProjectId: formData.projectId,
-            currentFeaturedPositionDB: currentFeaturedPositionDB,
-            newFeaturedPositionDB: newFeaturedPositionDB,
-            targetFeaturedProject: targetFeaturedProject
-              ? targetFeaturedProject.projectId
-              : "None",
-          });
-
           if (
             targetFeaturedProject &&
             targetFeaturedProject.projectId !== formData.projectId
           ) {
             try {
-              console.log(`Featured Swap: Step 1 - Move target to temp (-999)`);
               await axios.put(
                 `${Backend_Root_Url}/api/projects/edit/${targetFeaturedProject.projectId}?folder=projectsimg`,
                 { FeaturedDisplayOrder: -999 },
@@ -1238,9 +1200,6 @@ Available for iOS and Android platforms.`,
             }
 
             try {
-              console.log(
-                `Featured Swap: Step 2 - Move current project to new position (${newFeaturedPositionDB})`
-              );
               await axios.put(
                 `${Backend_Root_Url}/api/projects/edit/${data.projectId}?folder=projectsimg`,
                 { FeaturedDisplayOrder: newFeaturedPositionDB },
@@ -1259,9 +1218,6 @@ Available for iOS and Android platforms.`,
             }
 
             try {
-              console.log(
-                `Featured Swap: Step 3 - Move target to old position (${currentFeaturedPositionDB})`
-              );
               await axios.put(
                 `${Backend_Root_Url}/api/projects/edit/${targetFeaturedProject.projectId}?folder=projectsimg`,
                 { FeaturedDisplayOrder: currentFeaturedPositionDB },
@@ -1329,14 +1285,8 @@ Available for iOS and Android platforms.`,
 
         if (willBeFeatured) {
           featuredOrder = getNextFeaturedDisplayOrder();
-          console.log(
-            `Making project featured with FeaturedDisplayOrder: ${featuredOrder}`
-          );
         } else {
           featuredOrder = null;
-          console.log(
-            "Unfeaturing project - setting FeaturedDisplayOrder to null"
-          );
         }
 
         await axios.put(
