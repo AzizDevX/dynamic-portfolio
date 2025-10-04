@@ -1,7 +1,7 @@
 import express from "express";
 import isAdminLogged from "../middlewares/isAdminLogged.js";
 import mongoose from "mongoose";
-import { upload, verifyFileType } from "../controllers/storage.js";
+import { upload } from "../controllers/storage.js";
 import { access, unlink } from "fs/promises";
 import Cv from "../models/CvSchema.js";
 import CvFolder from "../middlewares/CvFolder.js";
@@ -11,7 +11,6 @@ Router.post(
   isAdminLogged,
   CvFolder,
   upload.single("cv"),
-  verifyFileType,
   async (req, res) => {
     try {
       if (!req.file?.filename) {

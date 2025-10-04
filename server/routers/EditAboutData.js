@@ -4,7 +4,7 @@ import aboutUsShema from "../models/AboutUsSchema.js";
 import AboutUsSlides from "../models/AboutUsSlidesSchema.js";
 import isAdminLogged from "../middlewares/isAdminLogged.js";
 import validateAboutData from "../middlewares/EditAboutValidation.js";
-import { upload, verifyFileType } from "../controllers/storage.js";
+import { upload } from "../controllers/storage.js";
 import SlidesLogoFolderValidation from "../middlewares/SlidesLogo.js";
 import mongoose from "mongoose";
 import { access, unlink } from "fs/promises";
@@ -14,7 +14,6 @@ Router.post(
   isAdminLogged,
   SlidesLogoFolderValidation,
   upload.single("image"),
-  verifyFileType,
   async (req, res) => {
     try {
       const slideImage = req.file?.filename;
@@ -132,7 +131,6 @@ Router.put(
   isAdminLogged,
   SlidesLogoFolderValidation,
   upload.single("image"),
-  verifyFileType,
   async (req, res) => {
     try {
       const id = req.params.id;

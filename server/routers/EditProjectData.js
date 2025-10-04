@@ -3,7 +3,7 @@ const Router = express.Router();
 import Project from "../models/ProjectSchema.js";
 import validateProjectInput from "../middlewares/validateProjectInput.js";
 import isAdminLogged from "../middlewares/isAdminLogged.js";
-import { upload, verifyFileType } from "../controllers/storage.js";
+import { upload } from "../controllers/storage.js";
 import PorjectsLogoFolderValidation from "../middlewares/ProjectsLogos.js";
 import { access, unlink } from "fs/promises";
 import mongoose from "mongoose";
@@ -15,7 +15,6 @@ Router.post(
   validateProjectInput,
   PorjectsLogoFolderValidation,
   upload.single("image"),
-  verifyFileType,
   async (req, res) => {
     try {
       const NewProject = new Project({
@@ -23,7 +22,7 @@ Router.post(
         ShortDescription: req.body.ShortDescription,
         Description: req.body.Description,
         Image: req.file?.filename,
-        ProjectLink: req.body.ProjectLink,
+        ProjectLiveUrl: req.body.ProjectLiveUrl,
         Project_technologies: req.body.Project_technologies,
         Porject_Status: req.body.Porject_Status,
         DisplayOrder: req.body.DisplayOrder,
@@ -79,7 +78,6 @@ Router.put(
   isAdminLogged,
   PorjectsLogoFolderValidation,
   upload.single("image"),
-  verifyFileType,
   async (req, res) => {
     try {
       const id = req.params.id;
@@ -145,7 +143,6 @@ Router.get("/show/projects", async (req, res) => {
       ShortDescription: doc.ShortDescription,
       Description: doc.Description,
       Image: doc.Image,
-      ProjectLink: doc.ProjectLink,
       ProjectLiveUrl: doc.ProjectLiveUrl,
       Project_technologies: doc.Project_technologies,
       Porject_Status: doc.Porject_Status,
