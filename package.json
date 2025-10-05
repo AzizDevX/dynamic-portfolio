@@ -1,6 +1,6 @@
 {
   "name": "portfolio-app",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Full-stack portfolio application",
   "scripts": {
     "install-pack": "npm install && concurrently \"cd server && npm install\" \"cd client && npm install\"",
