@@ -102,7 +102,9 @@ Returns comprehensive home page data including personal info, statistics, about 
         "AWS"
       ],
       "Porject_Status": "completed",
+      "DisplayOrder": 1,
       "Featured": true,
+      "FeaturedDisplayOrder": 1,
       "createdAt": "2024-02-01T14:20:00.000Z",
       "updatedAt": "2024-02-01T14:20:00.000Z"
     }
@@ -154,7 +156,9 @@ Returns all projects (both featured and non-featured) with complete project deta
     "ProjectLiveUrl": "https://demo-ecommerce.example.com",
     "Project_technologies": ["React.js", "Node.js", "MongoDB", "Stripe API"],
     "Porject_Status": "completed",
-    "Featured": true
+    "DisplayOrder": 1,
+    "Featured": true,
+    "FeaturedDisplayOrder": 1
   },
   {
     "_id": "507f1f77bcf86cd799439031",
@@ -165,7 +169,9 @@ Returns all projects (both featured and non-featured) with complete project deta
     "ProjectLiveUrl": "https://taskapp.example.com",
     "Project_technologies": ["Vue.js", "Express.js", "PostgreSQL", "Socket.io"],
     "Porject_Status": "completed",
-    "Featured": false
+    "DisplayOrder": 1,
+    "Featured": true,
+    "FeaturedDisplayOrder": 1
   }
 ]
 ```
@@ -613,7 +619,9 @@ POST /api/projects/add/project?folder=projectsimg
   "ProjectLiveUrl": "https://taskmanager.example.com",
   "Project_technologies": ["React", "Node.js", "MongoDB", "Socket.io"],
   "Porject_Status": "completed",
-  "Featured": true
+  "DisplayOrder": 1,
+  "Featured": true,
+  "FeaturedDisplayOrder": 1
 }
 ```
 
@@ -626,7 +634,9 @@ POST /api/projects/add/project?folder=projectsimg
 - `ProjectLiveUrl`: Optional, must be valid URI
 - `Project_technologies`: Optional array
 - `Porject_Status`: Required, see valid values below
+- `DisplayOrder`: Optional number, defines the display order
 - `Featured`: Optional boolean, defaults to false
+- `FeaturedDisplayOrder`: Optional number, defines display order for featured projects
 
 **Valid Status Values:**
 `completed`, `in progress`, `planning`, `planned`, `on hold`, `canceled`, `prototype`, `launched`, `metrics`, `awarded`, `passed`, `achievement`, `archived`
