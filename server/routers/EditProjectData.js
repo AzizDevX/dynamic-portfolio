@@ -39,7 +39,7 @@ Router.post(
   }
 );
 
-Router.delete("/projects/delete/:id", async (req, res) => {
+Router.delete("/projects/delete/:id", isAdminLogged, async (req, res) => {
   try {
     const id = req.params.id;
 
