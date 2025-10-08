@@ -351,9 +351,7 @@ function generate404Page(webLogo) {
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    ${
-      webLogo ? `<link rel="icon" type="image/x-icon" href="${webLogo}" />` : ""
-    }
+    ${webLogo ? `<link rel="icon" href="${webLogo}" />` : ""}
     ${webLogo ? `<link rel="apple-touch-icon" href="${webLogo}" />` : ""}
     ${webLogo ? `<link rel="shortcut icon" href="${webLogo}" />` : ""}
     ${cssLink}
@@ -410,9 +408,7 @@ function generateDeniedPage(webLogo) {
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    ${
-      webLogo ? `<link rel="icon" type="image/x-icon" href="${webLogo}" />` : ""
-    }
+    ${webLogo ? `<link rel="icon" href="${webLogo}" />` : ""}
     ${webLogo ? `<link rel="apple-touch-icon" href="${webLogo}" />` : ""}
     ${webLogo ? `<link rel="shortcut icon" href="${webLogo}" />` : ""}
     ${cssLink}
@@ -469,9 +465,7 @@ function generateAdminLoginPage(webLogo) {
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    ${
-      webLogo ? `<link rel="icon" type="image/x-icon" href="${webLogo}" />` : ""
-    }
+    ${webLogo ? `<link rel="icon" href="${webLogo}" />` : ""}
     ${webLogo ? `<link rel="apple-touch-icon" href="${webLogo}" />` : ""}
     ${webLogo ? `<link rel="shortcut icon" href="${webLogo}" />` : ""}
     ${cssLink}
@@ -528,9 +522,7 @@ function generateAdminDashboardPage(webLogo) {
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    ${
-      webLogo ? `<link rel="icon" type="image/x-icon" href="${webLogo}" />` : ""
-    }
+    ${webLogo ? `<link rel="icon" href="${webLogo}" />` : ""}
     ${webLogo ? `<link rel="apple-touch-icon" href="${webLogo}" />` : ""}
     ${webLogo ? `<link rel="shortcut icon" href="${webLogo}" />` : ""}
     ${cssLink}
@@ -697,7 +689,7 @@ function generateHTML(seoData, pathname) {
     `<link rel="canonical" href="${canonicalUrl}" />`,
 
     // Dynamic favicon from API
-    webLogo && `<link rel="icon" type="image/x-icon" href="${webLogo}" />`,
+    webLogo && `<link rel="icon" href="${webLogo}" />`,
     webLogo && `<link rel="apple-touch-icon" href="${webLogo}" />`,
     webLogo && `<link rel="shortcut icon" href="${webLogo}" />`,
 
