@@ -663,9 +663,6 @@ function generateHTML(seoData, pathname) {
     siteName && `<meta property="og:site_name" content="${siteName}" />`,
     langCode && `<meta property="og:locale" content="${langCode}" />`,
     socialImage && `<meta property="og:image" content="${socialImage}" />`,
-    socialImage && `<meta property="og:image:width" content="1200" />`,
-    socialImage && `<meta property="og:image:height" content="630" />`,
-    socialImage && `<meta property="og:image:type" content="image/png" />`,
 
     // Twitter Card tags
     `<meta name="twitter:card" content="summary_large_image" />`,
