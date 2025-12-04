@@ -1,11 +1,10 @@
 {
   "name": "dynamic-portfolio",
-  "private": true,
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "module",
   "homepage": "/",
   "scripts": {
-    "dev": "vite --host localhost --port 4000",
+    "dev": "vite --host localhost --port 3000",
     "build": "vite build",
     "start-client": "cross-env NODE_ENV=production node src/simple-server.js"
   },
